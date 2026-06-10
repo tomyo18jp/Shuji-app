@@ -1,0 +1,1742 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#2c1a0e">
+<title>習字教室 課題見本</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTIiIGZpbGw9IiM4YjczNTUiLz48dGV4dCB4PSIzMiIgeT0iNDgiIGZvbnQtc2l6ZT0iNDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0ic2VyaWYiPuethjwvdGV4dD48L3N2Zz4=">
+<style>
+@font-face{font-family:'ShokakiSarari';src:url('しょかきさらり行体.ttf') format('truetype');}
+@font-face{font-family:'GataSosyo';src:url('gatasosyo.ttf') format('truetype');}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{background:#1a0e08;overscroll-behavior:none;}
+input[type=range]{-webkit-appearance:none;height:24px;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#c8a878;cursor:pointer;}
+input[type=range]::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:#4a3020;}
+button{-webkit-touch-callout:none;user-select:none;}
+textarea{font-size:16px;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:#1a0e08;}
+::-webkit-scrollbar-thumb{background:#4a3020;border-radius:2px;}
+</style>
+</head>
+<body>
+<div id="root" style="height:100%;"></div>
+<script>
+if(window.pdfjsLib){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';}
+(function(){
+  var _w=console.warn.bind(console);
+  console.warn=function(){var m=arguments[0]&&String(arguments[0]);if(m&&(m.includes('Babel')||m.includes('fake worker')||m.includes('Setting up')))return;_w.apply(console,arguments);};
+})();
+var _storage={
+  set:function(k,v){return new Promise(function(res,rej){try{localStorage.setItem(k,typeof v==='string'?v:JSON.stringify(v));res({key:k,value:v})}catch(e){rej(e)}});},
+  get:function(k){return new Promise(function(res){var v=localStorage.getItem(k);res(v!==null?{key:k,value:v}:null)});},
+  delete:function(k){return new Promise(function(res){localStorage.removeItem(k);res({key:k,deleted:true})});},
+  list:function(p){return new Promise(function(res){var keys=Object.keys(localStorage).filter(function(k){return !p||k.startsWith(p)});res({keys:keys})});}
+};
+var {useState,useRef,useEffect}=React;
+</script>
+<script type="text/babel">
+
+const DEFAULT_TEXT = "アルバート・アインシュタインは、相対性理論を構築したドイツ生まれの理論物理学者で、質量とエネルギーの透過性の公式Ｅ＝ｍｃ²で知られている。１９２１年にノーベル物理学賞を受賞し、１９４０年にはアメリカ市民となった。";
+
+const FONTS = [
+  // ── 楷書 ──────────────────────────────
+  { key: "kaisho1",  category: "楷書", label: "楷書",     sublabel: "Yuji Syuku",         family: "'Yuji Syuku', serif",             googleUrl: "https://fonts.googleapis.com/css2?family=Yuji+Syuku&display=swap" },
+  { key: "kaisho2",  category: "楷書", label: "楷書 Mai", sublabel: "Yuji Mai",            family: "'Yuji Mai', serif",               googleUrl: "https://fonts.googleapis.com/css2?family=Yuji+Mai&display=swap" },
+  { key: "kaisho3",  category: "楷書", label: "教科書体", sublabel: "Klee One",            family: "'Klee One', cursive",             googleUrl: "https://fonts.googleapis.com/css2?family=Klee+One&display=swap" },
+  { key: "kaisho4",  category: "楷書", label: "紅道",     sublabel: "Zen Kurenaido",       family: "'Zen Kurenaido', serif",          googleUrl: "https://fonts.googleapis.com/css2?family=Zen+Kurenaido&display=swap" },
+  { key: "kaisho5",  category: "楷書", label: "よもぎ",   sublabel: "Yomogi",              family: "'Yomogi', cursive",               googleUrl: "https://fonts.googleapis.com/css2?family=Yomogi&display=swap" },
+  // ── 行書（手書き風） ──────────────────
+  { key: "gyosho1",  category: "行書", label: "行書",     sublabel: "Zen Old Mincho",      family: "'Zen Old Mincho', serif",         googleUrl: "https://fonts.googleapis.com/css2?family=Zen+Old+Mincho&display=swap" },
+  { key: "gyosho2",  category: "行書", label: "祐二",     sublabel: "Yuji Boku",           family: "'Yuji Boku', serif",              googleUrl: "https://fonts.googleapis.com/css2?family=Yuji+Boku&display=swap" },
+  { key: "gyosho3",  category: "行書", label: "古風",     sublabel: "Hina Mincho",         family: "'Hina Mincho', serif",            googleUrl: "https://fonts.googleapis.com/css2?family=Hina+Mincho&display=swap" },
+  { key: "gyosho4",  category: "行書", label: "骨格",     sublabel: "Zen Antique",         family: "'Zen Antique', serif",            googleUrl: "https://fonts.googleapis.com/css2?family=Zen+Antique&display=swap" },
+  { key: "gyosho5",  category: "行書", label: "典雅",     sublabel: "Zen Antique Soft",    family: "'Zen Antique Soft', serif",       googleUrl: "https://fonts.googleapis.com/css2?family=Zen+Antique+Soft&display=swap" },
+  { key: "gyosho6",  category: "行書", label: "解星飾",   sublabel: "Kaisei Decol",        family: "'Kaisei Decol', serif",           googleUrl: "https://fonts.googleapis.com/css2?family=Kaisei+Decol&display=swap" },
+  { key: "gyosho7",  category: "行書", label: "暁光",     sublabel: "Kaisei Tokumin",      family: "'Kaisei Tokumin', serif",         googleUrl: "https://fonts.googleapis.com/css2?family=Kaisei+Tokumin&display=swap" },
+  { key: "gyosho8",  category: "行書", label: "細楷",     sublabel: "Shippori Antique",    family: "'Shippori Antique', serif",       googleUrl: "https://fonts.googleapis.com/css2?family=Shippori+Antique&display=swap" },
+  { key: "gyosho9",  category: "行書", label: "筆書き",   sublabel: "Reggae One",          family: "'Reggae One', cursive",           googleUrl: "https://fonts.googleapis.com/css2?family=Reggae+One&display=swap" },
+  { key: "gyosho10", category: "行書", label: "B1古典",   sublabel: "Shippori Antique B1", family: "'Shippori Antique B1', serif",    googleUrl: "https://fonts.googleapis.com/css2?family=Shippori+Antique+B1&display=swap" },
+  { key: "gyosho11", category: "行書", label: "縦書祐二", sublabel: "Yuji Syuku",          family: "'Yuji Syuku', serif",             googleUrl: "https://fonts.googleapis.com/css2?family=Yuji+Syuku&display=swap" },
+  { key: "gyosho12", category: "行書", label: "さらり行書", sublabel: "しょかきさらり行体", family: "'ShokakiSarari', cursive",         googleUrl: "" },
+  { key: "gyosho13", category: "行書", label: "がた草書",   sublabel: "がた草書体",          family: "'GataSosyo', cursive",             googleUrl: "" },
+  // ── 草書・毛筆 ────────────────────────
+  { key: "sosho1",   category: "草書", label: "草書風",   sublabel: "Shippori Mincho",     family: "'Shippori Mincho', serif",        googleUrl: "https://fonts.googleapis.com/css2?family=Shippori+Mincho&display=swap" },
+  { key: "sosho2",   category: "草書", label: "古典明朝",  sublabel: "Shippori Mincho B1", family: "'Shippori Mincho B1', serif",     googleUrl: "https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1&display=swap" },
+  // ── 明朝・その他 ──────────────────────
+  { key: "mincho1",  category: "明朝", label: "明朝体",   sublabel: "Noto Serif JP",       family: "'Noto Serif JP', serif",          googleUrl: "https://fonts.googleapis.com/css2?family=Noto+Serif+JP&display=swap" },
+  { key: "mincho2",  category: "明朝", label: "解星",     sublabel: "Kaisei Opti",         family: "'Kaisei Opti', serif",            googleUrl: "https://fonts.googleapis.com/css2?family=Kaisei+Opti&display=swap" },
+  { key: "mincho3",  category: "明朝", label: "解星春海", sublabel: "Kaisei HarunoUmi",    family: "'Kaisei HarunoUmi', serif",       googleUrl: "https://fonts.googleapis.com/css2?family=Kaisei+HarunoUmi&display=swap" },
+  { key: "mincho4",  category: "明朝", label: "さわらび", sublabel: "Sawarabi Mincho",     family: "'Sawarabi Mincho', serif",        googleUrl: "https://fonts.googleapis.com/css2?family=Sawarabi+Mincho&display=swap" },
+];
+
+const CHAR_TYPE = { KANJI: "kanji", KANA: "kana", ALPHA: "alpha" };
+function charType(ch) {
+  if (/[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF]/.test(ch)) return CHAR_TYPE.KANJI;
+  if (/[\u3040-\u309F\u30A0-\u30FF\u3000-\u303F]/.test(ch))  return CHAR_TYPE.KANA;
+  return CHAR_TYPE.ALPHA;
+}
+
+function loadFont(url) {
+  if (!document.querySelector(`link[href="${url}"]`)) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = url;
+    document.head.appendChild(link);
+  }
+}
+FONTS.forEach((f) => loadFont(f.googleUrl));
+
+const SIZE_TARGETS = [
+  { key: "all",           label: "全体",  color: "#7a5c9a" },
+  { key: CHAR_TYPE.KANJI, label: "漢字",  color: "#6b4c2a" },
+  { key: CHAR_TYPE.KANA,  label: "平仮名", color: "#4a6b8a" },
+  { key: CHAR_TYPE.ALPHA, label: "英数字", color: "#4a7c59" },
+];
+
+function KadaiContent({ text, sizes, currentFont: currentFontProp, vertical, renderText, lineCount, lineSplits, bgImage, textOffset, lineHeight, justify, autoFontSize, onAutoFontSize, showOffsetGuide, onDragOffset, onDragEnd, vAlign }) {
+  const currentFont = currentFontProp ?? FONTS[0];
+  const textBoxStyle = vertical
+    ? { writingMode: "vertical-rl", textOrientation: "mixed", display: "block" }
+    : { writingMode: "horizontal-tb", display: "block" };
+  const paperTexture = vertical
+    ? { backgroundImage: "repeating-linear-gradient(to bottom, transparent, transparent 99%, #e8dfc8 100%)", backgroundSize: "100% 60px", opacity: 0.35 }
+    : { backgroundImage: "repeating-linear-gradient(to right, transparent, transparent 99%, #e8dfc8 100%)", backgroundSize: "60px 100%", opacity: 0.35 };
+
+  const textContainerRef = useRef(null);
+  const lineRefs = useRef([]);
+
+  // splitsから行配列を生成
+  const lines = lineCount > 0 && lineSplits && lineSplits.length > 0
+    ? (() => {
+        const points = [0, ...lineSplits, text.length];
+        return points.slice(0, -1).map((start, i) => text.slice(start, points[i + 1])).filter(l => l);
+      })()
+    : lineCount > 0
+    ? (() => {
+        const perLine = Math.ceil(text.length / lineCount);
+        return Array.from({ length: lineCount }, (_, i) => text.slice(i * perLine, (i + 1) * perLine)).filter(l => l);
+      })()
+    : null;
+
+  // 最長行基準で1行に収まる最大フォントサイズを自動計算
+  useEffect(() => {
+    if (!lines || lines.length === 0 || !autoFontSize) return;
+    let cancelled = false;
+
+    const calc = () => {
+      if (cancelled) return;
+      const containerEl = textContainerRef.current;
+      if (!containerEl) return;
+      const containerW = containerEl.offsetWidth;
+      const containerH = containerEl.offsetHeight;
+      if (containerW <= 0 || containerH <= 0) return;
+
+      const longestLine = lines.reduce((a, b) => a.length >= b.length ? a : b, "");
+      if (!longestLine) return;
+
+      const maxHeightPerLine = (containerH / lines.length) * 0.88;
+
+      // Canvasで測定（Google Fontsも正確に測定できる）
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      let lo = 6, hi = Math.min(72, maxHeightPerLine / (lineHeight ?? 1.8)), best = 6;
+      for (let i = 0; i < 24; i++) {
+        const mid = (lo + hi) / 2;
+        ctx.font = `${mid}px ${currentFont.family}, serif`;
+        const measured = ctx.measureText(longestLine).width;
+        if (measured <= containerW * 0.88) { best = mid; lo = mid; }
+        else { hi = mid; }
+      }
+
+      if (!cancelled) onAutoFontSize(parseFloat(best.toFixed(1)));
+    };
+
+    // 起動時はフォント+レイアウト完了を確実に待つ
+    document.fonts.ready.then(() => {
+      if (cancelled) return;
+      // 3段階RAFで確実にDOM・レイアウト完了後に計算
+      requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(() => calc())));
+    });
+
+    return () => { cancelled = true; };
+  }, [lines?.join(""), lineSplits?.join(","), currentFont.key, autoFontSize, textOffset, bgImage, lineHeight]);
+
+  // letter-spacing で両端揃え（space-betweenを廃止→文字切れ防止）
+  const [letterSpacings, setLetterSpacings] = useState([]);
+
+  // CSS justify方式（letterSpacingsは不要）
+  useEffect(() => {
+    setLetterSpacings([]);
+  }, [justify, lines?.join(""), lineSplits?.join(",")]); 
+
+  const offsetStyle = textOffset ? {
+    position: bgImage ? "absolute" : "relative",
+    ...(bgImage ? {
+      top: textOffset.top,
+      left: textOffset.left,
+      right: textOffset.right,
+      bottom: textOffset.bottom,
+    } : {
+      margin: `${textOffset.top}px ${textOffset.right}px ${textOffset.bottom}px ${textOffset.left}px`,
+    }),
+    zIndex: 1,
+    overflow: "visible",
+  } : { position: "relative", zIndex: 1, padding: "8px 0" };
+
+  // テキストエリアのクリップ用ラッパースタイル（はみ出し防止）
+  const clipStyle = bgImage && textOffset ? {
+    position: "absolute",
+    top: textOffset.top,
+    left: textOffset.left,
+    right: textOffset.right,
+    bottom: textOffset.bottom,
+    zIndex: 1,
+    overflow: "hidden",
+    pointerEvents: "none",
+  } : null;
+
+  return (
+    <>
+      {/* 背景：PDF画像 or 和紙テクスチャ */}
+      {bgImage
+        ? <img src={bgImage} alt="背景" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none", zIndex: 0, opacity: 1 }} />
+        : <div style={{ position: "absolute", inset: 0, pointerEvents: "none", ...paperTexture }} />
+      }
+
+      {/* ヘッダー（PDF背景なしのとき） */}
+      {!bgImage && (
+        <div style={{ position: "relative", zIndex: 1, textAlign: "center", marginBottom: 28, paddingBottom: 16, borderBottom: "2px solid #8b7355", display: "flex", justifyContent: "center", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+          <span style={{ fontSize: 13, letterSpacing: "0.4em", color: "#6b4c2a", fontFamily: "sans-serif" }}>令和　　年　　月　　日</span>
+          <span style={{ fontSize: 12, color: "#a08060", fontFamily: "sans-serif", background: "#f0e8d4", padding: "2px 10px", borderRadius: 20 }}>{currentFont.label}（{currentFont.sublabel}）</span>
+          <span style={{ fontSize: 12, color: "#a08060", fontFamily: "sans-serif", background: "#e8f0e4", padding: "2px 10px", borderRadius: 20 }}>{vertical ? "縦書き" : "横書き"}</span>
+          <span style={{ fontSize: 11, color: "#a08060", fontFamily: "sans-serif", background: "#f0f0e4", padding: "2px 10px", borderRadius: 20 }}>漢{sizes.kanji}pt　仮{sizes.kana}pt　英{sizes.alpha}pt</span>
+          {lineCount > 0 && <span style={{ fontSize: 11, color: "#a08060", fontFamily: "sans-serif", background: "#e8e4f4", padding: "2px 10px", borderRadius: 20 }}>{lineCount}行</span>}
+        </div>
+      )}
+
+      {/* テキスト（クリップ枠 + 実テキスト） */}
+      {clipStyle && <div style={clipStyle} />}
+      <div style={offsetStyle} ref={textContainerRef}>
+        {/* 手動調整時の青いガイド＋ドラッグハンドル */}
+        {showOffsetGuide && (
+          <div style={{
+            position: "absolute", inset: 0, zIndex: 10,
+            background: "rgba(100, 160, 255, 0.12)",
+            border: "2px solid rgba(60, 120, 255, 0.5)",
+            borderRadius: 4,
+            pointerEvents: "none",
+          }}>
+            <div style={{ position: "absolute", top: 2, left: 4, fontSize: 9, color: "rgba(40,80,200,0.8)", fontFamily: "sans-serif", userSelect: "none" }}>テキストエリア</div>
+          </div>
+        )}
+        {/* 4隅ドラッグハンドル */}
+        {showOffsetGuide && onDragOffset && (() => {
+          const corners = [
+            { id: "tl", cursor: "nwse-resize", style: { top: -8, left: -8 },
+              sides: { top: 1, left: 1, bottom: 0, right: 0 }, dirY: 1, dirX: 1 },
+            { id: "tr", cursor: "nesw-resize", style: { top: -8, right: -8 },
+              sides: { top: 1, right: 1, bottom: 0, left: 0 }, dirY: 1, dirX: -1 },
+            { id: "bl", cursor: "nesw-resize", style: { bottom: -8, left: -8 },
+              sides: { bottom: 1, left: 1, top: 0, right: 0 }, dirY: -1, dirX: 1 },
+            { id: "br", cursor: "nwse-resize", style: { bottom: -8, right: -8 },
+              sides: { bottom: 1, right: 1, top: 0, left: 0 }, dirY: -1, dirX: -1 },
+          ];
+          return corners.map(({ id, cursor, style, sides, dirY, dirX }) => (
+            <div key={id}
+              style={{
+                position: "absolute", zIndex: 20, width: 20, height: 20,
+                background: "rgba(40,100,255,0.85)", borderRadius: 4,
+                border: "2px solid #fff", cursor, boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
+                ...style,
+              }}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                const startX = e.clientX, startY = e.clientY;
+                const startOffset = { ...textOffset };
+                const onMove = (ev) => {
+                  const dx = (ev.clientX - startX) * dirX;
+                  const dy = (ev.clientY - startY) * dirY;
+                  onDragOffset(sides, dx, dy, startOffset);
+                };
+                const onUp = () => {
+                  window.removeEventListener("mousemove", onMove);
+                  window.removeEventListener("mouseup", onUp);
+                };
+                window.addEventListener("mousemove", onMove);
+                window.addEventListener("mouseup", onUp);
+              }}
+              onTouchStart={(e) => {
+                const t0 = e.touches[0];
+                const startX = t0.clientX, startY = t0.clientY;
+                const startOffset = { ...textOffset };
+                const onMove = (ev) => {
+                  const t = ev.touches[0];
+                  const dx = (t.clientX - startX) * dirX;
+                  const dy = (t.clientY - startY) * dirY;
+                  onDragOffset(sides, dx, dy, startOffset);
+                };
+                const onUp = () => {
+                  window.removeEventListener("touchmove", onMove);
+                  window.removeEventListener("touchend", onUp);
+                  if (onDragEnd) onDragEnd();
+                };
+                window.addEventListener("touchmove", onMove, { passive: true });
+                window.addEventListener("touchend", onUp);
+              }}
+            />
+          ));
+        })()}
+        {lines ? (
+          <div style={{ display: "flex", flexDirection: vertical ? "row-reverse" : "column", gap: vertical ? 16 : 8, justifyContent: vertical ? "flex-start" : (bgImage && vAlign === "center" ? "space-evenly" : "stretch"), height: (bgImage && vAlign === "center") ? "100%" : "auto" }}>
+            {lines.map((line, i) => (
+              <div key={i} ref={el => lineRefs.current[i] = el}
+                style={{ display: "flex", alignItems: "center", gap: 10, padding: vertical ? "0 4px" : "0", borderBottom: !vertical && !bgImage && i < lines.length - 1 ? "1px dashed rgba(212,196,160,0.5)" : "none", width: "100%", flex: bgImage && vAlign === "center" ? 1 : "none", justifyContent: "flex-start" }}>
+                {!bgImage && <span data-linenum="1" style={{ fontSize: 11, color: "#b0956a", fontFamily: "sans-serif", minWidth: 18, textAlign: "right", userSelect: "none", flexShrink: 0 }}>{i + 1}</span>}
+                <span data-textspan="1" style={{
+                  fontFamily: currentFont.family,
+                  color: "#1a0e05",
+                  lineHeight: lineHeight ?? 1.8,
+                  display: "block",
+                  flex: 1,
+                  minWidth: 0,
+                  overflow: "visible",
+                  ...(justify && !vertical && i < lines.length - 1 ? {
+                    textAlign: "justify",
+                    textJustify: "inter-ideograph",
+                    textAlignLast: "justify",
+                    whiteSpace: "normal",
+                    wordBreak: "break-all",
+                    letterSpacing: "0em",
+                  } : {
+                    whiteSpace: "nowrap",
+                    letterSpacing: "0.05em",
+                  }),
+                  ...textBoxStyle
+                }}>{renderText(line)}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ padding: bgImage ? 0 : "8px 0", display: "flex", justifyContent: vertical ? "flex-end" : "flex-start", height: bgImage ? "100%" : "auto" }}>
+            <span style={{ fontFamily: currentFont.family, color: "#1a0e05", lineHeight: lineHeight ?? 1.8, letterSpacing: vertical ? "0.1em" : "0.05em", ...textBoxStyle }}>{renderText(text)}</span>
+          </div>
+        )}
+      </div>
+
+      {/* フッター（PDF背景なしのとき） */}
+      {!bgImage && (
+        <>
+          <div style={{ position: "relative", zIndex: 1, marginTop: 28, padding: "16px 20px", background: "#f0e8d4", borderLeft: "4px solid #8b7355", borderRadius: "0 6px 6px 0" }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#6b4c2a", fontFamily: "sans-serif", letterSpacing: "0.15em", marginBottom: 8 }}>【ポイント】</div>
+            {["全角文字・数字を丁寧に、一定の大きさで書くこと", "句読点（、。）の位置に注意すること", "行頭・行末をそろえ、均等なバランスで書くこと"].map((p, i) => (
+              <div key={i} style={{ fontSize: 12, color: "#4a3020", fontFamily: "sans-serif", lineHeight: 1.8 }}>・{p}</div>
+            ))}
+          </div>
+          <div style={{ position: "relative", zIndex: 1, marginTop: 20, textAlign: "right", fontSize: 11, color: "#b0956a", fontFamily: "sans-serif", letterSpacing: "0.1em" }}>習字教室　課題プリント</div>
+        </>
+      )}
+    </>
+  );
+}
+
+function ShujiMihon() {
+  const [sizes, setSizes] = useState({ kanji: 28, kana: 28, alpha: 28 });
+  const [sizeTarget, setSizeTarget] = useState("all");
+  const [text, setText] = useState(DEFAULT_TEXT);
+  const [lineCount, setLineCount] = useState(0);
+  const [lineSplits, setLineSplits] = useState([]);
+  const [bgH, setBgH] = useState(null);
+  const [bgV, setBgV] = useState(null);
+  const [bgHOrig, setBgHOrig] = useState(null);
+  const [bgVOrig, setBgVOrig] = useState(null);
+  const [bgLoading, setBgLoading] = useState(false);
+  const [bgError, setBgError] = useState("");
+  const bgInputRef = useRef(null);
+  const [textOffset, setTextOffset] = useState({ top: 40, left: 40, right: 40, bottom: 40 });
+  const [offsetOpen, setOffsetOpen] = useState(false);
+  const [lineHeight, setLineHeight] = useState(1.8);
+  const [justify, setJustify] = useState(true);
+  const [autoFontSize, setAutoFontSize] = useState(false);
+  const [kanaOffset, setKanaOffset] = useState(-1.5);
+  const [alphaOffset, setAlphaOffset] = useState(-1.5);
+  const [vAlign, setVAlign] = useState("center");
+  const [fullAuto, setFullAuto] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(DEFAULT_TEXT);
+  const [selectedFont, setSelectedFont] = useState("kaisho1");
+  const [vertical, setVertical] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
+  const [savingOpen, setSavingOpen] = useState(false);
+  const [saves, setSaves] = useState([]);
+  const [saveMsg, setSaveMsg] = useState("");
+  const [ocrImage, setOcrImage] = useState(null);
+  const [ocrLoading, setOcrLoading] = useState(false);  const [ocrError, setOcrError] = useState("");
+  const [docLoading, setDocLoading] = useState(false);
+  const [docError, setDocError] = useState("");
+  const printRef = useRef(null);
+  const imageInputRef = useRef(null);
+  const docInputRef = useRef(null);
+
+  // 現在の方向に対応する背景（表示用）
+  const bgImage = vertical ? bgV : bgH;
+  const bgKey = vertical ? "shuji-bg-v" : "shuji-bg-h";
+
+  const [bgAnalyzing, setBgAnalyzing] = useState(false);
+  const [bgAnalyzeMsg, setBgAnalyzeMsg] = useState("");
+
+  // オフセット変更時に即時再適用
+  useEffect(() => {
+    setSizes(prev => ({
+      kanji: prev.kanji,
+      kana:  parseFloat(Math.max(6, prev.kanji + kanaOffset).toFixed(1)),
+      alpha: parseFloat(Math.max(6, prev.kanji + alphaOffset).toFixed(1)),
+    }));
+  }, [kanaOffset, alphaOffset]);
+
+  // 行数・テキスト位置変更時に罫線を自動描画
+  useEffect(() => {
+    if (!bgImage) return;
+    const origDataUrl = vertical ? bgVOrig : bgHOrig;
+    if (!origDataUrl) return;
+    if (lineCount < 2) {
+      if (vertical) setBgV(origDataUrl);
+      else setBgH(origDataUrl);
+      return;
+    }
+    drawRuledLines(origDataUrl, lineCount, vertical, textOffset).then(result => {
+      if (vertical) setBgV(result);
+      else setBgH(result);
+    });
+  }, [lineCount, vertical, textOffset, bgHOrig, bgVOrig]);
+
+  // PDF背景から罫線数・位置をAIで検出して行数・テキスト位置・行間を自動設定
+  const analyzeRuledLines = async (dataUrl, isVertical, keepOffset = false) => {
+    setBgAnalyzing(true); setBgAnalyzeMsg("🔍 罫線を解析中…");
+    try {
+      const base64 = dataUrl.split(",")[1];
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 400,
+          messages: [{
+            role: "user",
+            content: [
+              { type: "image", source: { type: "base64", media_type: "image/jpeg", data: base64 } },
+              { type: "text", text: `この習字・書写用紙の画像を解析してください。
+${isVertical ? "縦書き用紙として、縦の列（欄）" : "横書き用紙として、横の行（罫線）"}を分析してください。
+
+以下をJSON形式のみで返してください（説明不要）：
+{
+  "lines": テキストを書く行/列の数（0〜8の整数）,
+  "marginTop": 用紙上端からテキストエリア開始までの割合（0.0〜0.5）,
+  "marginBottom": 用紙下端からテキストエリア終了までの割合（0.0〜0.5）,
+  "marginLeft": 用紙左端からテキストエリア開始までの割合（0.0〜0.5）,
+  "marginRight": 用紙右端からテキストエリア終了までの割合（0.0〜0.5）,
+  "lineSpacing": 行間の広さ（1.0〜4.0、通常は1.5〜2.5）
+}` }
+            ]
+          }]
+        })
+      });
+      const data = await res.json();
+      const text = data.content?.map(b => b.text || "").join("").trim();
+
+      // JSONを抽出してパース
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error("JSON not found");
+      const result = JSON.parse(jsonMatch[0]);
+
+      const { lines, marginTop, marginBottom, marginLeft, marginRight, lineSpacing } = result;
+
+      // 行数を設定（2〜8の範囲）
+      let detected = "";
+      if (Number.isInteger(lines) && lines >= 2 && lines <= 8) {
+        changeLineCount(lines);
+        detected += `${lines}行`;
+      } else if (lines > 8) {
+        detected += `${lines}行（上限8）`;
+      }
+
+      // テキスト位置をpx換算（keepOffsetがtrueのときはスキップ）
+      const paperW = isVertical ? 515 : 728;
+      const paperH = isVertical ? 728 : 515;
+      if (!keepOffset) {
+        const newOffset = {
+          top:    Math.round((marginTop    ?? 0.08) * paperH),
+          bottom: Math.round((marginBottom ?? 0.08) * paperH),
+          left:   Math.round((marginLeft   ?? 0.08) * paperW),
+          right:  Math.round((marginRight  ?? 0.08) * paperW),
+        };
+        setTextOffset(newOffset);
+        detected += ` / 余白 上${newOffset.top}px 下${newOffset.bottom}px 左${newOffset.left}px 右${newOffset.right}px`;
+      } else {
+        detected += ` / テキスト位置は維持`;
+      }
+
+      // 行間を設定
+      if (lineSpacing && lineSpacing >= 1.0 && lineSpacing <= 4.0) {
+        setLineHeight(parseFloat(lineSpacing.toFixed(1)));
+        detected += ` / 行間 ${lineSpacing.toFixed(1)}`;
+      }
+
+      // 文字サイズ自動最大をON・縦位置中央揃えをON
+      setAutoFontSize(true);
+      setVAlign("center");
+      detected += ` / 文字サイズ自動最大・縦位置中央揃えON`;
+
+      // 解析後にテキスト位置パネルを自動で開く
+      setOffsetOpen(true);
+
+      setBgAnalyzeMsg(detected ? `✅ 検出：${detected}` : "罫線は検出されませんでした");
+    } catch {
+      setBgAnalyzeMsg("解析に失敗しました（手動で調整してください）");
+    } finally {
+      setBgAnalyzing(false);
+      setTimeout(() => setBgAnalyzeMsg(""), 8000);
+    }
+  };
+
+  // PDF → canvas → JPEG dataURL
+  const handleBgUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const isVertical = vertical;
+    const key = isVertical ? "shuji-bg-v" : "shuji-bg-h";
+    const setter = isVertical ? setBgV : setBgH;
+    setBgLoading(true); setBgError("");
+    try {
+      if (!window.pdfjsLib) {
+        // pdf.js本体を先にロード
+        await new Promise((res, rej) => {
+          const s = document.createElement("script");
+          s.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+          s.onload = res; s.onerror = rej;
+          document.head.appendChild(s);
+        });
+        // Workerも同じCDNから明示的にロード
+        await new Promise((res, rej) => {
+          const s = document.createElement("script");
+          s.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+          s.onload = res; s.onerror = rej;
+          document.head.appendChild(s);
+        });
+        // ロード済みWorkerを使用（fake workerを回避）
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+          "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      }
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const page = await pdf.getPage(1);
+      const scale = 2.0;
+      const viewport = page.getViewport({ scale });
+      const canvas = document.createElement("canvas");
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+      setter(dataUrl);
+      // オリジナルを保存（罫線なし）
+      if (isVertical) setBgVOrig(dataUrl);
+      else setBgHOrig(dataUrl);
+      try {
+        await _storage.set(key, dataUrl);
+      } catch {
+        setBgError("背景の保存に失敗しました（データが大きすぎる可能性があります）");
+      }
+      // 罫線を自動解析
+      analyzeRuledLines(dataUrl, isVertical);
+    } catch {
+      setBgError("PDFの読み込みに失敗しました。別のファイルをお試しください。");
+    } finally {
+      setBgLoading(false);
+      if (bgInputRef.current) bgInputRef.current.value = "";
+    }
+  };
+
+  // 現在の方向の背景を削除
+  const clearBg = async () => {
+    const isVertical = vertical;
+    const key = isVertical ? "shuji-bg-v" : "shuji-bg-h";
+    const setter = isVertical ? setBgV : setBgH;
+    setter(null); setBgError("");
+    if (bgInputRef.current) bgInputRef.current.value = "";
+    try { await _storage.delete(key); } catch {}
+  };
+
+  // 履歴管理
+  const historyRef = useRef([{ text: DEFAULT_TEXT, sizes: { kanji: 28, kana: 28, alpha: 28 }, selectedFont: "kaisho1", vertical: false }]);
+  const historyIdx = useRef(0);
+  const snapshot = () => ({ text, sizes, selectedFont, vertical });
+  const pushHistory = (s) => { const h = historyRef.current.slice(0, historyIdx.current + 1); h.push(s); historyRef.current = h.slice(-50); historyIdx.current = historyRef.current.length - 1; };
+  const applySnapshot = (s) => { setText(s.text); setSizes(s.sizes); setSelectedFont(s.selectedFont); setVertical(s.vertical); };
+  const canUndo = historyIdx.current > 0;
+  const canRedo = historyIdx.current < historyRef.current.length - 1;
+  const handleUndo = () => { if (!canUndo) return; historyIdx.current -= 1; applySnapshot(historyRef.current[historyIdx.current]); };
+  const handleRedo = () => { if (!canRedo) return; historyIdx.current += 1; applySnapshot(historyRef.current[historyIdx.current]); };
+
+  // 保存データを状態に適用する共通関数
+  const applySettings = (s) => {
+    const restoredText = s.text || DEFAULT_TEXT;
+    if (s.text)         setText(s.text);
+    if (s.sizes)        setSizes(s.sizes);
+    if (s.selectedFont) {
+      // 旧キー（kaisho/gyosho/mincho）を新キーに移行
+      const keyMap = { kaisho: "kaisho1", gyosho: "gyosho1", mincho: "mincho1" };
+      const migratedKey = keyMap[s.selectedFont] ?? s.selectedFont;
+      const validKey = FONTS.find(f => f.key === migratedKey) ? migratedKey : FONTS[0].key;
+      setSelectedFont(validKey);
+    }
+    if (s.vertical !== undefined) setVertical(s.vertical);
+    if (s.lineHeight)   setLineHeight(s.lineHeight);
+    if (s.textOffset)   setTextOffset(s.textOffset);
+    if (s.justify !== undefined) setJustify(s.justify);
+    if (s.autoFontSize !== undefined) setAutoFontSize(s.autoFontSize);
+    if (s.vAlign) setVAlign(s.vAlign);
+    if (s.fullAuto !== undefined) setFullAuto(s.fullAuto);
+    if (s.kanaOffset !== undefined) setKanaOffset(s.kanaOffset);
+    if (s.alphaOffset !== undefined) setAlphaOffset(s.alphaOffset);
+    if (s.lineCount !== undefined) {
+      setLineCount(s.lineCount);
+      if (s.lineSplits && s.lineSplits.length > 0) {
+        setLineSplits(s.lineSplits);
+      } else if (s.lineCount > 0) {
+        const len = restoredText.length;
+        const perLine = Math.ceil(len / s.lineCount);
+        const splits = [];
+        for (let i = 1; i < s.lineCount; i++) splits.push(Math.min(i * perLine, len));
+        setLineSplits(splits);
+      } else {
+        setLineSplits([]);
+      }
+    }
+  };
+
+  // 現在の状態をデフォルトとして保存（テキストは別キーに分離）
+  const saveAsDefault = async () => {
+    try {
+      const settings = { sizes, selectedFont, vertical, lineHeight, textOffset, lineCount, lineSplits, justify, autoFontSize, vAlign, fullAuto, kanaOffset, alphaOffset };
+      await _storage.set("shuji-default-settings", JSON.stringify(settings));
+      await _storage.set("shuji-default-text", text);
+      setSaveMsg("⭐ デフォルト設定を保存しました"); setTimeout(() => setSaveMsg(""), 2500);
+    } catch (e) {
+      setSaveMsg(`❌ デフォルト保存に失敗: ${e?.message ?? "不明"}`); setTimeout(() => setSaveMsg(""), 4000);
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      // デフォルト設定を復元
+      try {
+        const dt = await _storage.get("shuji-default-text");
+        const ds = await _storage.get("shuji-default-settings");
+        if (dt?.value) setText(dt.value);
+        if (ds?.value) applySettings(JSON.parse(ds.value));
+      } catch {}
+      // 最終状態で上書き（テキスト・設定別々に）
+      try {
+        const lt = await _storage.get("shuji-last-text");
+        const ls = await _storage.get("shuji-last-settings");
+        if (lt?.value) setText(lt.value);
+        if (ls?.value) applySettings(JSON.parse(ls.value));
+      } catch {}
+      await loadSaves();
+      try { const r = await _storage.get("shuji-bg-h"); if (r?.value) setBgH(r.value); } catch {}
+      try { const r = await _storage.get("shuji-bg-v"); if (r?.value) setBgV(r.value); } catch {}
+
+      // 復元完了後にフルオートを強制ON・遅延して再計算を確実にトリガー
+      setFullAuto(true);
+      setJustify(true);
+      setVAlign("center");
+      setAutoFontSize(false); // 一度OFFにしてから
+      setTimeout(() => {
+        setAutoFontSize(true); // ONにすることでuseEffectを確実にトリガー
+      }, 800); // フォント読み込み完了を待つ
+    })();
+  }, []);
+
+  // 状態変化時に最終保存を自動更新（テキストと設定を分離・3秒デバウンス）
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const settings = JSON.stringify({ sizes, selectedFont, vertical, lineHeight, textOffset, lineCount, lineSplits, justify, autoFontSize, vAlign, fullAuto, kanaOffset, alphaOffset });
+      _storage.set("shuji-last-text", text).catch(() => {});
+      _storage.set("shuji-last-settings", settings).catch(() => {});
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [text, sizes, selectedFont, vertical, lineHeight, textOffset, lineCount, lineSplits, justify, autoFontSize, vAlign, fullAuto, kanaOffset, alphaOffset]);
+
+  const loadSaves = async () => {
+    try {
+      const result = await _storage.list("shuji-save:");
+      if (!result) return;
+      const items = await Promise.all(result.keys.map(async (key) => {
+        try { const r = await _storage.get(key); return r ? { key, ...JSON.parse(r.value) } : null; } catch { return null; }
+      }));
+      setSaves(items.filter(Boolean).sort((a, b) => b.savedAt - a.savedAt));
+    } catch { setSaves([]); }
+  };
+
+  const handleSave = async () => {
+    const name = `保存 ${new Date().toLocaleString("ja-JP", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}`;
+    const key = `shuji-save:${Date.now()}`;
+    const payload = JSON.stringify({
+      name, savedAt: Date.now(),
+      text, sizes, selectedFont, vertical,
+      lineCount, lineSplits, lineHeight, textOffset, justify,
+    });
+    // サイズ確認（5MB = 5,242,880 bytes）
+    if (payload.length > 4_500_000) {
+      setSaveMsg("❌ データが大きすぎます（テキストを短くしてください）");
+      setTimeout(() => setSaveMsg(""), 4000);
+      return;
+    }
+    try {
+      await _storage.set(key, payload);
+      setSaveMsg("✅ 保存しました"); setTimeout(() => setSaveMsg(""), 2500);
+      await loadSaves();
+    } catch (e) {
+      console.error("Save error:", e);
+      setSaveMsg(`❌ 保存失敗: ${e?.message ?? "不明なエラー"}`);
+      setTimeout(() => setSaveMsg(""), 4000);
+    }
+  };
+
+  const handleLoad = (save) => {
+    pushHistory(snapshot());
+    setText(save.text);
+    setSizes(save.sizes);
+    setSelectedFont(save.selectedFont);
+    setVertical(save.vertical);
+    if (save.lineCount !== undefined) {
+      setLineCount(save.lineCount);
+      if (save.lineSplits && save.lineSplits.length > 0) {
+        setLineSplits(save.lineSplits);
+      } else if (save.lineCount > 0) {
+        const len = save.text.length;
+        const perLine = Math.ceil(len / save.lineCount);
+        const splits = [];
+        for (let i = 1; i < save.lineCount; i++) splits.push(Math.min(i * perLine, len));
+        setLineSplits(splits);
+      } else {
+        setLineSplits([]);
+      }
+    }
+    if (save.lineHeight)  setLineHeight(save.lineHeight);
+    if (save.textOffset)  setTextOffset(save.textOffset);
+    setSavingOpen(false); setSaveMsg("📂 読み込みました"); setTimeout(() => setSaveMsg(""), 2500);
+  };
+
+  const handleDelete = async (key) => { try { await _storage.delete(key); await loadSaves(); } catch {} };
+
+  const currentSize = sizeTarget === "all" ? sizes.kanji : sizes[sizeTarget];
+  const setCurrentSize = (fn) => {
+    if (sizeTarget === "all") {
+      setSizes((prev) => ({
+        kanji: Math.min(Math.max(parseFloat(fn(prev.kanji).toFixed(1)), 8), 72),
+        kana:  Math.min(Math.max(parseFloat(fn(prev.kana).toFixed(1)),  8), 72),
+        alpha: Math.min(Math.max(parseFloat(fn(prev.alpha).toFixed(1)), 8), 72),
+      }));
+    } else { setSizes((prev) => ({ ...prev, [sizeTarget]: fn(prev[sizeTarget]) })); }
+  };
+
+  const increase = () => { pushHistory(snapshot()); setAutoFontSize(false); setCurrentSize((f) => Math.min(parseFloat((f + 0.1).toFixed(1)), 72)); };
+  const decrease = () => { pushHistory(snapshot()); setAutoFontSize(false); setCurrentSize((f) => Math.max(parseFloat((f - 0.1).toFixed(1)), 8)); };
+  const reset = () => { pushHistory(snapshot()); setAutoFontSize(true); setSizes({ kanji: 28.0, kana: 28.0, alpha: 28.0 }); };
+
+  // 長押し連続変更フック
+  const useLongPress = (onPress, interval = 80) => {
+    const timerRef = useRef(null);
+    const startRef = useRef(null);
+    const start = () => {
+      onPress();
+      startRef.current = setTimeout(() => {
+        timerRef.current = setInterval(onPress, interval);
+      }, 500);
+    };
+    const stop = () => {
+      clearTimeout(startRef.current);
+      clearInterval(timerRef.current);
+    };
+    return { onMouseDown: start, onMouseUp: stop, onMouseLeave: stop, onTouchStart: start, onTouchEnd: stop };
+  };
+  const incProps = useLongPress(increase);
+  const decProps = useLongPress(decrease);
+  const startEdit = () => { setDraft(text); setEditing(true); };
+
+  // テキスト確定時に行区切りを自動調整
+  const applyEdit = () => {
+    pushHistory(snapshot());
+    const newText = draft.trim();
+    setText(newText);
+    setEditing(false);
+    autoSplitLines(newText, lineCount);
+  };
+
+  // 行区切りを自動計算する共通関数（フォント読み込み後に実行）
+  const autoSplitLines = (newText, currentLineCount) => {
+    if (!newText || newText.length === 0) return;
+    const len = newText.length;
+
+    const targetLines = currentLineCount > 0 ? currentLineCount : Math.min(8, Math.max(2, Math.ceil(len / 12)));
+    if (currentLineCount === 0) setLineCount(targetLines);
+
+    // フォント読み込み後に幅ベース分割を実行
+    const run = async () => {
+      const font = FONTS.find(f => f.key === selectedFont) || FONTS[0];
+      try { await document.fonts.load(`${sizes.kanji}px ${font.family}`); } catch(e) {}
+
+      // paper幅からコンテナ幅を推定
+      const paperEl = mainPaperRef.current;
+      let containerW = 500; // デフォルト
+      if (paperEl) {
+        const paperW = paperEl.offsetWidth || 728;
+        const pad = bgImage ? 72 : 96; // padding分
+        const off = textOffset ? (textOffset.left || 40) + (textOffset.right || 40) : 80;
+        containerW = Math.max(200, paperW - pad - off);
+      }
+
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      ctx.font = `${sizes.kanji}px ${font.family}, serif`;
+
+      // 幅ベースで行を分割（行数上限あり）
+      const splits = [];
+      let lineStart = 0;
+      let lineW = 0;
+      for (let i = 0; i < len; i++) {
+        const charW = ctx.measureText(newText[i]).width;
+        if (lineW + charW > containerW && i > lineStart && splits.length < targetLines - 1) {
+          splits.push(i);
+          lineStart = i;
+          lineW = charW;
+        } else {
+          lineW += charW;
+        }
+      }
+
+      if (splits.length > 0) {
+        setLineSplits(splits);
+        if (currentLineCount === 0) setLineCount(splits.length + 1);
+      } else {
+        // フォールバック：均等分割
+        const perLine = Math.ceil(len / targetLines);
+        const eqSplits = [];
+        for (let i = 1; i < targetLines; i++) {
+          eqSplits.push(Math.min(i * perLine, len - 1));
+        }
+        setLineSplits(eqSplits);
+      }
+    };
+
+    run();
+  };
+  const cancelEdit = () => { setEditing(false); setOcrImage(null); setOcrError(""); };
+  const currentFont = FONTS.find((f) => f.key === selectedFont) ?? FONTS[0];
+  const changeFont = (key) => { pushHistory(snapshot()); setSelectedFont(key); };
+  const changeVertical = (v) => { pushHistory(snapshot()); setVertical(v); };
+
+  // テキスト位置をドラッグで調整（4隅: sides={top,bottom,left,right}各0or1）
+  const handleDragOffset = (sides, dx, dy, startOffset) => {
+    setTextOffset(prev => {
+      const base = startOffset ?? prev;
+      return {
+        top:    sides.top    ? Math.max(0, Math.min(200, base.top    + Math.round(dy))) : prev.top,
+        bottom: sides.bottom ? Math.max(0, Math.min(200, base.bottom + Math.round(dy))) : prev.bottom,
+        left:   sides.left   ? Math.max(0, Math.min(200, base.left   + Math.round(dx))) : prev.left,
+        right:  sides.right  ? Math.max(0, Math.min(200, base.right  + Math.round(dx))) : prev.right,
+      };
+    });
+  };
+  const handleAutoFontSize = (size) => {
+    setSizes({
+      kanji: parseFloat(size.toFixed(1)),
+      kana:  parseFloat(Math.max(6, size + kanaOffset).toFixed(1)),
+      alpha: parseFloat(Math.max(6, size + alphaOffset).toFixed(1)),
+    });
+  };
+
+  // 背景画像に罫線を描画して合成する
+  const drawRuledLines = async (baseDataUrl, lineCount, isVertical, offset) => {
+    if (!baseDataUrl || lineCount < 2) return baseDataUrl;
+    return new Promise((resolve) => {
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+
+        // オフセットをpx→画像座標に変換（用紙表示幅 vs 画像幅の比率）
+        const displayW = isVertical ? 515 : 728;
+        const displayH = isVertical ? 728 : 515;
+        const scaleX = img.width / displayW;
+        const scaleY = img.height / displayH;
+
+        const top    = (offset?.top    ?? 40) * scaleY;
+        const bottom = (offset?.bottom ?? 40) * scaleY;
+        const left   = (offset?.left   ?? 40) * scaleX;
+        const right  = (offset?.right  ?? 40) * scaleX;
+
+        const areaW = img.width  - left - right;
+        const areaH = img.height - top  - bottom;
+
+        ctx.strokeStyle = "rgba(180, 140, 80, 0.6)";
+        ctx.lineWidth = Math.max(1, img.width / 400);
+        ctx.setLineDash([8 * scaleX, 4 * scaleX]);
+
+        if (!isVertical) {
+          // 横書き：横の罫線を行数+1本描画（上下境界含む）
+          for (let i = 0; i <= lineCount; i++) {
+            const y = top + (areaH / lineCount) * i;
+            ctx.beginPath();
+            ctx.moveTo(left, y);
+            ctx.lineTo(img.width - right, y);
+            ctx.stroke();
+          }
+        } else {
+          // 縦書き：縦の罫線を列数+1本描画（左右境界含む）
+          for (let i = 0; i <= lineCount; i++) {
+            const x = left + (areaW / lineCount) * i;
+            ctx.beginPath();
+            ctx.moveTo(x, top);
+            ctx.lineTo(x, img.height - bottom);
+            ctx.stroke();
+          }
+        }
+
+        resolve(canvas.toDataURL("image/jpeg", 0.90));
+      };
+      img.src = baseDataUrl;
+    });
+  };
+
+  // 行数変更 → 均等分割でsplitsを初期化
+  const changeLineCount = (n) => {
+    setLineCount(n);
+    if (n > 0) {
+      const len = text.length;
+      const perLine = Math.ceil(len / n);
+      const splits = [];
+      for (let i = 1; i < n; i++) splits.push(Math.min(i * perLine, len));
+      setLineSplits(splits);
+    } else {
+      setLineSplits([]);
+    }
+  };
+
+  // 境界を1文字単位で移動（idx: 境界インデックス、dir: +1/-1）
+  const moveSplit = (idx, dir) => {
+    setLineSplits(prev => {
+      const next = [...prev];
+      const min = idx === 0 ? 1 : prev[idx - 1] + 1;
+      const max = idx === prev.length - 1 ? text.length - 1 : prev[idx + 1] - 1;
+      next[idx] = Math.min(max, Math.max(min, prev[idx] + dir));
+      return next;
+    });
+  };
+
+  // splitsからlines配列を生成
+  const buildLines = (str, splits) => {
+    if (!splits || splits.length === 0) return [str];
+    const points = [0, ...splits, str.length];
+    return points.slice(0, -1).map((start, i) => str.slice(start, points[i + 1]));
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => { setOcrImage(reader.result); setOcrError(""); };
+    reader.readAsDataURL(file);
+  };
+
+  const handleOcr = async () => {    if (!ocrImage) return;
+    setOcrLoading(true); setOcrError("");
+    try {
+      const base64 = ocrImage.split(",")[1];
+      const mediaType = ocrImage.match(/data:(image\/[^;]+);/)[1];
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514", max_tokens: 1000,
+          messages: [{ role: "user", content: [
+            { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
+            { type: "text", text: "この画像に書かれているテキストをすべて正確に読み取って、テキストだけを返してください。説明や前置きは不要です。" }
+          ]}]
+        })
+      });
+      const data = await res.json();
+      const extracted = data.content?.map(b => b.text || "").join("").trim();
+      if (extracted) {
+        setDraft(extracted);
+        setText(extracted);
+        autoSplitLines(extracted, lineCount);
+        setOcrImage(null);
+        if (imageInputRef.current) imageInputRef.current.value = "";
+      }
+      else setOcrError("テキストを読み取れませんでした");
+    } catch { setOcrError("読み取りに失敗しました。もう一度お試しください。"); }
+    finally { setOcrLoading(false); }
+  };
+
+  // Word/Excel からテキスト読み込み
+  const handleDocUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setDocLoading(true); setDocError("");
+    const ext = file.name.split(".").pop().toLowerCase();
+    try {
+      if (ext === "docx") {
+        // mammoth.js でWord読み込み
+        if (!window.mammoth) {
+          await new Promise((res, rej) => {
+            const s = document.createElement("script");
+            s.src = "https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js";
+            s.onload = res; s.onerror = rej;
+            document.head.appendChild(s);
+          });
+        }
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        const text = result.value.trim();
+        if (text) { setDraft(text); setText(text); autoSplitLines(text, lineCount); }
+        else setDocError("テキストを抽出できませんでした");
+
+      } else if (ext === "xlsx" || ext === "xls" || ext === "csv") {
+        // SheetJS でExcel読み込み
+        if (!window.XLSX) {
+          await new Promise((res, rej) => {
+            const s = document.createElement("script");
+            s.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+            s.onload = res; s.onerror = rej;
+            document.head.appendChild(s);
+          });
+        }
+        const arrayBuffer = await file.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: "array" });
+        // 全シートのテキストを結合
+        const allText = workbook.SheetNames.map(name => {
+          const sheet = workbook.Sheets[name];
+          return XLSX.utils.sheet_to_txt(sheet);
+        }).join("\n").replace(/\t/g, " ").trim();
+        if (allText) { setDraft(allText); setText(allText); autoSplitLines(allText, lineCount); }
+        else setDocError("テキストを抽出できませんでした");
+
+      } else {
+        setDocError("対応ファイル: .docx .xlsx .xls .csv");
+      }
+    } catch (err) {
+      setDocError("読み込みに失敗しました: " + (err.message ?? ""));
+    } finally {
+      setDocLoading(false);
+      if (docInputRef.current) docInputRef.current.value = "";
+    }
+  };
+
+  const renderText = (str) => {
+    const segs = []; let cur = "", curType = null;
+    for (const ch of str) {
+      const t = charType(ch);
+      if (curType === null) curType = t;
+      if (t === curType) cur += ch;
+      else { segs.push({ text: cur, type: curType }); cur = ch; curType = t; }
+    }
+    if (cur) segs.push({ text: cur, type: curType });
+    return segs.map((s, i) => <span key={i} style={{ fontSize: `${sizes[s.type]}px` }}>{s.text}</span>);
+  };
+
+  // テキストを指定行数に均等分割
+  const splitLines = (str, n) => {
+    if (!n || n <= 0) return [str];
+    const len = str.length;
+    const perLine = Math.ceil(len / n);
+    const lines = [];
+    for (let i = 0; i < n; i++) {
+      const chunk = str.slice(i * perLine, (i + 1) * perLine);
+      if (chunk) lines.push(chunk);
+    }
+    return lines;
+  };
+
+  const mainPaperRef = useRef(null);
+  const handlePrint = () => {
+    const el = mainPaperRef.current;
+    if (!el) return;
+    const loadH2C = (cb) => {
+      if (window.html2canvas) { cb(); return; }
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      s.onload = cb; document.head.appendChild(s);
+    };
+    loadH2C(() => {
+      const rect = el.getBoundingClientRect();
+      html2canvas(el, {
+        scale: 3, useCORS: true, allowTaint: true,
+        backgroundColor: '#fff', width: rect.width, height: rect.height, logging: false,
+      }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const isLandscape = !vertical;
+        const pw = isLandscape ? 257 : 182;
+        const ph = isLandscape ? 182 : 257;
+        const pageSize = isLandscape ? 'B5 landscape' : 'B5 portrait';
+        const printWin = window.open('', '_blank', 'width=900,height=700');
+        if (!printWin) { alert('ポップアップをブロックしています。許可してから再度お試しください。'); return; }
+        printWin.document.write(`<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+@page{size:${pageSize};margin:0;}
+html,body{width:${pw}mm;height:${ph}mm;overflow:hidden;background:#fff;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;}
+img{width:${pw}mm;height:${ph}mm;display:block;}
+</style></head>
+<body><img src="${imgData}">
+<script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};setTimeout(function(){window.close();},3000);};<\/scr"+"ipt>
+</body></html>`);
+        printWin.document.close();
+      });
+    });
+  };
+
+  const targetInfo = SIZE_TARGETS.find((t) => t.key === sizeTarget);
+
+  // レスポンシブ判定
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [fontPopupCat, setFontPopupCat] = useState(null);
+  const [mobileTab, setMobileTab] = useState("font");
+  // スマホ：テキストエリアタッチ編集
+  const [touchEditMode, setTouchEditMode] = useState(false);   // ドラッグモード中
+  const [pendingOffset, setPendingOffset] = useState(null);     // 確認待ちのoffset
+  const [confirmOffset, setConfirmOffset] = useState(false);    // 確認ダイアログ表示
+  const [pcDragMode, setPcDragMode] = useState(false);          // PCドラッグモード
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', h);
+    return () => window.removeEventListener('resize', h);
+  }, []);
+
+  // 書体ポップアップセレクター
+  const FontSelector = ({ compact = false }) => {
+    const cats = ["楷書", "行書", "草書", "明朝"];
+    const currentCat = currentFont?.category ?? "楷書";
+    return (
+      <div style={{ position: "relative", display: "inline-flex", gap: 4, flexWrap: "wrap", alignItems: "center" }}>
+        {cats.map(cat => {
+          const catFonts = FONTS.filter(f => f.category === cat);
+          const isActive = currentCat === cat;
+          const isOpen = fontPopupCat === cat;
+          return (
+            <div key={cat} style={{ position: "relative" }}>
+              <button
+                onClick={() => setFontPopupCat(isOpen ? null : cat)}
+                style={{
+                  background: isActive ? "#6b4c2a" : "#f0e8d4",
+                  color: isActive ? "#fff" : "#6b4c2a",
+                  border: `1px solid ${isActive ? "#6b4c2a" : "#c8b48a"}`,
+                  borderRadius: 8, padding: compact ? "4px 10px" : "6px 14px",
+                  fontSize: compact ? 11 : 13, fontFamily: "sans-serif",
+                  cursor: "pointer", display: "flex", alignItems: "center", gap: 4,
+                  whiteSpace: "nowrap",
+                }}>
+                {cat}
+                {isActive && <span style={{ fontSize: 9, opacity: 0.8, fontFamily: currentFont.family }}>（{currentFont.label}）</span>}
+                <span style={{ fontSize: 9 }}>{isOpen ? "▲" : "▼"}</span>
+              </button>
+              {/* ポップアップ */}
+              {isOpen && (
+                <div style={{
+                  position: "absolute", top: "110%", left: 0, zIndex: 500,
+                  background: "#fffef9", border: "1px solid #d4c4a0",
+                  borderRadius: 10, boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                  padding: "8px", minWidth: 180,
+                }}>
+                  {catFonts.map(f => (
+                    <button key={f.key}
+                      onClick={() => { changeFont(f.key); setFontPopupCat(null); }}
+                      style={{
+                        display: "block", width: "100%", textAlign: "left",
+                        background: selectedFont === f.key ? "#f0e8d4" : "transparent",
+                        border: "none", borderRadius: 6,
+                        padding: "7px 12px", cursor: "pointer",
+                        borderLeft: selectedFont === f.key ? "3px solid #6b4c2a" : "3px solid transparent",
+                      }}>
+                      <span style={{ fontFamily: f.family, fontSize: 16, color: "#1a0e05" }}>{f.label}</span>
+                      <span style={{ fontSize: 10, color: "#a08060", marginLeft: 8, fontFamily: "sans-serif" }}>{f.sublabel}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+        {/* ポップアップ外クリックで閉じる */}
+        {fontPopupCat && (
+          <div style={{ position: "fixed", inset: 0, zIndex: 499 }}
+            onClick={() => setFontPopupCat(null)} />
+        )}
+      </div>
+    );
+  };
+
+  // 印刷用スタイルをheadに追加
+  useEffect(() => {
+    const pageSize = bgImage ? (vertical ? "B5 portrait" : "B5 landscape") : "A4";
+    const margin = bgImage ? "5mm" : "10mm";
+    const styleId = "shuji-print-css";
+    let el = document.getElementById(styleId);
+    if (!el) { el = document.createElement("style"); el.id = styleId; document.head.appendChild(el); }
+    el.textContent = `@media print {
+      @page { size: ${pageSize}; margin: ${margin}; }
+      body * { visibility: hidden !important; }
+      #shuji-main-paper, #shuji-main-paper * { visibility: visible !important; }
+      #shuji-main-paper {
+        position: fixed !important; inset: 0 !important;
+        width: 100% !important; max-width: 100% !important;
+        height: 100% !important; padding: 0 !important;
+        margin: 0 !important; border: none !important;
+        box-shadow: none !important; border-radius: 0 !important;
+        overflow: visible !important;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+      }
+    }`;
+  }, [bgImage, vertical]);
+
+  return (
+    <div style={{ height: "100vh", background: "#f5f0e8", fontFamily: "'Noto Serif JP', serif", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+
+      {/* ── スマホUI：ジェスチャー操作 ── */}
+      {isMobile && (
+        <div style={{ position:"fixed", inset:0, display:"flex", flexDirection:"column", background:"#f5f0e8", zIndex:1 }}>
+
+          {/* ヘッダー（最小限） */}
+          <div style={{ background:"#2c1a0e", padding:"6px 12px", display:"flex", alignItems:"center", justifyContent:"space-between", flexShrink:0 }}>
+            <div style={{ display:"flex", alignItems:"baseline", gap:8 }}>
+              <div style={{ fontSize:16, fontWeight:700, color:"#fff", letterSpacing:"0.1em" }}>課題見本</div>
+              <div style={{ fontSize:9, color:"#c8a878", fontFamily:"sans-serif" }}>習字教室</div>
+            </div>
+            <div style={{ display:"flex", gap:6 }}>
+              <button onClick={handleUndo} disabled={!canUndo}
+                style={{ background:canUndo?"#4a5a6a":"#2a2a2a", color:"#fff", border:"none", borderRadius:8, width:34, height:34, fontSize:15, cursor:"pointer", opacity:canUndo?1:0.4 }}>↩</button>
+              <button onClick={handleRedo} disabled={!canRedo}
+                style={{ background:canRedo?"#4a5a6a":"#2a2a2a", color:"#fff", border:"none", borderRadius:8, width:34, height:34, fontSize:15, cursor:"pointer", opacity:canRedo?1:0.4 }}>↪</button>
+              <button onClick={() => { setSavingOpen(true); loadSaves(); }}
+                style={{ background:"#6b4c2a", color:"#fff", border:"none", borderRadius:8, width:34, height:34, fontSize:16, cursor:"pointer" }}>💾</button>
+              <button onClick={() => setPreviewing(true)}
+                style={{ background:"#2c5f8a", color:"#fff", border:"none", borderRadius:8, width:34, height:34, fontSize:16, cursor:"pointer" }}>🖨️</button>
+            </div>
+          </div>
+
+          {/* ジェスチャーヒント */}
+          {!touchEditMode && !confirmOffset && (
+            <div style={{ background:"rgba(44,26,14,0.85)", padding:"4px 0", display:"flex", justifyContent:"space-around", flexShrink:0 }}>
+              {[
+                { icon:"✏️", label:"ダブルタップ 編集" },
+                { icon:"↕️", label:"スワイプ 行数" },
+                { icon:"↔️", label:"スワイプ 書体" },
+                { icon:"⏸️", label:"長押し 位置" },
+              ].map(h => (
+                <div key={h.icon} style={{ display:"flex", alignItems:"center", gap:3, padding:"2px 6px" }}>
+                  <span style={{ fontSize:11 }}>{h.icon}</span>
+                  <span style={{ fontSize:9, color:"#c8a878", fontFamily:"sans-serif" }}>{h.label}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* 用紙エリア：ジェスチャー検知 */}
+          <div style={{ flex:1, overflow:"hidden", display:"flex", alignItems:"center", justifyContent:"center", padding:"8px", position:"relative" }}
+            onTouchStart={(e) => {
+              const t = e.touches[0];
+              e.currentTarget._gs = { x: t.clientX, y: t.clientY, time: Date.now(), touches: e.touches.length };
+              // 長押しタイマー
+              e.currentTarget._longTimer = setTimeout(() => {
+                if (!touchEditMode && !confirmOffset) {
+                  setTouchEditMode(true);
+                  setPendingOffset({ ...textOffset });
+                }
+              }, 600);
+            }}
+            onTouchEnd={(e) => {
+              clearTimeout(e.currentTarget._longTimer);
+              if (touchEditMode) {
+                setTouchEditMode(false);
+                setConfirmOffset(true);
+                return;
+              }
+              const gs = e.currentTarget._gs;
+              if (!gs) return;
+              const dt = Date.now() - gs.time;
+              const t = e.changedTouches[0];
+              const dx = t.clientX - gs.x;
+              const dy = t.clientY - gs.y;
+              const adx = Math.abs(dx), ady = Math.abs(dy);
+
+              // ダブルタップ検出
+              const now = Date.now();
+              if (e.currentTarget._lastTap && now - e.currentTarget._lastTap < 300) {
+                startEdit();
+                e.currentTarget._lastTap = 0;
+                return;
+              }
+              e.currentTarget._lastTap = now;
+
+              // スワイプ判定（30px以上）
+              if (adx < 20 && ady < 20) return; // タップ
+              if (ady > adx) {
+                // 縦スワイプ → 行数変更
+                if (dy < -30) {
+                  // 上スワイプ → 行数増加
+                  const next = lineCount === 0 ? 2 : Math.min(8, lineCount + 1);
+                  changeLineCount(next);
+                } else if (dy > 30) {
+                  // 下スワイプ → 行数減少
+                  const next = lineCount <= 2 ? 0 : lineCount - 1;
+                  changeLineCount(next);
+                }
+              } else {
+                // 横スワイプ → 書体切替
+                const idx = FONTS.findIndex(f => f.key === selectedFont);
+                if (dx < -30) {
+                  // 左スワイプ → 次のフォント
+                  const next = FONTS[(idx + 1) % FONTS.length];
+                  changeFont(next.key);
+                } else if (dx > 30) {
+                  // 右スワイプ → 前のフォント
+                  const next = FONTS[(idx - 1 + FONTS.length) % FONTS.length];
+                  changeFont(next.key);
+                }
+              }
+            }}
+            onTouchMove={(e) => {
+              // スワイプ中は長押しキャンセル
+              const gs = e.currentTarget._gs;
+              if (gs) {
+                const t = e.touches[0];
+                const dx = Math.abs(t.clientX - gs.x);
+                const dy = Math.abs(t.clientY - gs.y);
+                if (dx > 10 || dy > 10) clearTimeout(e.currentTarget._longTimer);
+              }
+              if (touchEditMode) e.preventDefault();
+            }}
+          >
+            {/* ジェスチャー状態表示 */}
+            {touchEditMode && (
+              <div style={{ position:"absolute", top:8, left:"50%", transform:"translateX(-50%)", background:"rgba(40,100,255,0.9)", color:"#fff", fontSize:12, fontFamily:"sans-serif", borderRadius:20, padding:"5px 16px", zIndex:30, pointerEvents:"none", whiteSpace:"nowrap" }}>
+                ● 青い点をドラッグしてエリアを調整
+              </div>
+            )}
+
+            {/* 行数・書体インジケーター */}
+            {!touchEditMode && !confirmOffset && (
+              <div style={{ position:"absolute", top:8, right:12, zIndex:20, display:"flex", flexDirection:"column", alignItems:"flex-end", gap:4, pointerEvents:"none" }}>
+                <div style={{ background:"rgba(44,26,14,0.75)", color:"#c8a878", fontSize:10, fontFamily:"sans-serif", borderRadius:10, padding:"2px 10px" }}>
+                  {currentFont.label}
+                </div>
+                <div style={{ background:"rgba(44,26,14,0.75)", color:"#c8a878", fontSize:10, fontFamily:"sans-serif", borderRadius:10, padding:"2px 10px" }}>
+                  {lineCount === 0 ? "行数:自動" : `${lineCount}行`}
+                </div>
+              </div>
+            )}
+
+            {/* 用紙 */}
+            <div style={{ width:"100%", height:"100%", position:"relative" }}>
+              <KadaiContent
+                text={text} sizes={sizes} currentFont={currentFont} vertical={vertical}
+                renderText={renderText} lineCount={lineCount} lineSplits={lineSplits}
+                bgImage={bgImage} textOffset={textOffset} lineHeight={lineHeight}
+                justify={justify} autoFontSize={autoFontSize} onAutoFontSize={handleAutoFontSize}
+                showOffsetGuide={touchEditMode}
+                onDragOffset={handleDragOffset}
+                onDragEnd={() => { if (touchEditMode) { setTouchEditMode(false); setConfirmOffset(true); } }}
+                vAlign={vAlign}
+              />
+            </div>
+
+            {/* 確認ダイアログ */}
+            {confirmOffset && (
+              <div style={{ position:"absolute", inset:0, background:"rgba(0,0,0,0.45)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:50 }}>
+                <div style={{ background:"#fff", borderRadius:16, padding:"24px 20px", margin:"0 24px", boxShadow:"0 8px 32px rgba(0,0,0,0.3)", textAlign:"center" }}>
+                  <div style={{ fontSize:16, fontWeight:700, color:"#2c1a0e", marginBottom:6 }}>この範囲でよいですか？</div>
+                  <div style={{ fontSize:11, color:"#8b7355", fontFamily:"sans-serif", marginBottom:20 }}>
+                    上{textOffset.top} 下{textOffset.bottom} 左{textOffset.left} 右{textOffset.right}px
+                  </div>
+                  <div style={{ display:"flex", gap:12 }}>
+                    <button onClick={() => { setPendingOffset(null); setConfirmOffset(false); setOffsetOpen(false); }}
+                      style={{ flex:1, background:"#4a7c59", color:"#fff", border:"none", borderRadius:10, padding:"14px 0", fontSize:16, fontWeight:700, cursor:"pointer" }}>✅ はい</button>
+                    <button onClick={() => { if (pendingOffset) setTextOffset(pendingOffset); setConfirmOffset(false); setOffsetOpen(false); }}
+                      style={{ flex:1, background:"#e8dfc8", color:"#6b4c2a", border:"1px solid #c8b48a", borderRadius:10, padding:"14px 0", fontSize:16, fontWeight:700, cursor:"pointer" }}>↩ やり直し</button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* フッター：書体カテゴリ + 縦横 + 詳細 */}
+          <div style={{ background:"#fff", borderTop:"1px solid #d4c4a0", padding:"8px 12px", display:"flex", gap:8, alignItems:"center", flexShrink:0, flexWrap:"wrap" }}>
+            {/* 書体カテゴリ */}
+            <FontSelector compact={true} />
+            {/* 縦横 */}
+            <button onClick={() => changeVertical(!vertical)}
+              style={{ background:"#f0e8d4", color:"#6b4c2a", border:"1px solid #c8b48a", borderRadius:8, padding:"8px 12px", fontSize:12, fontFamily:"sans-serif", cursor:"pointer", whiteSpace:"nowrap" }}>
+              {vertical ? "縦↔横" : "横↔縦"}
+            </button>
+            {/* PDF背景 */}
+            <label style={{ background: bgImage?"#7a3c8a":"#5a4a7a", color:"#fff", border:"none", borderRadius:8, padding:"8px 12px", fontSize:12, fontFamily:"sans-serif", cursor:"pointer", whiteSpace:"nowrap" }}>
+              🖼️{bgImage?" 変更":" PDF"}
+              <input ref={bgInputRef} type="file" accept="application/pdf,image/*" onChange={handleBgUpload} style={{ display:"none" }} />
+            </label>
+            {bgImage && <button onClick={() => analyzeRuledLines(bgImage, vertical, true)} disabled={bgAnalyzing}
+              style={{ background:"#f0faf4", color:"#2c6b4a", border:"1px solid #a8d8b8", borderRadius:8, padding:"8px 10px", fontSize:12, fontFamily:"sans-serif", cursor:"pointer", whiteSpace:"nowrap" }}>
+              {bgAnalyzing ? "⏳" : "🔍"}
+            </button>}
+            {bgImage && <button onClick={clearBg}
+              style={{ background:"#a04040", color:"#fff", border:"none", borderRadius:8, padding:"8px 10px", fontSize:12, cursor:"pointer" }}>✕</button>}
+          </div>
+        </div>
+      )}
+
+      {/* ── PC固定レイアウト ── */}
+      {!isMobile && (
+        <div style={{ position:"fixed", inset:0, display:"flex", flexDirection:"column", background:"#1a0e08", zIndex:1 }}>
+
+          {/* PC ヘッダー */}
+          <div style={{ background:"#2c1a0e", padding:"6px 16px", display:"flex", alignItems:"center", justifyContent:"space-between", flexShrink:0, borderBottom:"1px solid #4a3020" }}>
+            <div style={{ display:"flex", alignItems:"baseline", gap:10 }}>
+              <div style={{ fontSize:18, fontWeight:700, color:"#fff", letterSpacing:"0.1em" }}>課題見本</div>
+              <div style={{ fontSize:10, color:"#c8a878", fontFamily:"sans-serif" }}>習字教室</div>
+            </div>
+            <div style={{ display:"flex", gap:6, alignItems:"center" }}>
+              <button onClick={handleUndo} disabled={!canUndo} style={{ background:canUndo?"#4a5a6a":"#2a2a2a", color:"#fff", border:"none", borderRadius:7, width:32, height:32, fontSize:14, cursor:"pointer", opacity:canUndo?1:0.4 }}>↩</button>
+              <button onClick={handleRedo} disabled={!canRedo} style={{ background:canRedo?"#4a5a6a":"#2a2a2a", color:"#fff", border:"none", borderRadius:7, width:32, height:32, fontSize:14, cursor:"pointer", opacity:canRedo?1:0.4 }}>↪</button>
+              <div style={{ width:1, height:24, background:"#4a3020", margin:"0 4px" }} />
+              <button onClick={startEdit} style={{ background:"#4a7c59", color:"#fff", border:"none", borderRadius:7, padding:"0 14px", height:32, fontSize:12, fontFamily:"sans-serif", cursor:"pointer" }}>✏️ 編集</button>
+              <label style={{ background:bgImage?"#7a3c8a":"#5a4a7a", color:"#fff", border:"none", borderRadius:7, padding:"0 14px", height:32, fontSize:12, fontFamily:"sans-serif", cursor:"pointer", display:"flex", alignItems:"center" }}>
+                🖼️ {bgImage?"背景変更":"PDF背景"}
+                <input ref={bgInputRef} type="file" accept="application/pdf,image/*" onChange={handleBgUpload} style={{ display:"none" }} />
+              </label>
+              {bgImage && <button onClick={clearBg} style={{ background:"#a04040", color:"#fff", border:"none", borderRadius:7, width:32, height:32, fontSize:13, cursor:"pointer" }}>✕</button>}
+              {bgImage && <button onClick={() => analyzeRuledLines(bgImage, vertical, true)} disabled={bgAnalyzing}
+                style={{ background:"#2c6b4a", color:"#fff", border:"none", borderRadius:7, padding:"0 12px", height:32, fontSize:12, fontFamily:"sans-serif", cursor:"pointer" }}>
+                {bgAnalyzing?"⏳":"🔍 再解析"}
+              </button>}
+              <div style={{ width:1, height:24, background:"#4a3020", margin:"0 4px" }} />
+              <button onClick={() => { setSavingOpen(true); loadSaves(); }} style={{ background:"#6b4c2a", color:"#fff", border:"none", borderRadius:7, padding:"0 14px", height:32, fontSize:12, fontFamily:"sans-serif", cursor:"pointer" }}>💾 保存</button>
+              <button onClick={saveAsDefault} style={{ background:"#8a6020", color:"#fff", border:"none", borderRadius:7, width:32, height:32, fontSize:14, cursor:"pointer" }}>⭐</button>
+              <button onClick={() => setPreviewing(true)} style={{ background:"#2c5f8a", color:"#fff", border:"none", borderRadius:7, padding:"0 14px", height:32, fontSize:12, fontFamily:"sans-serif", cursor:"pointer" }}>🖨️ 印刷</button>
+            </div>
+          </div>
+
+          {/* PC メインエリア：左サイドバー＋中央用紙＋右矢印 */}
+          <div style={{ flex:1, display:"flex", overflow:"hidden" }}>
+
+            {/* 左サイドバー */}
+            <div style={{ width:220, background:"#241408", borderRight:"1px solid #3a2010", padding:"12px 10px", display:"flex", flexDirection:"column", gap:10, overflowY:"auto", flexShrink:0 }}>
+
+              {/* 書体 */}
+              <div>
+                <div style={{ fontSize:9, color:"#8b7355", fontFamily:"sans-serif", letterSpacing:"0.2em", marginBottom:6 }}>FONT 書体</div>
+                <FontSelector compact={true} />
+              </div>
+
+              <div style={{ height:1, background:"#3a2010" }} />
+
+              {/* 方向 */}
+              <div>
+                <div style={{ fontSize:9, color:"#8b7355", fontFamily:"sans-serif", letterSpacing:"0.2em", marginBottom:6 }}>DIRECTION 方向</div>
+                <div style={{ display:"flex", gap:4 }}>
+                  <button onClick={() => changeVertical(false)} style={{ flex:1, background:!vertical?"#6b4c2a":"#3a2010", color:"#fff", border:"1px solid #4a3020", borderRadius:7, padding:"8px 0", fontSize:12, fontFamily:"sans-serif", cursor:"pointer" }}>横書き</button>
+                  <button onClick={() => changeVertical(true)} style={{ flex:1, background:vertical?"#6b4c2a":"#3a2010", color:"#fff", border:"1px solid #4a3020", borderRadius:7, padding:"8px 0", fontSize:12, fontFamily:"sans-serif", cursor:"pointer" }}>縦書き</button>
+                </div>
+              </div>
+
+              <div style={{ height:1, background:"#3a2010" }} />
+
+              {/* 行数 */}
+              <div>
+                <div style={{ fontSize:9, color:"#8b7355", fontFamily:"sans-serif", letterSpacing:"0.2em", marginBottom:6 }}>LINES 行数</div>
+                <div style={{ display:"flex", flexWrap:"wrap", gap:4 }}>
+                  <button onClick={() => changeLineCount(0)} style={{ background:lineCount===0?"#7a5c9a":"#3a2010", color:"#fff", border:"1px solid #4a3020", borderRadius:7, padding:"6px 10px", fontSize:12, fontFamily:"sans-serif", cursor:"pointer" }}>自動</button>
+                  {[2,3,4,5,6,7,8].map(n => (
+                    <button key={n} onClick={() => changeLineCount(n)} style={{ background:lineCount===n?"#7a5c9a":"#3a2010", color:"#fff", border:"1px solid #4a3020", borderRadius:7, width:36, height:32, fontSize:14, fontWeight:700, cursor:"pointer" }}>{n}</button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ height:1, background:"#3a2010" }} />
+
+              {/* 文字サイズ表示 */}
+              <div>
+                <div style={{ fontSize:9, color:"#8b7355", fontFamily:"sans-serif", letterSpacing:"0.2em", marginBottom:6 }}>SIZE 文字サイズ</div>
+                <div style={{ background:"#3a2010", borderRadius:8, padding:"8px 10px" }}>
+                  <div style={{ fontSize:20, fontWeight:700, color:"#e8d0a0", textAlign:"center" }}>
+                    漢 {parseFloat(sizes.kanji).toFixed(1)}<span style={{ fontSize:10, color:"#8b7355" }}>pt</span>
+                  </div>
+                  <div style={{ display:"flex", gap:6, marginTop:6 }}>
+                    <div style={{ flex:1, textAlign:"center" }}>
+                      <div style={{ fontSize:9, color:"#8b7355", fontFamily:"sans-serif" }}>仮</div>
+                      <div style={{ display:"flex", alignItems:"center", gap:2 }}>
+                        <button onClick={() => setKanaOffset(o => parseFloat((o-0.5).toFixed(1)))} style={{ background:"#4a3020", border:"none", borderRadius:4, width:22, height:22, color:"#e8d0a0", fontSize:13, cursor:"pointer" }}>－</button>
+                        <span style={{ flex:1, textAlign:"center", fontSize:11, color:"#e8d0a0", fontFamily:"sans-serif" }}>{parseFloat(sizes.kana).toFixed(1)}</span>
+                        <button onClick={() => setKanaOffset(o => parseFloat((o+0.5).toFixed(1)))} style={{ background:"#4a3020", border:"none", borderRadius:4, width:22, height:22, color:"#e8d0a0", fontSize:13, cursor:"pointer" }}>＋</button>
+                      </div>
+                    </div>
+                    <div style={{ flex:1, textAlign:"center" }}>
+                      <div style={{ fontSize:9, color:"#8b7355", fontFamily:"sans-serif" }}>英</div>
+                      <div style={{ display:"flex", alignItems:"center", gap:2 }}>
+                        <button onClick={() => setAlphaOffset(o => parseFloat((o-0.5).toFixed(1)))} style={{ background:"#4a3020", border:"none", borderRadius:4, width:22, height:22, color:"#e8d0a0", fontSize:13, cursor:"pointer" }}>－</button>
+                        <span style={{ flex:1, textAlign:"center", fontSize:11, color:"#e8d0a0", fontFamily:"sans-serif" }}>{parseFloat(sizes.alpha).toFixed(1)}</span>
+                        <button onClick={() => setAlphaOffset(o => parseFloat((o+0.5).toFixed(1)))} style={{ background:"#4a3020", border:"none", borderRadius:4, width:22, height:22, color:"#e8d0a0", fontSize:13, cursor:"pointer" }}>＋</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ height:1, background:"#3a2010" }} />
+
+              {/* テキスト位置 */}
+              <div>
+                <div style={{ fontSize:9, color:"#8b7355", fontFamily:"sans-serif", letterSpacing:"0.2em", marginBottom:6 }}>POSITION テキスト位置</div>
+                <div style={{ fontSize:10, color:"#7a6a5a", fontFamily:"sans-serif", background:"#3a2010", borderRadius:7, padding:"8px 10px" }}>
+                  用紙を長押し→ドラッグで調整
+                  <div style={{ marginTop:4, color:"#6a8060", fontSize:10 }}>
+                    上{textOffset.top} 下{textOffset.bottom} 左{textOffset.left} 右{textOffset.right}px
+                  </div>
+                  <button onClick={() => setTextOffset({ top:40, left:40, right:40, bottom:40 })}
+                    style={{ marginTop:6, background:"#4a3020", color:"#c8a878", border:"none", borderRadius:5, padding:"4px 10px", fontSize:10, fontFamily:"sans-serif", cursor:"pointer", width:"100%" }}>↺ リセット</button>
+                </div>
+              </div>
+
+              {/* 状態メッセージ */}
+              {(saveMsg || bgAnalyzeMsg || bgError) && (
+                <div style={{ fontSize:10, fontFamily:"sans-serif", color:"#a8d898", background:"#1a3020", borderRadius:7, padding:"6px 8px" }}>
+                  {saveMsg || bgAnalyzeMsg || bgError}
+                </div>
+              )}
+            </div>
+
+            {/* 中央：用紙エリア */}
+            <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:"16px", overflow:"auto", position:"relative" }}>
+
+              {/* 行区切り左矢印 */}
+              {lineCount > 0 && lineSplits.length > 0 && (
+                <div style={{ display:"flex", flexDirection:"column", justifyContent:"space-evenly", gap:4, paddingRight:8, alignSelf:"stretch" }}>
+                  {lineSplits.map((_, idx) => (
+                    <div key={idx} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:2 }}>
+                      <span style={{ fontSize:8, color:"#8b7355", fontFamily:"sans-serif" }}>{idx+1}｜{idx+2}</span>
+                      <button onClick={() => moveSplit(idx, -1)}
+                        style={{ background:"#3a2010", border:"1px solid #4a3020", borderRadius:6, width:28, height:28, fontSize:14, cursor:"pointer", color:"#e8d0a0", display:"flex", alignItems:"center", justifyContent:"center" }}>←</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* 用紙本体 */}
+              <div style={{ position:"relative" }}>
+                <div id="shuji-main-paper" ref={mainPaperRef} data-paper="1"
+                  style={{ width:bgImage?(vertical?515:728):720, maxWidth:"100%", background:"#fffef9", border:"1px solid #d4c4a0", borderRadius:4, boxShadow:"0 8px 40px rgba(0,0,0,0.4)", padding:bgImage?"36px 36px":"40px 48px", position:"relative", overflow:"hidden", aspectRatio:bgImage?(vertical?"182 / 257":"257 / 182"):"auto", cursor:bgImage?"default":"default" }}
+                  onMouseDown={(e) => {
+                    if (!bgImage) return;
+                    const timer = setTimeout(() => {
+                      setPcDragMode(true);
+                      setOffsetOpen(true);
+                      setPendingOffset({ ...textOffset });
+                    }, 500);
+                    e.currentTarget._longTimer = timer;
+                  }}
+                  onMouseUp={(e) => {
+                    if (e.currentTarget._longTimer) clearTimeout(e.currentTarget._longTimer);
+                    if (pcDragMode) { setPcDragMode(false); setConfirmOffset(true); }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (e.currentTarget._longTimer) clearTimeout(e.currentTarget._longTimer);
+                  }}
+                >
+                  <KadaiContent text={text} sizes={sizes} currentFont={currentFont} vertical={vertical} renderText={renderText} lineCount={lineCount} lineSplits={lineSplits} bgImage={bgImage} textOffset={textOffset} lineHeight={lineHeight} justify={justify} autoFontSize={autoFontSize} onAutoFontSize={handleAutoFontSize}
+                    showOffsetGuide={offsetOpen || pcDragMode}
+                    onDragOffset={handleDragOffset}
+                    onDragEnd={() => { if (pcDragMode) { setPcDragMode(false); setOffsetOpen(false); setConfirmOffset(true); } }}
+                    vAlign={vAlign} />
+                </div>
+
+                {/* PC確認ダイアログ */}
+                {confirmOffset && !isMobile && (
+                  <div style={{ position:"absolute", inset:0, background:"rgba(0,0,0,0.5)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:50, borderRadius:4 }}>
+                    <div style={{ background:"#fff", borderRadius:14, padding:"24px 28px", boxShadow:"0 8px 32px rgba(0,0,0,0.3)", textAlign:"center", minWidth:260 }}>
+                      <div style={{ fontSize:16, fontWeight:700, color:"#2c1a0e", marginBottom:6 }}>この範囲でよいですか？</div>
+                      <div style={{ fontSize:11, color:"#8b7355", fontFamily:"sans-serif", marginBottom:20 }}>上{textOffset.top} 下{textOffset.bottom} 左{textOffset.left} 右{textOffset.right}px</div>
+                      <div style={{ display:"flex", gap:10 }}>
+                        <button onClick={() => { setPendingOffset(null); setConfirmOffset(false); setOffsetOpen(false); setPcDragMode(false); }}
+                          style={{ flex:1, background:"#4a7c59", color:"#fff", border:"none", borderRadius:10, padding:"12px 0", fontSize:15, fontWeight:700, cursor:"pointer" }}>✅ はい</button>
+                        <button onClick={() => { if (pendingOffset) setTextOffset(pendingOffset); setConfirmOffset(false); setOffsetOpen(false); setPcDragMode(false); }}
+                          style={{ flex:1, background:"#e8dfc8", color:"#6b4c2a", border:"1px solid #c8b48a", borderRadius:10, padding:"12px 0", fontSize:15, fontWeight:700, cursor:"pointer" }}>↩ やり直し</button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 行区切り右矢印 */}
+              {lineCount > 0 && lineSplits.length > 0 && (
+                <div style={{ display:"flex", flexDirection:"column", justifyContent:"space-evenly", gap:4, paddingLeft:8, alignSelf:"stretch" }}>
+                  {lineSplits.map((_, idx) => (
+                    <div key={idx} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:2 }}>
+                      <span style={{ fontSize:8, color:"#8b7355", fontFamily:"sans-serif" }}>{idx+1}｜{idx+2}</span>
+                      <button onClick={() => moveSplit(idx, +1)}
+                        style={{ background:"#3a2010", border:"1px solid #4a3020", borderRadius:6, width:28, height:28, fontSize:14, cursor:"pointer", color:"#e8d0a0", display:"flex", alignItems:"center", justifyContent:"center" }}>→</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )} {/* end !isMobile */}
+
+      
+      {/* 保存モーダル */}
+      {savingOpen && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 150, display: "flex", alignItems: isMobile ? "flex-end" : "center", justifyContent: "center", padding: isMobile ? 0 : 24 }}>
+          <div style={{ background: "#fffef9", borderRadius: isMobile ? "16px 16px 0 0" : 14, padding: isMobile ? "20px 16px" : 28, width: "100%", maxWidth: isMobile ? "100%" : 520, boxShadow: "0 8px 40px rgba(0,0,0,0.25)", border: "1px solid #d4c4a0", maxHeight: isMobile ? "85vh" : "80vh", display: "flex", flexDirection: "column" }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "#2c1a0e", fontFamily: "sans-serif", marginBottom: 18 }}>💾 保存・読込</div>
+            <button onClick={handleSave} style={{ background: "#8a5c2c", color: "#fff", border: "none", borderRadius: 10, padding: "12px 0", fontSize: 14, fontFamily: "sans-serif", fontWeight: 700, cursor: "pointer", marginBottom: 20 }}>＋ 現在の状態を保存する</button>
+            <div style={{ fontSize: 12, color: "#8b7355", fontFamily: "sans-serif", marginBottom: 10 }}>保存済みデータ（{saves.length}件）</div>
+            <div style={{ overflowY: "auto", flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+              {saves.length === 0 && <div style={{ color: "#b0956a", fontFamily: "sans-serif", fontSize: 13, textAlign: "center", padding: "24px 0" }}>保存データがありません</div>}
+              {saves.map((save) => (
+                <div key={save.key} style={{ display: "flex", alignItems: "center", gap: 10, background: "#faf6ee", border: "1px solid #e0d0b0", borderRadius: 10, padding: "10px 14px" }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#2c1a0e", fontFamily: "sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{save.name}</div>
+                    <div style={{ fontSize: 10, color: "#a08060", fontFamily: "sans-serif", marginTop: 2 }}>{(FONTS.find(f=>f.key===save.selectedFont)?.label ?? save.selectedFont)}　{save.vertical ? "縦書き" : "横書き"}　漢{save.sizes.kanji}pt 仮{save.sizes.kana}pt 英{save.sizes.alpha}pt</div>
+                    <div style={{ fontSize: 10, color: "#b8a080", fontFamily: "sans-serif", marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{save.text.slice(0, 30)}{save.text.length > 30 ? "…" : ""}</div>
+                  </div>
+                  <button onClick={() => handleLoad(save)} style={{ background: "#4a7c59", color: "#fff", border: "none", borderRadius: 7, padding: "6px 14px", fontSize: 12, fontFamily: "sans-serif", cursor: "pointer" }}>読込</button>
+                  <button onClick={() => handleDelete(save.key)} style={{ background: "#c0392b", color: "#fff", border: "none", borderRadius: 7, padding: "6px 10px", fontSize: 12, fontFamily: "sans-serif", cursor: "pointer" }}>✕</button>
+                </div>
+              ))}
+            </div>
+            <button onClick={() => setSavingOpen(false)} style={{ marginTop: 18, background: "#e8e0d0", color: "#6b4c2a", border: "none", borderRadius: 8, padding: "10px 0", fontSize: 13, fontFamily: "sans-serif", cursor: "pointer" }}>閉じる</button>
+          </div>
+        </div>
+      )}
+
+      {/* テキスト編集モーダル */}
+      {editing && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 100, display: "flex", alignItems: isMobile ? "flex-end" : "center", justifyContent: "center", padding: isMobile ? 0 : 24 }}>
+          <div style={{ background: "#fffef9", borderRadius: isMobile ? "16px 16px 0 0" : 12, padding: isMobile ? "20px 16px" : 28, width: "100%", maxWidth: isMobile ? "100%" : 620, boxShadow: "0 8px 40px rgba(0,0,0,0.2)", border: "1px solid #d4c4a0", maxHeight: isMobile ? "90vh" : "none", overflowY: isMobile ? "auto" : "visible" }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#2c1a0e", fontFamily: "sans-serif", marginBottom: 14 }}>課題テキストを編集</div>
+            <div style={{ background: "#f5f0e8", border: "1px dashed #c8b48a", borderRadius: 10, padding: "14px 16px", marginBottom: 14 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#6b4c2a", fontFamily: "sans-serif", marginBottom: 10 }}>📷 画像からテキストを読み込む</div>
+              <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                <label style={{ background: "#fff", border: "1px solid #c8b48a", borderRadius: 8, padding: "7px 16px", fontSize: 12, fontFamily: "sans-serif", color: "#6b4c2a", cursor: "pointer" }}>
+                  🖼️ 画像を選択
+                  <input ref={imageInputRef} type="file" accept="image/*" onChange={handleImageUpload} style={{ display: "none" }} />
+                </label>
+                {ocrImage && (
+                  <>
+                    <img src={ocrImage} alt="選択画像" style={{ height: 48, borderRadius: 6, border: "1px solid #d4c4a0", objectFit: "cover" }} />
+                    <button onClick={handleOcr} disabled={ocrLoading} style={{ background: ocrLoading ? "#aaa" : "#4a6b8a", color: "#fff", border: "none", borderRadius: 8, padding: "7px 18px", fontSize: 12, fontFamily: "sans-serif", cursor: ocrLoading ? "not-allowed" : "pointer", fontWeight: 700 }}>
+                      {ocrLoading ? "⏳ 読み取り中…" : "✨ テキストを読み取る"}
+                    </button>
+                    <button onClick={() => { setOcrImage(null); if (imageInputRef.current) imageInputRef.current.value = ""; }} style={{ background: "#e8e0d0", color: "#6b4c2a", border: "none", borderRadius: 8, padding: "7px 12px", fontSize: 12, fontFamily: "sans-serif", cursor: "pointer" }}>✕</button>
+                  </>
+                )}
+              </div>
+              {ocrError && <div style={{ color: "#c0392b", fontSize: 11, fontFamily: "sans-serif", marginTop: 8 }}>{ocrError}</div>}
+              {!ocrImage && <div style={{ color: "#b0956a", fontSize: 11, fontFamily: "sans-serif", marginTop: 6 }}>写真・スキャン・スクリーンショットなどから自動読み取りします</div>}
+            </div>
+
+            {/* Word / Excel 読み込み */}
+            <div style={{ background: "#eef2f8", border: "1px dashed #a0b4cc", borderRadius: 10, padding: "14px 16px", marginBottom: 14 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#2c4a6b", fontFamily: "sans-serif", marginBottom: 10 }}>📄 Word・Excel からテキストを読み込む</div>
+              <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                <label style={{ background: "#fff", border: "1px solid #a0b4cc", borderRadius: 8, padding: "7px 16px", fontSize: 12, fontFamily: "sans-serif", color: "#2c4a6b", cursor: "pointer", whiteSpace: "nowrap" }}>
+                  📁 ファイルを選択
+                  <input ref={docInputRef} type="file" accept=".docx,.xlsx,.xls,.csv" onChange={handleDocUpload} style={{ display: "none" }} />
+                </label>
+                {docLoading && <span style={{ fontSize: 12, color: "#4a6b8a", fontFamily: "sans-serif" }}>⏳ 読み込み中…</span>}
+              </div>
+              {docError && <div style={{ color: "#c0392b", fontSize: 11, fontFamily: "sans-serif", marginTop: 8 }}>{docError}</div>}
+              <div style={{ color: "#6a8aaa", fontSize: 11, fontFamily: "sans-serif", marginTop: 6 }}>対応形式：.docx（Word）・.xlsx / .xls（Excel）・.csv</div>
+            </div>
+            <textarea value={draft} onChange={(e) => setDraft(e.target.value)} autoFocus
+              style={{ width: "100%", minHeight: 160, fontSize: 15, fontFamily: currentFont.family, lineHeight: 1.8, color: "#1a0e05", background: "#faf7f0", border: "1px solid #c8b88a", borderRadius: 8, padding: "12px 14px", resize: "vertical", outline: "none", boxSizing: "border-box" }} />
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 16 }}>
+              <button onClick={cancelEdit} style={{ background: "#e8e0d0", color: "#6b4c2a", border: "none", borderRadius: 8, padding: "9px 20px", fontSize: 13, fontFamily: "sans-serif", cursor: "pointer" }}>キャンセル</button>
+              <button onClick={applyEdit} style={{ background: "#4a7c59", color: "#fff", border: "none", borderRadius: 8, padding: "9px 24px", fontSize: 13, fontFamily: "sans-serif", cursor: "pointer", fontWeight: 700 }}>適用する</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {previewing && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 9999, display: "flex", flexDirection: "column", alignItems: "center", overflowY: "auto", padding: "24px 16px" }}>
+          <div style={{ width: "100%", maxWidth: 900, display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 10, flexShrink: 0 }}>
+            <div style={{ color: "#fff", fontFamily: "sans-serif", fontSize: 15, fontWeight: 700 }}>
+              🖨️ 印刷プレビュー
+              <span style={{ fontSize: 11, fontWeight: 400, opacity: 0.7, marginLeft: 12 }}>
+                {bgImage ? (vertical ? "B5 縦" : "B5 横") : "A4"} ／ アプリと同一表示
+              </span>
+            </div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={handlePrint}
+                style={{ background: "#2c5f8a", color: "#fff", border: "none", borderRadius: 8, padding: "10px 22px", fontSize: 14, fontFamily: "sans-serif", cursor: "pointer", fontWeight: 700 }}>
+                🖨️ 印刷する
+              </button>
+              <button onClick={() => setPreviewing(false)}
+                style={{ background: "#555", color: "#fff", border: "none", borderRadius: 8, padding: "10px 18px", fontSize: 14, fontFamily: "sans-serif", cursor: "pointer" }}>
+                ✕ 閉じる
+              </button>
+            </div>
+          </div>
+          <div ref={printRef} style={{ width: "100%", maxWidth: bgImage ? (vertical ? 515 : 728) : 900, background: "#fffef9", border: "1px solid #d4c4a0", borderRadius: 4, boxShadow: "0 4px 24px rgba(0,0,0,0.3)", padding: bgImage ? "36px 36px" : "40px 48px", position: "relative", overflow: "hidden", aspectRatio: bgImage ? (vertical ? "182 / 257" : "257 / 182") : "auto", flexShrink: 0 }}>
+            <KadaiContent text={text} sizes={sizes} currentFont={currentFont} vertical={vertical} renderText={renderText} lineCount={lineCount} lineSplits={lineSplits} bgImage={bgImage} textOffset={textOffset} lineHeight={lineHeight} justify={justify} autoFontSize={autoFontSize} onAutoFontSize={handleAutoFontSize} showOffsetGuide={offsetOpen} onDragOffset={handleDragOffset} vAlign={vAlign} />
+          </div>
+          <div style={{ marginTop: 12, color: "rgba(255,255,255,0.5)", fontFamily: "sans-serif", fontSize: 11, flexShrink: 0 }}>
+            「印刷する」を押すとブラウザの印刷ダイアログが開きます
+          </div>
+        </div>
+      )}
+
+  );
+}
+
+const controlBox = { display: "flex", alignItems: "center", gap: 8, background: "#fff", border: "1px solid #d4c4a0", borderRadius: 12, padding: "8px 14px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" };
+const labelStyle = { fontSize: 11, color: "#8b7355", fontFamily: "sans-serif", letterSpacing: "0.1em", marginRight: 4, whiteSpace: "nowrap" };
+const mobileLabel = { fontSize: 11, color: "#8b7355", fontFamily: "sans-serif", marginBottom: 4, fontWeight: 700, letterSpacing: "0.1em" };
+function mobileToggleBtn(active, activeColor = "#6b4c2a") {
+  return {
+    background: active ? activeColor : "#f0e8d4",
+    color: active ? "#fff" : "#6b4c2a",
+    border: "1px solid", borderColor: active ? activeColor : "#c8b48a",
+    borderRadius: 8, padding: "8px 12px", cursor: "pointer",
+    fontSize: 13, fontFamily: "sans-serif", letterSpacing: "0.05em",
+    minHeight: 44, display: "inline-flex", alignItems: "center", justifyContent: "center",
+  };
+}
+function actionBtn(bg) { return { background: bg, color: "#fff", border: "none", borderRadius: 10, padding: "10px 18px", fontSize: 13, fontFamily: "sans-serif", letterSpacing: "0.1em", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.10)", whiteSpace: "nowrap" }; }
+function toggleBtn(active, activeColor = "#6b4c2a") { return { background: active ? activeColor : "#f0e8d4", color: active ? "#fff" : "#6b4c2a", border: "1px solid", borderColor: active ? activeColor : "#c8b48a", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 14, transition: "all 0.15s", display: "flex", flexDirection: "column", alignItems: "center", lineHeight: 1.3, minWidth: 48 }; }
+function btnStyle(bg) { return { background: bg, color: "#fff", border: "none", borderRadius: 8, width: 36, height: 36, fontSize: 20, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "sans-serif" }; }
+
+const root=ReactDOM.createRoot(document.getElementById('root'));
+root.render(<ShujiMihon/>);
+</script>
+</body>
+</html>
