@@ -1,0 +1,2435 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>習字教室</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+<link href="https://fonts.googleapis.com/css2?family=Kaisei+Opti&family=Kaisei+Decol&family=Kaisei+HarunoUmi&family=Kaisei+Tokumin&family=Yuji+Syuku&family=Yuji+Mai&family=Yuji+Boku&family=Zen+Old+Mincho&family=Shippori+Mincho&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f0e8;
+  --bg2: #ede7da;
+  --bg3: #e4ddd0;
+  --accent: #2c6e49;
+  --accent2: #3a8a5c;
+  --orange: #e07b39;
+  --text: #1a1a1a;
+  --text2: #555;
+  --text3: #999;
+  --border: #d0c8b8;
+  --card: #fff;
+  --radius: 14px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.09);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
+button { cursor: pointer; font-family: inherit; }
+input, textarea, select { font-family: inherit; }
+
+/* ===== 画面管理 ===== */
+.screen { display: none; min-height: 100vh; }
+.screen.on { display: flex; flex-direction: column; }
+
+/* ===== スタート ===== */
+#s-start {
+  align-items: center; justify-content: center;
+  background: linear-gradient(145deg, #2c6e49 0%, #1a4a30 60%, #0f2e1c 100%);
+}
+.start-box { text-align: center; padding: 40px 28px; }
+.start-logo { font-size: clamp(36px,8vw,64px); font-family: 'Yuji Syuku', serif; color: #f0e0b0; letter-spacing: 0.4em; text-shadow: 0 2px 20px rgba(0,0,0,0.3); margin-bottom: 8px; }
+.start-tagline { font-size: 12px; color: rgba(240,224,176,0.6); letter-spacing: 0.3em; margin-bottom: 56px; }
+.btn-primary { display: block; width: 230px; margin: 0 auto 14px; padding: 18px 0; border: none; border-radius: 50px; font-size: 16px; font-weight: 700; letter-spacing: 0.15em; transition: all 0.2s; }
+.btn-start-new { background: #f0e0b0; color: #1a4a30; }
+.btn-start-new:hover { background: #fff; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
+.btn-start-load { background: transparent; color: rgba(240,224,176,0.6); border: 1px solid rgba(240,224,176,0.25); font-weight: 400; }
+.btn-start-load:hover { border-color: rgba(240,224,176,0.6); color: #f0e0b0; }
+
+/* ===== 共通ヘッダー ===== */
+.hdr { display: flex; align-items: center; gap: 12px; padding: 14px 20px; background: #fff; border-bottom: 1px solid var(--border); flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.hdr-back { background: var(--bg2); border: none; border-radius: 50px; padding: 7px 14px; font-size: 13px; color: var(--text2); transition: all 0.15s; }
+.hdr-back:hover { background: var(--bg3); color: var(--text); }
+.hdr-title { font-size: 17px; font-weight: 700; color: var(--text); letter-spacing: 0.05em; }
+.hdr-step { margin-left: auto; font-size: 11px; color: var(--text3); background: var(--bg2); border-radius: 20px; padding: 4px 12px; }
+
+/* ===== 用紙選択 ===== */
+#s-bg { background: var(--bg); }
+.bg-scroll { flex: 1; overflow-y: auto; padding: 20px; }
+.bg-section-title { font-size: 12px; font-weight: 700; color: var(--text2); letter-spacing: 0.15em; margin-bottom: 12px; padding-left: 2px; }
+.bg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.bg-card {
+  background: var(--card); border-radius: var(--radius); overflow: hidden;
+  border: 2.5px solid transparent; cursor: pointer; transition: all 0.2s;
+  box-shadow: var(--shadow);
+}
+.bg-card:hover { border-color: var(--accent2); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+.bg-card.sel { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(44,110,73,0.18); }
+.bg-preview { width: 100%; aspect-ratio: 3/4; background: #fffef9; overflow: hidden; }
+.bg-preview.yoko { aspect-ratio: 4/3; }
+.bg-preview svg { width: 100%; height: 100%; }
+.bg-meta { padding: 10px 12px 8px; }
+.bg-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.bg-desc { font-size: 10px; color: var(--text3); margin-bottom: 8px; }
+.bg-lines { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.bg-lines-label { font-size: 10px; color: var(--text2); white-space: nowrap; }
+.ln-btn { height: 26px; min-width: 26px; padding: 0 5px; border: 1.5px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text2); font-size: 11px; font-weight: 700; transition: all 0.15s; }
+.ln-btn:hover { border-color: var(--accent); color: var(--accent); }
+.ln-btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.upload-card {
+  border-radius: var(--radius); border: 2px dashed var(--border); cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; padding: 28px 12px; background: var(--card); transition: all 0.2s; box-shadow: var(--shadow);
+  min-height: 120px;
+}
+.upload-card:hover { border-color: var(--accent); background: #f0f7f3; }
+.upload-card.sel { border-color: var(--accent); border-style: solid; background: #f0f7f3; }
+.upload-icon { font-size: 28px; }
+.upload-text { font-size: 11px; color: var(--text3); text-align: center; line-height: 1.5; }
+
+/* ===== テキスト範囲ハンドル ===== */
+.range-handle {
+  position: absolute; width: 32px; height: 32px; border-radius: 50%;
+  background: var(--accent); border: 4px solid #fff;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.4), 0 0 0 1px rgba(44,110,73,0.3);
+  touch-action: none; z-index: 10;
+  transition: transform 0.1s, background 0.1s, box-shadow 0.1s;
+}
+.range-handle::after {
+  content: ''; position: absolute; inset: 5px;
+  border-radius: 50%; background: rgba(255,255,255,0.5);
+}
+.range-handle:hover {
+  background: var(--accent2); transform: scale(1.18);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.4), 0 0 0 2px rgba(44,110,73,0.4);
+}
+.range-handle.dragging {
+  transform: scale(1.25); background: var(--accent2);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5), 0 0 0 3px rgba(44,110,73,0.5);
+}
+.range-line-h {
+  position: absolute; height: 2px; background: rgba(44,110,73,0.6);
+  pointer-events: none; display: none; /* fillで代替 */
+}
+.range-line-v {
+  position: absolute; width: 2px; background: rgba(44,110,73,0.6);
+  pointer-events: none; display: none; /* fillで代替 */
+}
+.range-fill {
+  position: absolute; background: rgba(44,110,73,0.08);
+  border: 2px dashed rgba(44,110,73,0.5); border-radius: 3px;
+  pointer-events: none;
+}
+/* OCR / ファイル取込ボタン */
+.ocr-row {
+  display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;
+}
+.ocr-btn {
+  flex: 1; min-width: 120px; padding: 11px 8px; border: 1.5px solid var(--border);
+  border-radius: 10px; background: var(--bg); color: var(--text2); font-size: 12px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: all 0.15s; cursor: pointer;
+}
+.ocr-btn:hover { border-color: var(--accent); color: var(--accent); background: #f0f7f3; }
+.ocr-loading { font-size: 11px; color: var(--text3); margin-top: 6px; min-height: 16px; }
+
+/* ===== 保存管理ダイアログ ===== */
+.saves-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  z-index: 2000; align-items: center; justify-content: center;
+}
+.saves-overlay.on { display: flex; }
+.saves-dialog {
+  background: #fff; border-radius: 20px; padding: 24px;
+  width: min(460px, 92vw); max-height: 80vh;
+  display: flex; flex-direction: column; gap: 14px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+}
+.saves-title {
+  font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.saves-close {
+  width: 32px; height: 32px; border: none; border-radius: 50%;
+  background: var(--bg2); color: var(--text2); font-size: 16px; cursor: pointer;
+}
+.saves-list { overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+.save-item {
+  display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+  border: 1.5px solid var(--border); border-radius: 12px; background: var(--bg);
+  transition: all 0.15s;
+}
+.save-item.current { border-color: var(--accent); background: #e8f4ec; }
+.save-icon { font-size: 22px; flex-shrink: 0; }
+.save-info { flex: 1; min-width: 0; cursor: pointer; }
+.save-info:hover .save-name { color: var(--accent); }
+.save-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.save-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.save-overwrite {
+  padding: 6px 12px; border: 1.5px solid var(--border); border-radius: 8px;
+  background: var(--bg); color: var(--text2); font-size: 12px; cursor: pointer;
+  flex-shrink: 0; transition: all 0.15s; white-space: nowrap;
+}
+.save-overwrite:hover { border-color: var(--accent); color: var(--accent); }
+.save-del {
+  width: 28px; height: 28px; border: none; border-radius: 50%;
+  background: transparent; color: var(--text3); font-size: 14px; cursor: pointer;
+  flex-shrink: 0; transition: all 0.15s;
+}
+.save-del:hover { background: #fee; color: #c00; }
+.saves-new {
+  padding: 13px; border: 2px dashed var(--border); border-radius: 12px;
+  background: transparent; color: var(--text2); font-size: 14px;
+  letter-spacing: 0.05em; transition: all 0.2s; cursor: pointer;
+}
+.saves-new:hover { border-color: var(--accent); color: var(--accent); background: #f0f7f3; }
+.overwrite-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 3000; align-items: center; justify-content: center;
+}
+.overwrite-overlay.on { display: flex; }
+.overwrite-dialog {
+  background: #fff; border-radius: 20px; padding: 26px 24px 22px;
+  width: min(360px, 90vw); box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center;
+}
+.overwrite-icon { font-size: 36px; margin-bottom: 10px; }
+.overwrite-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.overwrite-sub { font-size: 12px; color: var(--text3); margin-bottom: 20px; line-height: 1.6; }
+.overwrite-btns { display: flex; gap: 10px; }
+.ow-cancel { flex: 1; padding: 13px; border: 1.5px solid var(--border); border-radius: 50px; background: transparent; color: var(--text2); font-size: 14px; cursor: pointer; }
+.ow-ok { flex: 2; padding: 13px; border: none; border-radius: 50px; background: var(--accent); color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; }
+.ow-ok:hover { background: var(--accent2); }
+
+/* テキスト編集ダイアログ */
+.textedit-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  z-index: 2000; align-items: center; justify-content: center;
+}
+.textedit-overlay.on { display: flex; }
+.textedit-dialog {
+  background: #fff; border-radius: 20px; padding: 24px;
+  width: min(440px, 92vw); box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.textedit-title {
+  font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: space-between;
+}
+.textedit-close {
+  width: 32px; height: 32px; border: none; border-radius: 50%;
+  background: var(--bg2); color: var(--text2); font-size: 16px; cursor: pointer;
+}
+.textedit-ta {
+  width: 100%; min-height: 140px; border: 1.5px solid var(--border); border-radius: 10px;
+  padding: 12px; font-size: 16px; color: var(--text); line-height: 1.8; resize: vertical;
+  outline: none; transition: border-color 0.2s;
+}
+.textedit-ta:focus { border-color: var(--accent); }
+.textedit-apply {
+  padding: 14px; border: none; border-radius: 50px; background: var(--accent);
+  color: #fff; font-size: 15px; font-weight: 700; transition: all 0.2s;
+}
+.textedit-apply:hover { background: var(--accent2); }
+
+/* ===== テキスト位置指定画面 ===== */
+#s-range { background: var(--bg2); }
+.range-main {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  padding: 16px; overflow: auto; position: relative;
+}
+.range-paper-wrap {
+  position: relative; box-shadow: 0 8px 40px rgba(0,0,0,0.25); border-radius: 4px;
+  touch-action: none;
+}
+.range-canvas { display: block; }
+.range-drag-box {
+  position: absolute; pointer-events: none; display: none;
+  background: rgba(74,144,226,0.15); border: 2.5px solid rgba(74,144,226,0.8);
+  border-radius: 3px;
+}
+.range-overlay-el {
+  position: absolute; inset: 0; cursor: crosshair;
+  touch-action: none; user-select: none; -webkit-user-select: none;
+}
+.range-instr {
+  padding: 10px 20px 0; text-align: center;
+  font-size: 13px; color: var(--text2); letter-spacing: 0.05em; flex-shrink: 0;
+}
+.range-instr strong { color: var(--accent); }
+.range-skip-btn {
+  background: transparent; border: none; color: var(--text3);
+  font-size: 12px; text-decoration: underline; cursor: pointer; padding: 4px;
+}
+
+/* ===== テキスト入力 ===== */
+#s-text { background: var(--bg); }
+.text-body { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+.field-lbl { font-size: 11px; font-weight: 700; color: var(--text2); letter-spacing: 0.2em; }
+textarea.main-ta {
+  width: 100%; min-height: 200px; background: #fff; border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 16px; color: var(--text); font-size: 17px; line-height: 1.9;
+  resize: vertical; outline: none; transition: border-color 0.2s;
+}
+textarea.main-ta:focus { border-color: var(--accent); }
+.hint-box { background: #e8f4ec; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #2c6e49; line-height: 1.7; }
+
+/* ===== 共通ボタン ===== */
+.btn-wrap { padding: 14px 20px; flex-shrink: 0; background: #fff; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
+.btn-next { width: 100%; padding: 16px; border: none; border-radius: 50px; background: var(--accent); color: #fff; font-size: 15px; font-weight: 700; letter-spacing: 0.1em; transition: all 0.2s; }
+.btn-next:disabled { background: var(--bg3); color: var(--text3); cursor: not-allowed; }
+.btn-next:not(:disabled):hover { background: var(--accent2); }
+.btn-sub { width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 50px; background: transparent; color: var(--text2); font-size: 13px; letter-spacing: 0.05em; transition: all 0.2s; }
+.btn-sub:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ===== 編集画面 ===== */
+#s-edit { flex-direction: row; background: var(--bg2); overflow: hidden; height: 100vh; }
+
+/* --- サイドバー --- */
+.sidebar {
+  width: 260px; background: #fff; border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.06);
+}
+.sb-hdr { padding: 16px 18px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+.sb-hdr-title { font-size: 15px; font-weight: 700; }
+.sb-sec { padding: 14px 18px; border-bottom: 1px solid var(--bg2); }
+.sb-lbl { font-size: 10px; font-weight: 700; color: var(--text3); letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 10px; }
+/* フォント */
+.font-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.f-btn { padding: 8px 4px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text2); font-size: 13px; text-align: center; transition: all 0.15s; line-height: 1.3; }
+.f-btn:hover { border-color: var(--accent); color: var(--accent); background: #f0f7f3; }
+.f-btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+/* 仮名オフセット */
+.kana-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.kana-lbl { font-size: 11px; color: var(--text2); flex: 1; }
+.kana-val { font-size: 13px; font-weight: 700; color: var(--text); width: 48px; text-align: center; }
+.adj-btn { width: 30px; height: 30px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text2); font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.adj-btn:hover { border-color: var(--accent); color: var(--accent); }
+/* 行区切り調整 */
+.split-list { display: flex; flex-direction: column; gap: 5px; margin-top: 2px; }
+.split-row { display: flex; align-items: center; gap: 6px; background: var(--bg); border-radius: 8px; padding: 5px 8px; }
+.split-idx { font-size: 10px; color: var(--text3); width: 20px; text-align: center; }
+.split-preview { flex: 1; font-size: 11px; color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.split-btn { width: 28px; height: 28px; border: 1.5px solid var(--border); border-radius: 7px; background: #fff; color: var(--text2); font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
+.split-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: #f0f7f3; }
+.split-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+/* 印刷・保存 */
+.sb-actions { padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; margin-top: auto; border-top: 1px solid var(--bg2); }
+.btn-print { padding: 14px; border: none; border-radius: 50px; background: var(--accent); color: #fff; font-size: 15px; font-weight: 700; letter-spacing: 0.1em; transition: all 0.2s; }
+.btn-print:hover { background: var(--accent2); }
+.btn-save { padding: 11px; border: 1.5px solid var(--border); border-radius: 50px; background: transparent; color: var(--text2); font-size: 13px; transition: all 0.2s; }
+.btn-save:hover { border-color: var(--accent); color: var(--accent); }
+
+/* --- メインエリア --- */
+.edit-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; overflow: auto; }
+.paper-wrap { position: relative; box-shadow: 0 8px 40px rgba(0,0,0,0.25); border-radius: 4px; }
+canvas { display: block; }
+.overlay { position: absolute; inset: 0; cursor: default; pointer-events: none; }
+
+/* --- スマホボトム --- */
+.sp-bottom { display: none; background: #fff; border-top: 1px solid var(--border); flex-shrink: 0; }
+.sp-tabs { display: flex; border-bottom: 1px solid var(--bg2); }
+.sp-tab { flex: 1; padding: 10px 0 8px; border: none; background: transparent; color: var(--text3); font-size: 9px; display: flex; flex-direction: column; align-items: center; gap: 3px; border-bottom: 2.5px solid transparent; transition: all 0.15s; letter-spacing: 0.05em; }
+.sp-tab .ti { font-size: 16px; line-height: 1; }
+.sp-tab.on { color: var(--accent); border-bottom-color: var(--accent); }
+.sp-panel { display: none; padding: 12px 14px; max-height: 200px; overflow-y: auto; }
+.sp-panel.on { display: block; }
+.sp-panel-out { display: none; padding: 12px 14px; flex-direction: column; gap: 8px; }
+.sp-panel-out.on { display: flex; }
+
+/* ===== フォントポップアップ ===== */
+.font-popup-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  z-index: 1000; align-items: center; justify-content: center;
+}
+.font-popup-overlay.on { display: flex; }
+.font-popup {
+  background: #fff; border-radius: 20px; padding: 24px;
+  width: min(540px, 92vw); max-height: 80vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+}
+.font-popup-title {
+  font-size: 16px; font-weight: 700; color: var(--text);
+  margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between;
+}
+.font-popup-close {
+  width: 32px; height: 32px; border: none; border-radius: 50%;
+  background: var(--bg2); color: var(--text2); font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+.font-popup-close:hover { background: var(--bg3); }
+.font-cat-title {
+  font-size: 10px; font-weight: 700; color: var(--text3);
+  letter-spacing: 0.25em; margin: 14px 0 8px; padding-bottom: 4px;
+  border-bottom: 1px solid var(--bg2);
+}
+.font-cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.font-card {
+  border: 2px solid var(--border); border-radius: 12px; padding: 10px 8px;
+  background: var(--bg); cursor: pointer; transition: all 0.15s; text-align: center;
+}
+.font-card:hover { border-color: var(--accent); background: #f0f7f3; }
+.font-card.on { border-color: var(--accent); background: #e8f4ec; }
+.font-card-sample { font-size: 22px; color: var(--text); line-height: 1.3; margin-bottom: 4px; display: block; }
+.font-card-name { font-size: 10px; color: var(--text2); font-family: sans-serif; }
+.font-card-note { font-size: 9px; color: var(--text3); font-family: sans-serif; margin-top: 1px; }
+/* フォント選択ボタン（サイドバー内） */
+.font-select-btn {
+  width: 100%; padding: 12px 14px; border: 2px solid var(--border); border-radius: 12px;
+  background: var(--bg); display: flex; align-items: center; justify-content: space-between;
+  transition: all 0.15s;
+}
+.font-select-btn:hover { border-color: var(--accent); }
+.font-select-preview { font-size: 18px; color: var(--text); }
+.font-select-label { font-size: 11px; color: var(--text2); font-family: sans-serif; }
+.font-select-arrow { font-size: 12px; color: var(--text3); }
+
+/* ===== 用紙左右の区切りボタン列 ===== */
+.edit-paper-row {
+  display: flex; align-items: center; gap: 10px;
+}
+.split-col {
+  position: relative; flex-shrink: 0; width: 28px;
+  overflow: visible;
+}
+.sc-btn {
+  width: 28px; height: 28px; border: none; border-radius: 7px;
+  background: var(--accent); color: #fff; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.15s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.sc-btn:hover:not(:disabled) { background: var(--accent2); transform: scale(1.08); }
+.sc-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+.sc-spacer { flex: 1; }
+
+/* ===== カスタム用紙保存ダイアログ ===== */
+.savebg-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+  z-index: 2000; align-items: center; justify-content: center;
+}
+.savebg-overlay.on { display: flex; }
+.savebg-dialog {
+  background: #fff; border-radius: 20px; padding: 28px 28px 24px;
+  width: min(400px, 90vw); box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+}
+.savebg-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+.savebg-sub { font-size: 12px; color: var(--text3); margin-bottom: 20px; line-height: 1.6; }
+.savebg-field { margin-bottom: 14px; }
+.savebg-label { font-size: 11px; font-weight: 700; color: var(--text2); letter-spacing: 0.15em; display: block; margin-bottom: 6px; }
+.savebg-input {
+  width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px;
+  font-size: 15px; color: var(--text); outline: none; transition: border-color 0.2s;
+}
+.savebg-input:focus { border-color: var(--accent); }
+.savebg-lines { display: flex; flex-wrap: wrap; gap: 6px; }
+.savebg-ln {
+  height: 34px; min-width: 34px; padding: 0 8px; border: 1.5px solid var(--border);
+  border-radius: 8px; background: var(--bg); color: var(--text2); font-size: 13px;
+  font-weight: 700; transition: all 0.15s; cursor: pointer;
+}
+.savebg-ln:hover { border-color: var(--accent); color: var(--accent); }
+.savebg-ln.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.savebg-btns { display: flex; gap: 10px; margin-top: 22px; }
+.savebg-cancel {
+  flex: 1; padding: 13px; border: 1.5px solid var(--border); border-radius: 50px;
+  background: transparent; color: var(--text2); font-size: 14px; transition: all 0.2s;
+}
+.savebg-cancel:hover { border-color: var(--text2); }
+.savebg-save {
+  flex: 2; padding: 13px; border: none; border-radius: 50px;
+  background: var(--accent); color: #fff; font-size: 14px; font-weight: 700; transition: all 0.2s;
+}
+.savebg-save:hover { background: var(--accent2); }
+
+/* ===== カスタム用紙カード =====*/
+.custom-card-del {
+  position: absolute; top: 6px; right: 6px; width: 22px; height: 22px;
+  border: none; border-radius: 50%; background: rgba(200,50,50,0.8); color: #fff;
+  font-size: 11px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; opacity: 0; transition: opacity 0.15s;
+}
+.bg-card:hover .custom-card-del { opacity: 1; }
+
+/* ===== テキスト範囲ドラッグ ===== */
+.drag-overlay {
+  position: absolute; inset: 0; cursor: default;
+  touch-action: none; user-select: none; -webkit-user-select: none;
+}
+.drag-overlay.drag-mode { cursor: crosshair; }
+.drag-overlay.can-drag { cursor: grab; }
+.drag-overlay.dragging { cursor: grabbing; }
+.drag-range-box {
+  position: absolute; pointer-events: none;
+  background: rgba(74,144,226,0.12);
+  border: 2px solid rgba(74,144,226,0.7);
+  border-radius: 3px; display: none;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.3);
+}
+.drag-hint {
+  position: absolute; bottom: -28px; left: 50%; transform: translateX(-50%);
+  background: rgba(44,110,73,0.9); color: #fff; font-size: 11px;
+  padding: 4px 12px; border-radius: 20px; white-space: nowrap; pointer-events: none;
+  font-family: sans-serif; letter-spacing: 0.05em;
+}
+
+/* ===== 範囲確認ダイアログ ===== */
+.range-confirm-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  z-index: 3000; align-items: flex-end; justify-content: center;
+  padding-bottom: 40px;
+}
+.range-confirm-overlay.on { display: flex; }
+.range-confirm-box {
+  background: #fff; border-radius: 20px; padding: 22px 24px 20px;
+  width: min(360px, 90vw); box-shadow: 0 -4px 40px rgba(0,0,0,0.2);
+  text-align: center;
+}
+.range-confirm-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.range-confirm-sub { font-size: 12px; color: var(--text3); margin-bottom: 18px; }
+.range-confirm-btns { display: flex; gap: 10px; }
+.rc-no {
+  flex: 1; padding: 13px; border: 1.5px solid var(--border); border-radius: 50px;
+  background: transparent; color: var(--text2); font-size: 14px; transition: all 0.2s;
+}
+.rc-no:hover { border-color: var(--text2); }
+.rc-yes {
+  flex: 2; padding: 13px; border: none; border-radius: 50px;
+  background: var(--accent); color: #fff; font-size: 14px; font-weight: 700;
+  transition: all 0.2s;
+}
+.rc-yes:hover { background: var(--accent2); }
+
+/* ===== ピンチアウト ===== */
+.zoom-reset-btn {
+  position: fixed; bottom: 150px; right: 14px; z-index: 200;
+  width: 48px; height: 48px; border-radius: 50%;
+  border: none; background: rgba(44,110,73,0.92); color: #fff;
+  font-size: 10px; font-weight: 700; cursor: pointer;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.3);
+  display: none; flex-direction: column; align-items: center;
+  justify-content: center; gap: 2px; line-height: 1.2;
+}
+.zoom-reset-btn.show { display: flex; }
+@media (max-width: 700px) { .zoom-reset-btn { bottom: 145px; right: 8px; } }
+
+/* ===== 編集画面 長押しドラッグ ===== */
+.lp-indicator {
+  position: absolute; border-radius: 50%;
+  background: rgba(44,110,73,0.2); border: 2px solid rgba(44,110,73,0.5);
+  transform: translate(-50%,-50%) scale(0);
+  transition: transform 0.4s ease-out, opacity 0.4s;
+  pointer-events: none; z-index: 5;
+  width: 60px; height: 60px;
+}
+.lp-indicator.active { transform: translate(-50%,-50%) scale(1); opacity: 1; }
+.lp-indicator.done   { transform: translate(-50%,-50%) scale(1.4); opacity: 0; }
+/* 範囲調整ボタン（サイドバー） */
+.range-adjust-btn {
+  width: 100%; padding: 11px; border: 1.5px solid var(--border); border-radius: 50px;
+  background: var(--bg); color: var(--text2); font-size: 13px; margin-top: 8px;
+  transition: all 0.2s; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; gap: 6px;
+}
+.range-adjust-btn:hover { border-color: var(--accent); color: var(--accent); background: #f0f7f3; }
+.range-adjust-btn.active { border-color: var(--accent); background: #e8f4ec; color: var(--accent); font-weight: 700; }
+
+/* ===== 印刷 ===== */
+#parea { display: none; }
+@media print { body > * { display: none !important; } #parea { display: block !important; position: fixed; inset: 0; } }
+
+/* ===== レスポンシブ ===== */
+@media (max-width: 700px) {
+  #s-edit { flex-direction: column; height: auto; min-height: 100vh; }
+  .sidebar { display: none; }
+  .sp-bottom { display: block; }
+  .edit-main { padding: 14px 10px; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<!-- スタート -->
+<div id="s-start" class="screen on">
+  <div class="start-box">
+    <div class="start-logo">習字教室</div>
+    <div class="start-tagline">課題プリント作成</div>
+    <button class="btn-primary btn-start-new" onclick="App.go('bg')">✏️ 新規作成</button>
+    <button class="btn-primary btn-start-load" onclick="App.loadSaved()">📂 保存から再開</button>
+  </div>
+</div>
+
+<!-- 用紙選択 -->
+<div id="s-bg" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="App.go('start')">← 戻る</button>
+    <div class="hdr-title">用紙を選ぶ</div>
+    <div class="hdr-step">STEP 1 / 4</div>
+  </div>
+  <div class="bg-scroll">
+    <div class="bg-section-title">縦書き用</div>
+    <div class="bg-grid" id="bg-tate"></div>
+    <div class="bg-section-title">横書き用</div>
+    <div class="bg-grid" id="bg-yoko"></div>
+    <div class="bg-section-title">ファイルから取り込む</div>
+    <div class="bg-grid" id="bg-upload"></div>
+  </div>
+  <div class="btn-wrap">
+    <button class="btn-next" id="bg-next" disabled onclick="App.go('range')">テキスト範囲を指定する →</button>
+  </div>
+</div>
+
+<!-- テキスト位置指定 -->
+<div id="s-range" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="App.go('bg')">← 戻る</button>
+    <div class="hdr-title">テキスト範囲を指定</div>
+    <div class="hdr-step">STEP 2 / 4</div>
+  </div>
+  <div class="range-instr">
+    四隅の●をドラッグして範囲を調整してください<br>
+    <button class="range-skip-btn" onclick="App.skipRange()">スキップ（全体に配置）</button>
+  </div>
+  <div class="range-main" id="range-main">
+    <div class="range-paper-wrap" id="range-paper-wrap" style="position:relative;">
+      <canvas id="range-cv" class="range-canvas"></canvas>
+      <!-- 範囲表示 -->
+      <div class="range-fill"   id="rng-fill"></div>
+      <div class="range-line-h" id="rng-top"></div>
+      <div class="range-line-h" id="rng-bot"></div>
+      <div class="range-line-v" id="rng-lft"></div>
+      <div class="range-line-v" id="rng-rgt"></div>
+      <!-- 四隅ハンドル -->
+      <div class="range-handle" id="rng-h-tl" data-corner="tl" title="左上" style="cursor:nw-resize;"></div>
+      <div class="range-handle" id="rng-h-tr" data-corner="tr" title="右上" style="cursor:ne-resize;"></div>
+      <div class="range-handle" id="rng-h-bl" data-corner="bl" title="左下" style="cursor:sw-resize;"></div>
+      <div class="range-handle" id="rng-h-br" data-corner="br" title="右下" style="cursor:se-resize;"></div>
+    </div>
+  </div>
+  <div class="btn-wrap" style="background:transparent;border:none;">
+    <button class="btn-next" onclick="App.go('text')">次へ（テキスト入力）→</button>
+  </div>
+</div>
+
+<!-- テキスト入力 -->
+<div id="s-text"  class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="App.go('bg')">← 戻る</button>
+    <div class="hdr-title">テキストを入力</div>
+    <div class="hdr-step">STEP 3 / 4</div>
+  </div>
+  <div class="text-body">
+    <div class="field-lbl">課題テキスト</div>
+    <textarea class="main-ta" id="main-text" rows="7" placeholder="例：春夏秋冬&#10;山川草木"></textarea>
+    <button class="ocr-btn" style="width:100%;margin-top:10px;" onclick="App.openOcrFile()">
+      📎 ファイルからテキスト取込（画像・PDF・Excel・Word）
+    </button>
+    <div class="ocr-loading" id="ocr-loading"></div>
+    <div class="hint-box">💡 改行で行を分けることもできます。次の画面で区切り位置を1文字ずつ調整できます。</div>
+  </div>
+  <div class="btn-wrap">
+    <button class="btn-next" onclick="App.goEdit()">レイアウトを調整する →</button>
+  </div>
+</div>
+
+<!-- 編集 -->
+<div id="s-edit" class="screen">
+  <!-- PC サイドバー -->
+  <div class="sidebar">
+    <div class="sb-hdr">
+      <button class="hdr-back" onclick="App.go('text')">← 戻る</button>
+      <div class="sb-hdr-title">編集</div>
+    </div>
+
+    <div class="sb-sec">
+      <div class="sb-lbl">フォント</div>
+      <button class="font-select-btn" id="font-select-btn" onclick="App.openFontPopup()">
+        <span class="font-select-preview" id="font-select-preview">春</span>
+        <span class="font-select-label" id="font-select-label">楷書 標準</span>
+        <span class="font-select-arrow">▼</span>
+      </button>
+      <div class="kana-row" style="margin-top:10px;">
+        <span class="kana-lbl">仮名・英数サイズ</span>
+        <button class="adj-btn" id="pc-kana-d">－</button>
+        <span class="kana-val" id="pc-kana-v">-1.5pt</span>
+        <button class="adj-btn" id="pc-kana-i">＋</button>
+      </div>
+    </div>
+
+    <div class="sb-actions">
+      <button class="btn-print" onclick="App.doPrint()">🖨️ 印刷する</button>
+      <button class="range-adjust-btn" id="range-adjust-btn" onclick="App.toggleRangeAdjust()">📐 テキスト範囲を調整</button>
+      <button class="btn-save" onclick="App.openTextEdit()" style="background:var(--bg);border:1.5px solid var(--border);color:var(--text2);">✏️ テキスト編集</button>
+      <button class="btn-save" onclick="App.openSaves()">💾 保存</button>
+    </div>
+  </div>
+
+  <!-- キャンバス -->
+  <div class="edit-main" id="edit-main">
+    <button class="zoom-reset-btn" id="zoom-reset-btn" onclick="App.resetZoom()">⊙<span style="font-size:8px;">戻す</span></button>
+    <div class="edit-paper-row" id="edit-paper-row" style="transform-origin:center top;">
+      <!-- 左ボタン列（縦書き:上ボタン / 横書き:◀ボタン） -->
+      <div class="split-col" id="split-col-left"></div>
+      <!-- 用紙 -->
+      <div class="paper-wrap" id="paper-wrap" style="position:relative;">
+        <canvas id="cv"></canvas>
+        <!-- 現在の範囲表示（確定済み） -->
+        <div class="range-fill" id="edit-rng-fill" style="pointer-events:none;display:none;"></div>
+        <!-- 四隅ハンドル（確定済み範囲） -->
+        <div class="range-handle" id="edit-h-tl" data-corner="tl" style="display:none;"></div>
+        <div class="range-handle" id="edit-h-tr" data-corner="tr" style="display:none;"></div>
+        <div class="range-handle" id="edit-h-bl" data-corner="bl" style="display:none;"></div>
+        <div class="range-handle" id="edit-h-br" data-corner="br" style="display:none;"></div>
+        <!-- ドラッグ中の新範囲プレビュー -->
+        <div id="edit-drag-preview" style="display:none;position:absolute;background:rgba(74,144,226,0.15);border:2.5px dashed rgba(74,144,226,0.8);border-radius:3px;pointer-events:none;"></div>
+        <!-- 長押し検知オーバーレイ（ハンドル外の用紙全体） -->
+        <div id="edit-drag-overlay" style="position:absolute;inset:0;cursor:crosshair;display:none;touch-action:none;"></div>
+      </div>
+      <!-- 右ボタン列（縦書き:下ボタン / 横書き:▶ボタン） -->
+      <div class="split-col" id="split-col-right"></div>
+    </div>
+  </div>
+
+  <!-- スマホ ボトム -->
+  <div class="sp-bottom">
+    <div class="sp-tabs">
+      <button class="sp-tab on" onclick="App.spTab('font',this)"><span class="ti">🖋</span>フォント</button>
+      <button class="sp-tab" onclick="App.spTab('out',this)"><span class="ti">🖨</span>出力</button>
+    </div>
+    <div id="sp-font" class="sp-panel on" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <button class="font-select-btn" onclick="App.openFontPopup()" style="flex:1;min-width:140px;">
+        <span class="font-select-preview" id="sp-font-preview">春</span>
+        <span class="font-select-label" id="sp-font-label">楷書 標準</span>
+        <span class="font-select-arrow">▼</span>
+      </button>
+      <div class="kana-row" style="flex:1;min-width:140px;">
+        <span class="kana-lbl">仮名・英数</span>
+        <button class="adj-btn" id="sp-kana-d">－</button>
+        <span class="kana-val" id="sp-kana-v">-1.5pt</span>
+        <button class="adj-btn" id="sp-kana-i">＋</button>
+      </div>
+    </div>
+    <div id="sp-out" class="sp-panel-out">
+      <button class="btn-print" onclick="App.doPrint()">🖨️ 印刷する</button>
+      <button class="btn-save" onclick="App.openSaves()">💾 保存</button>
+    </div>
+  </div>
+</div>
+
+<div id="parea"></div>
+
+<!-- 保存一覧ダイアログ -->
+<div class="saves-overlay" id="saves-overlay">
+  <div class="saves-dialog">
+    <div class="saves-title">
+      💾 保存データ
+      <button class="saves-close" onclick="App.closeSaves()">✕</button>
+    </div>
+    <div class="saves-list" id="saves-list"></div>
+    <button class="saves-new" onclick="App.saveAsNew()">＋ 新しく保存する</button>
+  </div>
+</div>
+
+<!-- 上書き確認ダイアログ -->
+<div class="overwrite-overlay" id="overwrite-overlay">
+  <div class="overwrite-dialog">
+    <div class="overwrite-icon">💾</div>
+    <div class="overwrite-title" id="ow-title">上書き保存しますか？</div>
+    <div class="overwrite-sub" id="ow-sub"></div>
+    <div class="overwrite-btns">
+      <button class="ow-cancel" onclick="App.closeOverwrite()">キャンセル</button>
+      <button class="ow-ok" onclick="App.confirmOverwrite()">はい、上書き</button>
+    </div>
+  </div>
+</div>
+
+<!-- テキスト編集ダイアログ -->
+<div class="textedit-overlay" id="textedit-overlay">
+  <div class="textedit-dialog">
+    <div class="textedit-title">
+      ✏️ テキスト編集
+      <button class="textedit-close" onclick="App.closeTextEdit()">✕</button>
+    </div>
+    <textarea class="textedit-ta" id="textedit-ta" placeholder="課題テキストを入力"></textarea>
+    <button class="textedit-apply" onclick="App.applyTextEdit()">適用する</button>
+  </div>
+</div>
+
+<!-- テキスト範囲確認ダイアログ -->
+<div class="range-confirm-overlay" id="range-confirm-overlay">
+  <div class="range-confirm-box">
+    <div class="range-confirm-title">この範囲でよろしいですか？</div>
+    <div class="range-confirm-sub">テキストをこの範囲内に配置します</div>
+    <div class="range-confirm-btns">
+      <button class="rc-no" onclick="App.confirmEditRange(false)">やり直す</button>
+      <button class="rc-yes" onclick="App.confirmEditRange(true)">はい、決定</button>
+    </div>
+  </div>
+</div>
+
+<!-- カスタム用紙保存ダイアログ -->
+<div class="savebg-overlay" id="savebg-overlay">
+  <div class="savebg-dialog">
+    <div class="savebg-title">📄 用紙をデフォルトに追加</div>
+    <div class="savebg-sub">取り込んだ用紙に名前と行数を設定して保存します。<br>次回から用紙選択画面に表示されます。</div>
+    <div class="savebg-field">
+      <label class="savebg-label">用紙名</label>
+      <input class="savebg-input" id="savebg-name" type="text" placeholder="例：書道教室オリジナル" maxlength="20">
+    </div>
+    <div class="savebg-field">
+      <label class="savebg-label">行数</label>
+      <div class="savebg-lines" id="savebg-lines"></div>
+    </div>
+    <div class="savebg-btns">
+      <button class="savebg-cancel" onclick="App.closeSaveBg()">キャンセル</button>
+      <button class="savebg-save" onclick="App.doSaveBg()">✓ 追加する</button>
+    </div>
+  </div>
+</div>
+
+<!-- フォントポップアップ -->
+<div class="font-popup-overlay" id="font-popup-overlay" onclick="App.closeFontPopup(event)">
+  <div class="font-popup" onclick="event.stopPropagation()">
+    <div class="font-popup-title">
+      フォントを選ぶ
+      <button class="font-popup-close" onclick="App.closeFontPopup()">✕</button>
+    </div>
+    <div id="font-popup-body"></div>
+  </div>
+</div>
+<input type="file" id="bgfile" accept="image/*,application/pdf" style="display:none" onchange="App.handleFile(event)">
+<input type="file" id="ocr-file" accept="image/*,application/pdf,.xlsx,.xls,.docx,.doc,.csv,.txt" style="display:none" onchange="App.handleOcrFile(event)">
+
+<script>
+var App = (function(){
+'use strict';
+
+// ============================================================
+// STATE
+// ============================================================
+var st = {
+  bgImg: null, bgVert: true, bgKey: null,
+  text: '',
+  font: 'kaisho1',
+  kanaOffset: -1.5,   // 仮名・英数のフォントサイズ調整（pt単位、スケール前）
+  lineCount: 4,        // 行数
+  range: null,          // テキスト配置範囲 {x,y,w,h}（用紙px基準）
+  splits: [],          // 各行の文字数配列 [n1, n2, ...] 合計=text.length
+};
+
+// ============================================================
+// FONTS
+// ============================================================
+var FONTS = [
+  // 楷書
+  { k:'kaisho1', cat:'楷書', lbl:'楷書 標準',  fam:"'Kaisei Opti', serif",        note:'端正な楷書体' },
+  { k:'kaisho2', cat:'楷書', lbl:'楷書 飾り',  fam:"'Kaisei Decol', serif",       note:'装飾的な楷書体' },
+  { k:'kaisho3', cat:'楷書', lbl:'楷書 春海',  fam:"'Kaisei HarunoUmi', serif",   note:'柔らかい楷書体' },
+  { k:'kaisho4', cat:'楷書', lbl:'楷書 特明',  fam:"'Kaisei Tokumin', serif",     note:'太めの楷書体' },
+  // 行書
+  { k:'gyosho1', cat:'行書', lbl:'行書 宿',    fam:"'Yuji Syuku', cursive",       note:'流麗な行書体' },
+  { k:'gyosho2', cat:'行書', lbl:'行書 舞',    fam:"'Yuji Mai', cursive",         note:'優雅な行書体' },
+  { k:'gyosho3', cat:'行書', lbl:'行書 墨',    fam:"'Yuji Boku', cursive",        note:'墨筆の行書体' },
+  // 草書
+  { k:'sosho1',  cat:'草書', lbl:'草書 古典',  fam:"'Zen Old Mincho', serif",     note:'古典的な草書風' },
+  { k:'sosho2',  cat:'草書', lbl:'草書 筆',    fam:"'Shippori Mincho', serif",    note:'筆書き風草書' },
+];
+function getFam(){ return (FONTS.find(function(f){return f.k===st.font;})||FONTS[0]).fam; }
+
+// ============================================================
+// SVG BACKGROUNDS
+// ============================================================
+function svgLines(rows, cols, vert) {
+  var W = vert ? 182 : 257, H = vert ? 257 : 182, p = 14;
+  var r = [], i, x, y;
+  if (vert) {
+    var cw = (W-p*2)/cols;
+    for (i=0; i<=cols; i++) {
+      x = p+i*cw;
+      r.push('<line x1="'+x+'" y1="'+p+'" x2="'+x+'" y2="'+(H-p)+'" stroke="#c8b48a" stroke-width="'+(i===0||i===cols?1.2:0.6)+'"/>');
+    }
+    var rh = (H-p*2)/rows;
+    for (i=1; i<rows; i++) {
+      y = p+i*rh;
+      r.push('<line x1="'+p+'" y1="'+y+'" x2="'+(W-p)+'" y2="'+y+'" stroke="#e8dfc8" stroke-width="0.4"/>');
+    }
+  } else {
+    var rh2 = (H-p*2)/rows;
+    for (i=0; i<=rows; i++) {
+      y = p+i*rh2;
+      r.push('<line x1="'+p+'" y1="'+y+'" x2="'+(W-p)+'" y2="'+y+'" stroke="#c8b48a" stroke-width="'+(i===0||i===rows?1.2:0.6)+'"/>');
+    }
+  }
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" style="background:#fffef9">'+r.join('')+'</svg>';
+}
+function svgGenkou(cols, rows, vert) {
+  var W = vert ? 182 : 257, H = vert ? 257 : 182, p = 10;
+  var nc = vert?rows:cols, nr = vert?cols:rows;
+  var cw = (W-p*2)/nc, rh = (H-p*2)/nr;
+  var r = [], c, row;
+  for (row=0; row<nr; row++)
+    for (c=0; c<nc; c++)
+      r.push('<rect x="'+(p+c*cw)+'" y="'+(p+row*rh)+'" width="'+cw+'" height="'+rh+'" fill="none" stroke="#c8b48a" stroke-width="0.5"/>');
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" style="background:#fffef9">'+r.join('')+'</svg>';
+}
+
+var BGS_TATE = [
+  { k:'h10t', n:'半紙',      d:'縦書き・10列', v:true, svg:function(){return svgLines(16,10,true);} },
+  { k:'b8t',  n:'B5縦書き', d:'縦書き・8列',  v:true, svg:function(){return svgLines(16,8,true);} },
+  { k:'g20t', n:'原稿縦',   d:'縦書き20×10', v:true, svg:function(){return svgGenkou(20,10,true);} },
+];
+var BGS_YOKO = [
+  { k:'n12y', n:'ノート横',   d:'横書き・12行', v:false, svg:function(){return svgLines(12,0,false);} },
+  { k:'b8y',  n:'B5横書き',  d:'横書き・8行',  v:false, svg:function(){return svgLines(8,0,false);} },
+  { k:'g10y', n:'原稿横',    d:'横書き10×20', v:false, svg:function(){return svgGenkou(10,20,false);} },
+];
+
+// ============================================================
+// 文字種判定
+// ============================================================
+function isKana(ch) {
+  var code = ch.charCodeAt(0);
+  return (code>=0x3040&&code<=0x309F)||(code>=0x30A0&&code<=0x30FF)||
+         (code>=0xFF00&&code<=0xFFEF)||
+         /[a-zA-Z0-9\uff10-\uff19\uff21-\uff3a\uff41-\uff5a]/.test(ch);
+}
+
+// ============================================================
+// 画面遷移
+// ============================================================
+function go(name) {
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on');});
+  document.getElementById('s-'+name).classList.add('on');
+  if (name === 'range') { setTimeout(initRangeScreen, 60); }
+}
+
+// ===== テキスト位置指定画面（四隅ハンドル） =====
+var rngState = { x1:0, y1:0, x2:0, y2:0, cvW:1, cvH:1 };
+var rngDragging = null; // 'tl'|'tr'|'bl'|'br'
+
+function initRangeScreen() {
+  var rcv = document.getElementById('range-cv');
+  var main = document.getElementById('range-main');
+  if (!rcv) return;
+
+  var img = new Image();
+  img.onload = function(){
+    var mw = main.clientWidth - 24;
+    var mh = main.clientHeight - 100;
+    if (mh < 100) mh = window.innerHeight * 0.55;
+    if (mw < 100) mw = window.innerWidth - 32;
+    var rat = img.naturalWidth / img.naturalHeight;
+    var w = mw, h = mw / rat;
+    if (h > mh) { h = mh; w = mh * rat; }
+    w = Math.round(w); h = Math.round(h);
+    rcv.width = w; rcv.height = h;
+    rcv.style.width = w+'px'; rcv.style.height = h+'px';
+    rcv.getContext('2d').drawImage(img, 0, 0, w, h);
+    rngState.cvW = w; rngState.cvH = h;
+
+    // 初期範囲：既存rangeかデフォルト余白
+    var pad = Math.round(w * 0.08);
+    if (st.range && st.range.rx !== undefined) {
+      // 比率→px変換
+      rngState.x1 = st.range.rx * w;
+      rngState.y1 = st.range.ry * h;
+      rngState.x2 = (st.range.rx + st.range.rw) * w;
+      rngState.y2 = (st.range.ry + st.range.rh) * h;
+    } else {
+      rngState.x1 = pad; rngState.y1 = pad;
+      rngState.x2 = w - pad; rngState.y2 = h - pad;
+    }
+    updateRangeUI();
+    setupHandleDrag(rcv);
+  };
+  img.src = st.bgImg || '';
+  if (!st.bgImg) {
+    // 用紙未選択の場合デフォルトサイズ
+    rcv.width = 300; rcv.height = 420;
+    rcv.style.width='300px'; rcv.style.height='420px';
+    var ctx = rcv.getContext('2d'); ctx.fillStyle='#fffef9'; ctx.fillRect(0,0,300,420);
+    rngState.cvW=300; rngState.cvH=420;
+    rngState.x1=24; rngState.y1=24; rngState.x2=276; rngState.y2=396;
+    updateRangeUI();
+    setupHandleDrag(rcv);
+  }
+}
+
+function cvToEl(v, isX) {
+  // canvas座標 → DOM座標
+  var rcv = document.getElementById('range-cv');
+  var rect = rcv.getBoundingClientRect();
+  return isX ? v * rect.width / rngState.cvW : v * rect.height / rngState.cvH;
+}
+function elToCv(v, isX) {
+  var rcv = document.getElementById('range-cv');
+  var rect = rcv.getBoundingClientRect();
+  return isX ? v * rngState.cvW / rect.width : v * rngState.cvH / rect.height;
+}
+
+function updateRangeUI() {
+  var x1=rngState.x1, y1=rngState.y1, x2=rngState.x2, y2=rngState.y2;
+  var ex1=cvToEl(x1,true), ey1=cvToEl(y1,false);
+  var ex2=cvToEl(x2,true), ey2=cvToEl(y2,false);
+  var hw=14; // ハンドル半径
+  function pos(id, ex, ey){
+    var el=document.getElementById(id);
+    if(el){el.style.left=(ex-hw)+'px';el.style.top=(ey-hw)+'px';}
+  }
+  pos('rng-h-tl', ex1, ey1);
+  pos('rng-h-tr', ex2, ey1);
+  pos('rng-h-bl', ex1, ey2);
+  pos('rng-h-br', ex2, ey2);
+
+  function lineH(id, ex, ey, ew){
+    var el=document.getElementById(id);
+    if(el){el.style.left=ex+'px';el.style.top=ey+'px';el.style.width=ew+'px';}
+  }
+  function lineV(id, ex, ey, eh){
+    var el=document.getElementById(id);
+    if(el){el.style.left=ex+'px';el.style.top=ey+'px';el.style.height=eh+'px';}
+  }
+  lineH('rng-top', ex1, ey1, ex2-ex1);
+  lineH('rng-bot', ex1, ey2, ex2-ex1);
+  lineV('rng-lft', ex1, ey1, ey2-ey1);
+  lineV('rng-rgt', ex2, ey1, ey2-ey1);
+
+  var fill=document.getElementById('rng-fill');
+  if(fill){fill.style.left=ex1+'px';fill.style.top=ey1+'px';fill.style.width=(ex2-ex1)+'px';fill.style.height=(ey2-ey1)+'px';}
+}
+
+function setupHandleDrag(rcv) {
+  ['tl','tr','bl','br'].forEach(function(corner){
+    var el = document.getElementById('rng-h-'+corner);
+    if (!el) return;
+    el.replaceWith(el.cloneNode(true));
+    el = document.getElementById('rng-h-'+corner);
+
+    function startDrag(e) {
+      e.preventDefault(); e.stopPropagation();
+      rngDragging = corner;
+      el.classList.add('dragging');
+    }
+    el.addEventListener('mousedown', startDrag);
+    el.addEventListener('touchstart', startDrag, {passive:false});
+  });
+
+  function onMove(e) {
+    if (!rngDragging) return;
+    e.preventDefault();
+    var src = e.touches ? e.touches[0] : e;
+    var rect = rcv.getBoundingClientRect();
+    var ex = src.clientX - rect.left;
+    var ey = src.clientY - rect.top;
+    var cx = Math.max(0, Math.min(rngState.cvW, elToCv(ex, true)));
+    var cy = Math.max(0, Math.min(rngState.cvH, elToCv(ey, false)));
+    var minSz = 20;
+    if (rngDragging === 'tl') {
+      rngState.x1 = Math.min(cx, rngState.x2 - minSz);
+      rngState.y1 = Math.min(cy, rngState.y2 - minSz);
+    } else if (rngDragging === 'tr') {
+      rngState.x2 = Math.max(cx, rngState.x1 + minSz);
+      rngState.y1 = Math.min(cy, rngState.y2 - minSz);
+    } else if (rngDragging === 'bl') {
+      rngState.x1 = Math.min(cx, rngState.x2 - minSz);
+      rngState.y2 = Math.max(cy, rngState.y1 + minSz);
+    } else if (rngDragging === 'br') {
+      rngState.x2 = Math.max(cx, rngState.x1 + minSz);
+      rngState.y2 = Math.max(cy, rngState.y1 + minSz);
+    }
+    updateRangeUI();
+  }
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('touchmove', onMove, {passive:false});
+
+  function onEnd() {
+    if (!rngDragging) return;
+    var el = document.getElementById('rng-h-'+rngDragging);
+    if (el) el.classList.remove('dragging');
+    rngDragging = null;
+    // 比率で保存（どのcanvasサイズでも使える）
+    st.range = {
+      rx: rngState.x1 / rngState.cvW,
+      ry: rngState.y1 / rngState.cvH,
+      rw: (rngState.x2 - rngState.x1) / rngState.cvW,
+      rh: (rngState.y2 - rngState.y1) / rngState.cvH
+    };
+  }
+  document.addEventListener('mouseup', onEnd);
+  document.addEventListener('touchend', onEnd);
+}
+
+// ===== OCR / ファイルからテキスト取込 =====
+function openOcrFile() {
+  document.getElementById('ocr-file').click();
+}
+
+function handleOcrFile(e) {
+  var f = e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  var loading = document.getElementById('ocr-loading');
+  loading.textContent = '⏳ 読み込み中…';
+
+  var name = f.name.toLowerCase();
+  var type = f.type;
+
+  // テキストファイル
+  if (type === 'text/plain' || name.endsWith('.txt') || name.endsWith('.csv')) {
+    var rd = new FileReader();
+    rd.onload = function(ev){
+      var text = ev.target.result.replace(/\s+/g,'').slice(0,200);
+      document.getElementById('main-text').value = text;
+      loading.textContent = text ? '✅ テキストを取り込みました' : '⚠️ テキストが見つかりませんでした';
+      setTimeout(function(){ loading.textContent=''; }, 3000);
+    };
+    rd.readAsText(f, 'UTF-8');
+    return;
+  }
+
+  // PDF
+  if (type === 'application/pdf' || name.endsWith('.pdf')) {
+    extractTextFromPdf(f, function(text){
+      document.getElementById('main-text').value = text;
+      loading.textContent = text ? '✅ テキストを取り込みました' : '⚠️ テキストが見つかりませんでした';
+      setTimeout(function(){ loading.textContent=''; }, 3000);
+    });
+    return;
+  }
+
+  // Excel (.xlsx/.xls)
+  if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
+    extractTextFromExcel(f, function(text){
+      document.getElementById('main-text').value = text;
+      loading.textContent = text ? '✅ テキストを取り込みました' : '⚠️ テキストが見つかりませんでした';
+      setTimeout(function(){ loading.textContent=''; }, 3000);
+    });
+    return;
+  }
+
+  // Word (.docx/.doc)
+  if (name.endsWith('.docx') || name.endsWith('.doc')) {
+    extractTextFromWord(f, function(text){
+      document.getElementById('main-text').value = text;
+      loading.textContent = text ? '✅ テキストを取り込みました' : '⚠️ テキストが見つかりませんでした';
+      setTimeout(function(){ loading.textContent=''; }, 3000);
+    });
+    return;
+  }
+
+  // 画像 → OCR
+  runOcr(f, function(text){
+    document.getElementById('main-text').value = text;
+    loading.textContent = text ? '✅ テキストを取り込みました' : '⚠️ テキストが認識できませんでした';
+    setTimeout(function(){ loading.textContent=''; }, 3000);
+  });
+}
+
+function extractTextFromExcel(f, cb) {
+  function doExtract(){
+    var rd = new FileReader();
+    rd.onload = function(ev){
+      try {
+        var wb = XLSX.read(ev.target.result, {type:'array'});
+        var text = '';
+        wb.SheetNames.forEach(function(name){
+          var ws = wb.Sheets[name];
+          var rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+          rows.forEach(function(row){
+            row.forEach(function(cell){ text += String(cell||''); });
+          });
+        });
+        cb(text.replace(/\s+/g,'').slice(0,200));
+      } catch(e){ cb(''); }
+    };
+    rd.readAsArrayBuffer(f);
+  }
+  if (window.XLSX) { doExtract(); return; }
+  var s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  s.onload = doExtract;
+  s.onerror = function(){ cb(''); };
+  document.head.appendChild(s);
+}
+
+function extractTextFromWord(f, cb) {
+  function doExtract(){
+    var rd = new FileReader();
+    rd.onload = function(ev){
+      mammoth.extractRawText({arrayBuffer: ev.target.result})
+        .then(function(result){
+          cb(result.value.replace(/\s+/g,'').slice(0,200));
+        }).catch(function(){ cb(''); });
+    };
+    rd.readAsArrayBuffer(f);
+  }
+  if (window.mammoth) { doExtract(); return; }
+  var s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
+  s.onload = doExtract;
+  s.onerror = function(){ cb(''); };
+  document.head.appendChild(s);
+}
+
+function extractTextFromPdf(f, cb) {
+  // PDF.jsでテキストレイヤーを取得
+  var rd = new FileReader();
+  rd.onload = function(ev){
+    var data = new Uint8Array(ev.target.result);
+    pdfjsLib.getDocument({data:data}).promise.then(function(pdf){
+      var results = [];
+      var total = pdf.numPages;
+      var done = 0;
+      for (var i = 1; i <= Math.min(total, 3); i++) {
+        pdf.getPage(i).then(function(pg){
+          pg.getTextContent().then(function(tc){
+            var str = tc.items.map(function(it){ return it.str; }).join('');
+            results.push(str);
+            done++;
+            if (done >= Math.min(total, 3)) {
+              cb(results.join('').replace(/\s+/g,'').slice(0, 200));
+            }
+          });
+        });
+      }
+    }).catch(function(){ cb(''); });
+  };
+  rd.readAsArrayBuffer(f);
+}
+
+function runOcr(f, cb) {
+  // Tesseract.jsをCDNから動的ロード
+  function doOcr(){
+    // スマホ写真を縮小してOCR高速化
+    var img = new Image(), objUrl = URL.createObjectURL(f);
+    img.onload = function(){
+      var MAX = 800, sw = img.width, sh = img.height;
+      var sc = (sw>MAX||sh>MAX) ? MAX/Math.max(sw,sh) : 1;
+      var tc = document.createElement('canvas');
+      tc.width=Math.round(sw*sc); tc.height=Math.round(sh*sc);
+      tc.getContext('2d').drawImage(img,0,0,tc.width,tc.height);
+      URL.revokeObjectURL(objUrl);
+      var url = tc.toDataURL('image/jpeg', 0.85);
+      doRecognize(url);
+    };
+    img.onerror = function(){ doRecognize(objUrl); };
+    img.src = objUrl;
+  }
+  function doRecognize(url){
+    Tesseract.recognize(url, 'jpn', {
+      logger: function(m){ if(m.status==='recognizing text'){
+        var loading=document.getElementById('ocr-loading');
+        if(loading) loading.textContent='⏳ 認識中… '+Math.round(m.progress*100)+'%';
+      }}
+    }).then(function(result){
+      var text = result.data.text.replace(/\s+/g,'').slice(0,200);
+      cb(text);
+    }).catch(function(){ cb(''); });
+  } // end doRecognize
+  if (window.Tesseract) { doOcr(); return; }
+  var s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.1.0/tesseract.min.js';
+  s.onload = doOcr;
+  s.onerror = function(){ cb(''); document.getElementById('ocr-loading').textContent='⚠️ OCRの読み込みに失敗しました'; };
+  document.head.appendChild(s);
+}
+
+// ===== テキスト編集ダイアログ =====
+function openTextEdit() {
+  document.getElementById('textedit-ta').value = st.text || '';
+  document.getElementById('textedit-overlay').classList.add('on');
+  setTimeout(function(){ document.getElementById('textedit-ta').focus(); }, 100);
+}
+function closeTextEdit() {
+  document.getElementById('textedit-overlay').classList.remove('on');
+}
+function applyTextEdit() {
+  // 改行は除去、スペースはそのまま保持（文頭一字下げに使う）
+  var t = document.getElementById('textedit-ta').value.replace(/\n/g,'');
+  // 先頭・末尾の改行のみ除去（trimは使わない）
+  if (!t.trim()) { alert('テキストを入力してください'); return; }
+  var oldText = st.text;
+  st.text = t;
+  // main-text にも反映して同期
+  var mt = document.getElementById('main-text');
+  if (mt) mt.value = t;
+  // 行数調整: 前の分割比率を維持して再計算
+  reSplitsKeepRatio(oldText, t);
+  closeTextEdit();
+  render();
+  buildSplitOverlay();
+}
+
+function skipRange() {
+  st.range = null;
+  go('text');
+}
+
+// ============================================================
+// 用紙グリッド構築
+// ============================================================
+function loadCustomBgs() {
+  try {
+    var raw = localStorage.getItem('shuji_custom_bgs');
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
+}
+
+function saveCustomBgs(arr) {
+  localStorage.setItem('shuji_custom_bgs', JSON.stringify(arr));
+}
+
+function initBgGrid() {
+  buildBgSection('bg-tate', BGS_TATE);
+  buildBgSection('bg-yoko', BGS_YOKO);
+  rebuildCustomSection();
+  // アップロードカード
+  var g = document.getElementById('bg-upload');
+  var card = document.createElement('div');
+  card.className = 'upload-card';
+  card.id = 'upload-card';
+  card.innerHTML = '<span class="upload-icon">🖼️</span><span class="upload-text">画像・PDF<br>を取り込む</span>';
+  card.onclick = function(){ document.getElementById('bgfile').click(); };
+  g.appendChild(card);
+}
+
+function rebuildCustomSection() {
+  var customs = loadCustomBgs();
+  // カスタムセクションを削除して再構築
+  var existing = document.getElementById('bg-custom-section');
+  if (existing) existing.remove();
+  if (customs.length === 0) return;
+
+  var scroll = document.querySelector('.bg-scroll');
+  var sec = document.createElement('div');
+  sec.id = 'bg-custom-section';
+
+  var title = document.createElement('div');
+  title.className = 'bg-section-title';
+  title.textContent = 'カスタム用紙';
+  sec.appendChild(title);
+
+  var grid = document.createElement('div');
+  grid.className = 'bg-grid';
+
+  customs.forEach(function(bg, idx){
+    var card = document.createElement('div');
+    card.className = 'bg-card';
+    card.style.position = 'relative';
+
+    var isVert = bg.vert;
+    var img = new Image();
+    img.onload = function(){};
+    img.src = bg.img;
+
+    card.innerHTML =
+      '<div class="bg-preview'+(isVert?'':' yoko')+'" style="background:#f5f0e8;">' +
+        '<img src="'+bg.img+'" style="width:100%;height:100%;object-fit:cover;">' +
+      '</div>'+
+      '<div class="bg-meta">'+
+        '<div class="bg-name">'+escHtml(bg.name)+'</div>'+
+        '<div class="bg-desc">'+(isVert?'縦書き':'横書き')+'・'+bg.lines+'行</div>'+
+        '<div class="bg-lines">'+
+          '<span class="bg-lines-label">行数：</span>'+
+          [2,3,4,5,6,7,8].map(function(n){
+            return '<button class="ln-btn'+(bg.lines===n?' on':'')+'" data-n="'+n+'">'+n+'</button>';
+          }).join('')+
+        '</div>'+
+      '</div>'+
+      '<button class="custom-card-del" title="削除">✕</button>';
+
+    // 削除ボタン
+    card.querySelector('.custom-card-del').onclick = function(e){
+      e.stopPropagation();
+      if (confirm('"'+bg.name+'" を削除しますか？')){
+        var arr = loadCustomBgs();
+        arr.splice(idx, 1);
+        saveCustomBgs(arr);
+        rebuildCustomSection();
+      }
+    };
+
+    // 行数ボタン
+    card.querySelectorAll('.ln-btn').forEach(function(btn){
+      btn.onclick = function(e){
+        e.stopPropagation();
+        var n = parseInt(btn.dataset.n);
+        selectCustomBg(bg, n, card);
+        card.querySelectorAll('.ln-btn').forEach(function(b){b.classList.toggle('on', parseInt(b.dataset.n)===n);});
+      };
+    });
+
+    // カードクリック
+    card.onclick = function(){
+      selectCustomBg(bg, bg.lines, card);
+      card.querySelectorAll('.ln-btn').forEach(function(b){b.classList.toggle('on', parseInt(b.dataset.n)===bg.lines);});
+    };
+
+    grid.appendChild(card);
+  });
+
+  sec.appendChild(grid);
+  // アップロードカードの前（bg-uploadセクションの前）に挿入
+  var uploadSection = document.querySelector('.bg-section-title:last-of-type');
+  if (uploadSection) scroll.insertBefore(sec, uploadSection);
+  else scroll.appendChild(sec);
+}
+
+function escHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/[\x22]/g,'&quot;');
+}
+
+function selectCustomBg(bg, lines, card){
+  document.querySelectorAll('.bg-card,.upload-card').forEach(function(c){c.classList.remove('sel');});
+  card.classList.add('sel');
+  st.bgImg = bg.img;
+  st.bgKey = 'custom_'+bg.name;
+  st.bgVert = bg.vert;
+  st.lineCount = lines;
+  document.getElementById('bg-next').disabled = false;
+}
+
+// ===== 保存ダイアログ =====
+var _pendingBgImg = null;
+var _pendingBgVert = true;
+var _saveBgLines = 4;
+
+function openSaveBgDialog(){
+  _pendingBgImg = st.bgImg;
+  _pendingBgVert = st.bgVert;
+  _saveBgLines = st.lineCount || 4;
+
+  // 行数ボタン構築
+  var wrap = document.getElementById('savebg-lines');
+  wrap.innerHTML = '';
+  [2,3,4,5,6,7,8].forEach(function(n){
+    var b = document.createElement('button');
+    b.className = 'savebg-ln' + (n===_saveBgLines?' on':'');
+    b.textContent = n;
+    b.onclick = function(){
+      _saveBgLines = n;
+      wrap.querySelectorAll('.savebg-ln').forEach(function(x){x.classList.toggle('on', parseInt(x.textContent)===n);});
+    };
+    wrap.appendChild(b);
+  });
+
+  // 名前入力欄をクリア
+  document.getElementById('savebg-name').value = '';
+  document.getElementById('savebg-overlay').classList.add('on');
+  setTimeout(function(){ document.getElementById('savebg-name').focus(); }, 100);
+}
+
+function closeSaveBg(){
+  document.getElementById('savebg-overlay').classList.remove('on');
+}
+
+function doSaveBg(){
+  var name = document.getElementById('savebg-name').value.trim();
+  if (!name){ alert('用紙名を入力してください'); return; }
+
+  var arr = loadCustomBgs();
+  // 同名チェック
+  if (arr.find(function(b){ return b.name === name; })){
+    if (!confirm('"'+name+'" はすでに存在します。上書きしますか？')) return;
+    arr = arr.filter(function(b){ return b.name !== name; });
+  }
+
+  arr.push({ name: name, vert: _pendingBgVert, lines: _saveBgLines, img: _pendingBgImg });
+  saveCustomBgs(arr);
+
+  // st に反映
+  st.lineCount = _saveBgLines;
+
+  closeSaveBg();
+  rebuildCustomSection();
+
+  // 追加したカードを選択状態にする
+  setTimeout(function(){
+    var customs = loadCustomBgs();
+    var lastIdx = customs.length - 1;
+    var cards = document.querySelectorAll('#bg-custom-section .bg-card');
+    if (cards[lastIdx]) {
+      cards[lastIdx].click();
+    }
+  }, 100);
+}
+
+function buildBgSection(gridId, bgs) {
+  var g = document.getElementById(gridId);
+  g.innerHTML = '';
+  bgs.forEach(function(bg){
+    var svg = bg.svg();
+    var card = document.createElement('div');
+    card.className = 'bg-card';
+    card.dataset.key = bg.k;
+    card.innerHTML =
+      '<div class="bg-preview'+(bg.v?'':' yoko')+'">'+svg+'</div>'+
+      '<div class="bg-meta">'+
+        '<div class="bg-name">'+bg.n+'</div>'+
+        '<div class="bg-desc">'+bg.d+'</div>'+
+        '<div class="bg-lines">'+
+          '<span class="bg-lines-label">行数：</span>'+
+          [2,3,4,5,6,7,8].map(function(n){
+            return '<button class="ln-btn'+(st.lineCount===n&&bg.k===st.bgKey?' on':'')+'" data-bg="'+bg.k+'" data-n="'+n+'">'+n+'</button>';
+          }).join('')+
+        '</div>'+
+      '</div>';
+    // 行数ボタンのイベント
+    card.querySelectorAll('.ln-btn').forEach(function(btn){
+      btn.onclick = function(e){
+        e.stopPropagation();
+        selectBg(bg, svg, parseInt(btn.dataset.n));
+        card.querySelectorAll('.ln-btn').forEach(function(b){b.classList.remove('on');});
+        btn.classList.add('on');
+      };
+    });
+    // カードクリック（行数は現在値を維持）
+    card.onclick = function(){
+      selectBg(bg, svg, st.lineCount||4);
+      // 現在の行数に対応するボタンをONに
+      card.querySelectorAll('.ln-btn').forEach(function(b){
+        b.classList.toggle('on', parseInt(b.dataset.n)===st.lineCount);
+      });
+    };
+    g.appendChild(card);
+  });
+}
+
+function selectBg(bg, svg, lineCount) {
+  // 全カードのsel解除
+  document.querySelectorAll('.bg-card,.upload-card').forEach(function(c){c.classList.remove('sel');});
+  document.querySelector('[data-key="'+bg.k+'"]').classList.add('sel');
+  st.bgKey = bg.k;
+  st.bgVert = bg.v;
+  st.lineCount = lineCount;
+  document.getElementById('bg-next').disabled = false;
+  // SVG→DataURL
+  svgToDataUrl(svg, function(url){ st.bgImg = url; });
+}
+
+function svgToDataUrl(svg, cb) {
+  var blob = new Blob([svg],{type:'image/svg+xml'});
+  var url = URL.createObjectURL(blob);
+  var img = new Image();
+  img.onload = function(){
+    var c = document.createElement('canvas');
+    c.width = img.naturalWidth*2; c.height = img.naturalHeight*2;
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    cb(c.toDataURL('image/png'));
+    URL.revokeObjectURL(url);
+  };
+  img.src = url;
+}
+
+// ファイル取込
+function handleFile(e) {
+  var f = e.target.files[0]; if(!f) return;
+  if (f.type==='application/pdf') { loadPdf(f); return; }
+  var rd = new FileReader();
+  rd.onload = function(ev){
+    var img = new Image();
+    img.onload = function(){
+      st.bgImg = ev.target.result; st.bgKey = 'custom';
+      st.bgVert = img.naturalHeight > img.naturalWidth;
+      document.querySelectorAll('.bg-card,.upload-card').forEach(function(c){c.classList.remove('sel');});
+      document.getElementById('upload-card').classList.add('sel');
+      document.getElementById('bg-next').disabled = false;
+      openSaveBgDialog();
+    };
+    img.src = ev.target.result;
+  };
+  rd.readAsDataURL(f);
+}
+
+function loadPdf(f) {
+  var rd = new FileReader();
+  rd.onload = function(ev){
+    var data = new Uint8Array(ev.target.result);
+    pdfjsLib.getDocument({data:data}).promise.then(function(pdf){
+      pdf.getPage(1).then(function(pg){
+        var vp = pg.getViewport({scale:2});
+        var c = document.createElement('canvas');
+        c.width=vp.width; c.height=vp.height;
+        pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise.then(function(){
+          st.bgImg=c.toDataURL('image/png'); st.bgKey='custom';
+          st.bgVert=vp.height>vp.width;
+          document.querySelectorAll('.bg-card,.upload-card').forEach(function(x){x.classList.remove('sel');});
+          document.getElementById('upload-card').classList.add('sel');
+          document.getElementById('bg-next').disabled=false;
+          openSaveBgDialog();
+        });
+      });
+    }).catch(function(e){ alert('PDF読み込みエラー: '+e.message); });
+  };
+  rd.readAsArrayBuffer(f);
+}
+
+// ============================================================
+// 編集画面へ
+// ============================================================
+var cv, ctx2, pImg;
+
+function goEdit() {
+  var ta = document.getElementById('main-text');
+  // 改行除去、スペース保持
+  var t = ta.value.replace(/\n/g,'');
+  if (!t.trim() && !st.text) { alert('テキストを入力してください'); return; }
+  if (t.trim()) {
+    var oldText = st.text;
+    st.text = t;
+    reSplitsKeepRatio(oldText, t);
+  } else {
+    ta.value = st.text;
+    if (!st.splits || !st.splits.length) initSplits();
+  }
+  buildEditUI();
+  console.log('[goEdit] go edit, st.text:', st.text ? st.text.slice(0,10) : 'none');
+  go('edit');
+  setTimeout(initCanvas, 100);
+}
+
+// splits: 各行に何文字割り当てるかの配列
+function initSplits() {
+  var n = st.lineCount, total = st.text.length;
+  st.splits = [];
+  var base = Math.floor(total/n);
+  var rem = total % n;
+  for (var i=0; i<n; i++) st.splits.push(base + (i<rem?1:0));
+}
+
+// テキスト変更時、前の分割比率を維持して再計算
+function reSplitsKeepRatio(oldText, newText) {
+  var n = st.lineCount;
+  var newTotal = newText.length;
+  // splits が未設定 or 行数が違う場合は均等分割
+  if (!st.splits || st.splits.length !== n) {
+    initSplits(); return;
+  }
+  var oldTotal = (oldText || '').length || 1;
+  // 前の比率で新しい文字数を配分
+  var newSplits = [];
+  var assigned = 0;
+  for (var i = 0; i < n; i++) {
+    if (i === n-1) {
+      // 最終行は残り全部
+      newSplits.push(Math.max(0, newTotal - assigned));
+    } else {
+      var ratio = st.splits[i] / oldTotal;
+      var count = Math.max(1, Math.round(ratio * newTotal));
+      // 残りを超えないように
+      count = Math.min(count, newTotal - assigned - (n - 1 - i));
+      newSplits.push(count);
+      assigned += count;
+    }
+  }
+  // 合計が合わない場合の補正
+  var sum = newSplits.reduce(function(a,b){return a+b;},0);
+  if (sum !== newTotal) {
+    newSplits[n-1] += newTotal - sum;
+  }
+  // 0以下の行がないように
+  for (var j=0; j<newSplits.length; j++) {
+    if (newSplits[j] < 1) newSplits[j] = 1;
+  }
+  st.splits = newSplits;
+}
+
+// splits から各行のテキストを取得
+function getLines() {
+  var lines = [], pos = 0, i;
+  for (i=0; i<st.splits.length; i++) {
+    lines.push(st.text.slice(pos, pos+st.splits[i]));
+    pos += st.splits[i];
+  }
+  return lines;
+}
+
+// ============================================================
+// UI構築
+// ============================================================
+function buildEditUI() {
+  updateFontBtn();
+  bindKana('pc-kana'); bindKana('sp-kana');
+  updateKanaDisplay();
+}
+
+function openFontPopup() {
+  var body = document.getElementById('font-popup-body');
+  body.innerHTML = '';
+  var cats = ['楷書','行書','草書'];
+  cats.forEach(function(cat){
+    var catTitle = document.createElement('div');
+    catTitle.className = 'font-cat-title';
+    catTitle.textContent = cat;
+    body.appendChild(catTitle);
+    var grid = document.createElement('div');
+    grid.className = 'font-cat-grid';
+    FONTS.filter(function(f){return f.cat===cat;}).forEach(function(f){
+      var card = document.createElement('button');
+      card.className = 'font-card' + (st.font===f.k?' on':'');
+      card.dataset.fk = f.k;
+      card.innerHTML =
+        '<span class="font-card-sample" style="font-family:'+f.fam+'">春風</span>'+
+        '<div class="font-card-name">'+f.lbl.replace(cat+' ','')+'</div>'+
+        '<div class="font-card-note">'+f.note+'</div>';
+      card.onclick = function(){
+        st.font = f.k;
+        document.querySelectorAll('.font-card').forEach(function(x){x.classList.remove('on');});
+        document.querySelectorAll('[data-fk="'+f.k+'"]').forEach(function(x){x.classList.add('on');});
+        updateFontBtn();
+        render();
+        closeFontPopup();
+      };
+      grid.appendChild(card);
+    });
+    body.appendChild(grid);
+  });
+  document.getElementById('font-popup-overlay').classList.add('on');
+}
+
+function closeFontPopup(e) {
+  if (!e || e.target === document.getElementById('font-popup-overlay'))
+    document.getElementById('font-popup-overlay').classList.remove('on');
+}
+
+function updateFontBtn() {
+  var f = FONTS.find(function(x){return x.k===st.font;}) || FONTS[0];
+  ['font-select-preview','sp-font-preview'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.style.fontFamily = f.fam;
+  });
+  ['font-select-label','sp-font-label'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.textContent = f.lbl;
+  });
+}
+
+function buildSplitOverlay() {
+  var colL = document.getElementById('split-col-left');
+  var colR = document.getElementById('split-col-right');
+  if (!colL || !colR || !cv) return;
+  colL.innerHTML = '';
+  colR.innerHTML = '';
+
+  var lines = getLines();
+  var n = lines.length;
+
+  // テキスト範囲のcanvas座標を取得
+  var rngY, rngH;
+  if (st.range && st.range.rx !== undefined) {
+    rngY = st.range.ry * cv.height;
+    rngH = st.range.rh * cv.height;
+  } else {
+    var pad = cv.width * 0.07;
+    rngY = pad;
+    rngH = cv.height - pad * 2;
+  }
+
+  // canvas座標→DOM座標のスケール
+  var rect = cv.getBoundingClientRect();
+  var scaleY = rect.height / cv.height;
+  var domRngY = rngY * scaleY;
+  var domRngH = rngH * scaleY;
+
+  // ボタン列全体の高さ・位置を用紙に合わせる（上端オフセットあり）
+  colL.style.height = cv.height * scaleY + 'px';
+  colR.style.height = cv.height * scaleY + 'px';
+  colL.style.position = 'relative';
+  colR.style.position = 'relative';
+
+  if (n <= 1) return;
+
+  // 各行の高さ（DOM px）
+  var rowH = domRngH / n;
+
+  lines.forEach(function(line, i){
+    var canUp   = (i > 0 && line.length > 1);
+    var canDown = (i < n-1 && line.length > 1);
+    // この行の中央Y（DOM px, ボタン列の上端からの距離）
+    var btnCY = domRngY + (i + 0.5) * rowH;
+    var btnSize = 28;
+
+    // 左列: ▲ボタン
+    var upBtn = document.createElement('button');
+    upBtn.className = 'sc-btn';
+    upBtn.textContent = '▲';
+    upBtn.title = 'この行の先頭を上の行へ';
+    upBtn.disabled = !canUp;
+    upBtn.style.position = 'absolute';
+    upBtn.style.top = (btnCY - btnSize/2) + 'px';
+    upBtn.style.left = '0';
+    ;(function(idx){ upBtn.onclick = function(){
+      if(st.splits[idx]>1){st.splits[idx]--;st.splits[idx-1]++;}
+      buildSplitOverlay(); render();
+    };})(i);
+    colL.appendChild(upBtn);
+
+    // 右列: ▼ボタン
+    var downBtn = document.createElement('button');
+    downBtn.className = 'sc-btn';
+    downBtn.textContent = '▼';
+    downBtn.title = 'この行の末尾を下の行へ';
+    downBtn.disabled = !canDown;
+    downBtn.style.position = 'absolute';
+    downBtn.style.top = (btnCY - btnSize/2) + 'px';
+    downBtn.style.left = '0';
+    ;(function(idx){ downBtn.onclick = function(){
+      if(st.splits[idx]>1){st.splits[idx]--;st.splits[idx+1]++;}
+      buildSplitOverlay(); render();
+    };})(i);
+    colR.appendChild(downBtn);
+  });
+}
+
+function rebuildSplits() {
+  buildSplitOverlay();
+}
+
+function bindKana(prefix) {
+  document.getElementById(prefix+'-d').onclick = function(){
+    st.kanaOffset = Math.round((st.kanaOffset - 0.5)*10)/10;
+    updateKanaDisplay(); render();
+  };
+  document.getElementById(prefix+'-i').onclick = function(){
+    st.kanaOffset = Math.round((st.kanaOffset + 0.5)*10)/10;
+    if (st.kanaOffset > 0) st.kanaOffset = 0;
+    updateKanaDisplay(); render();
+  };
+}
+
+function updateKanaDisplay() {
+  var txt = (st.kanaOffset >= 0 ? '+' : '') + st.kanaOffset.toFixed(1) + 'pt';
+  document.querySelectorAll('[id$="-kana-v"]').forEach(function(el){ el.textContent = txt; });
+}
+
+// ============================================================
+// キャンバス初期化
+// ============================================================
+function initCanvas() {
+  cv = document.getElementById('cv');
+  if (!cv) return;
+  ctx2 = cv.getContext('2d');
+
+  function doInit() {
+    console.log('[initCanvas] doInit start, bgImg:', st.bgImg ? st.bgImg.slice(0,40) : 'none');
+    if (!st.bgImg) {
+      var dw = st.bgVert ? 400 : 566;
+      var dh = st.bgVert ? 566 : 400;
+      cv.width=dw; cv.height=dh;
+      cv.style.width=dw+'px'; cv.style.height=dh+'px';
+      console.log('[initCanvas] no bgImg, size:', dw, dh);
+      render(); return;
+    }
+    var img = new Image();
+    img.onload = function(){
+      pImg = img;
+      var imgRat = img.naturalWidth / img.naturalHeight;
+      var isSp = window.innerWidth <= 700;
+      var vw = window.innerWidth, vh = window.innerHeight;
+      var sidebarW = isSp ? 0 : 260;
+      var btnW = isSp ? 48 : 76;
+      var mw = vw - sidebarW - btnW - (isSp ? 8 : 40);
+      var mh = vh - (isSp ? 150 : 40);
+      mw = Math.max(100, mw);
+      mh = Math.max(200, mh);
+      var w, h;
+      if (mw / mh > imgRat) { h = mh; w = mh * imgRat; }
+      else { w = mw; h = mw / imgRat; }
+      cv.width = Math.round(w); cv.height = Math.round(h);
+      cv.style.width = cv.width + 'px'; cv.style.height = cv.height + 'px';
+      console.log('[initCanvas] canvas size:', cv.width, cv.height, 'vw/vh:', vw, vh);
+      render();
+      buildSplitOverlay();
+      initDragOverlay();
+      initPinchZoom();
+    };
+    img.onerror = function(){ console.error('[initCanvas] 用紙画像ロード失敗'); };
+    img.src = st.bgImg;
+    console.log('[initCanvas] img.src set');
+  }
+
+  // 画面遷移直後はレイアウトが確定していないので少し待つ
+  // requestAnimationFrameを複数回使って確実に描画後に実行
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      doInit();
+    });
+  });
+}
+
+// ==================================================
+// ④ ピンチアウト
+// ==================================================
+var zoomScale = 1;
+
+function initPinchZoom() {
+  var row = document.getElementById('edit-paper-row');
+  if (!row) return;
+  row.replaceWith(row.cloneNode(true));
+  row = document.getElementById('edit-paper-row');
+  var lastDist=0, lastScale=1, ogX=0, ogY=0;
+  function dist(t){ var dx=t[0].clientX-t[1].clientX,dy=t[0].clientY-t[1].clientY; return Math.sqrt(dx*dx+dy*dy); }
+  row.addEventListener('touchstart', function(e){
+    if(e.touches.length===2){
+      e.preventDefault();
+      lastDist=dist(e.touches); lastScale=zoomScale;
+      var rect=row.getBoundingClientRect();
+      ogX=((e.touches[0].clientX+e.touches[1].clientX)/2)-rect.left;
+      ogY=((e.touches[0].clientY+e.touches[1].clientY)/2)-rect.top;
+      row.style.transformOrigin=ogX+'px '+ogY+'px';
+    }
+  },{passive:false});
+  row.addEventListener('touchmove', function(e){
+    if(e.touches.length===2){
+      e.preventDefault();
+      var s=Math.max(1,Math.min(4,lastScale*dist(e.touches)/lastDist));
+      zoomScale=s;
+      row.style.transform='scale('+s+')';
+      var btn=document.getElementById('zoom-reset-btn');
+      if(btn) btn.classList.toggle('show', s>1.05);
+    }
+  },{passive:false});
+  row.addEventListener('touchend', function(e){
+    if(e.touches.length<2&&zoomScale<1.1) resetZoom();
+  });
+}
+
+function resetZoom(){
+  var row=document.getElementById('edit-paper-row');
+  if(row){row.style.transform='scale(1)';row.style.transformOrigin='center top';}
+  zoomScale=1;
+  var btn=document.getElementById('zoom-reset-btn');
+  if(btn) btn.classList.remove('show');
+}
+
+// ===== ドラッグ処理 =====
+var dragState = {
+  mode: 'none',   // 'none' | 'longpress' | 'dragging'
+  longTimer: null,
+  startX: 0, startY: 0,
+  curX: 0, curY: 0,
+  pendingRange: null,
+};
+
+// 編集画面の四隅ハンドル管理
+var editRngState = { x1:0, y1:0, x2:0, y2:0 };
+var editRngDragging = null;
+
+function initDragOverlay() {
+  if (!cv) return;
+  // 初期位置を設定
+  var pad = cv.width * 0.07;
+  if (st.range && st.range.rx !== undefined) {
+    editRngState.x1 = st.range.rx * cv.width;
+    editRngState.y1 = st.range.ry * cv.height;
+    editRngState.x2 = (st.range.rx + st.range.rw) * cv.width;
+    editRngState.y2 = (st.range.ry + st.range.rh) * cv.height;
+  } else {
+    editRngState.x1 = pad; editRngState.y1 = pad;
+    editRngState.x2 = cv.width - pad; editRngState.y2 = cv.height - pad;
+  }
+  updateEditHandles();
+  setupEditHandleDrag();
+}
+
+function cvToElEdit(v, isX) {
+  var rect = cv.getBoundingClientRect();
+  return isX ? v * rect.width / cv.width : v * rect.height / cv.height;
+}
+function elToCvEdit(v, isX) {
+  var rect = cv.getBoundingClientRect();
+  return isX ? v * cv.width / rect.width : v * cv.height / rect.height;
+}
+
+function updateEditHandles() {
+  var x1=editRngState.x1, y1=editRngState.y1, x2=editRngState.x2, y2=editRngState.y2;
+  var ex1=cvToElEdit(x1,true), ey1=cvToElEdit(y1,false);
+  var ex2=cvToElEdit(x2,true), ey2=cvToElEdit(y2,false);
+  var hw = 16; // ハンドル半径
+
+  function setHandle(id, ex, ey) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = 'block';
+    el.style.left = (ex-hw)+'px';
+    el.style.top  = (ey-hw)+'px';
+  }
+  setHandle('edit-h-tl', ex1, ey1);
+  setHandle('edit-h-tr', ex2, ey1);
+  setHandle('edit-h-bl', ex1, ey2);
+  setHandle('edit-h-br', ex2, ey2);
+
+  var fill = document.getElementById('edit-rng-fill');
+  if (fill) {
+    fill.style.display = 'block';
+    fill.style.left   = ex1+'px'; fill.style.top    = ey1+'px';
+    fill.style.width  = (ex2-ex1)+'px'; fill.style.height = (ey2-ey1)+'px';
+  }
+  // ボタン位置も更新
+  buildSplitOverlay();
+}
+
+function setupEditHandleDrag() {
+  ['tl','tr','bl','br'].forEach(function(corner){
+    var el = document.getElementById('edit-h-'+corner);
+    if (!el) return;
+    el.replaceWith(el.cloneNode(true));
+    el = document.getElementById('edit-h-'+corner);
+    function startDrag(e) {
+      e.preventDefault(); e.stopPropagation();
+      editRngDragging = corner;
+      el.classList.add('dragging');
+    }
+    el.addEventListener('mousedown', startDrag);
+    el.addEventListener('touchstart', startDrag, {passive:false});
+  });
+
+  function onMove(e) {
+    if (!editRngDragging) return;
+    e.preventDefault();
+    var src = e.touches ? e.touches[0] : e;
+    var rect = cv.getBoundingClientRect();
+    var ex = src.clientX - rect.left;
+    var ey = src.clientY - rect.top;
+    var cx = Math.max(0, Math.min(cv.width,  elToCvEdit(ex, true)));
+    var cy = Math.max(0, Math.min(cv.height, elToCvEdit(ey, false)));
+    var minSz = 20;
+    if      (editRngDragging==='tl'){editRngState.x1=Math.min(cx,editRngState.x2-minSz);editRngState.y1=Math.min(cy,editRngState.y2-minSz);}
+    else if (editRngDragging==='tr'){editRngState.x2=Math.max(cx,editRngState.x1+minSz);editRngState.y1=Math.min(cy,editRngState.y2-minSz);}
+    else if (editRngDragging==='bl'){editRngState.x1=Math.min(cx,editRngState.x2-minSz);editRngState.y2=Math.max(cy,editRngState.y1+minSz);}
+    else if (editRngDragging==='br'){editRngState.x2=Math.max(cx,editRngState.x1+minSz);editRngState.y2=Math.max(cy,editRngState.y1+minSz);}
+    updateEditHandles();
+    render();
+  }
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('touchmove', onMove, {passive:false});
+
+  function onEnd() {
+    if (!editRngDragging) return;
+    var el = document.getElementById('edit-h-'+editRngDragging);
+    if (el) el.classList.remove('dragging');
+    editRngDragging = null;
+    // 比率で保存
+    st.range = {
+      rx: editRngState.x1 / cv.width,
+      ry: editRngState.y1 / cv.height,
+      rw: (editRngState.x2-editRngState.x1) / cv.width,
+      rh: (editRngState.y2-editRngState.y1) / cv.height
+    };
+    render();
+    buildSplitOverlay();
+  }
+  document.addEventListener('mouseup', onEnd);
+  document.addEventListener('touchend', onEnd);
+}
+
+function confirmRange(yes) {
+  document.getElementById('range-confirm-overlay').classList.remove('on');
+  var rb = document.getElementById('drag-range-box');
+  if (yes && dragState.pendingRange) {
+    st.range = dragState.pendingRange;
+    rb.style.display = 'none';
+    render();
+    buildSplitOverlay();
+  } else {
+    // やり直し: ボックスを消してドラッグ再開可能に
+    rb.style.display = 'none';
+    dragState.pendingRange = null;
+  }
+}
+
+// ============================================================
+// レイアウトエンジン
+// ============================================================
+function calcLayout() {
+  var lines = getLines();
+  var n = lines.length;
+  if (!n) return null;
+
+  // 描画領域（rangeがあればそれを使用、なければデフォルト余白）
+  var pad, areaW, areaH, areaX, areaY;
+  if (st.range && st.range.rx !== undefined) {
+    // 比率→現在のcanvas px に変換
+    areaX = st.range.rx * cv.width;
+    areaY = st.range.ry * cv.height;
+    areaW = st.range.rw * cv.width;
+    areaH = st.range.rh * cv.height;
+    pad = 0;
+  } else {
+    pad = cv.width * 0.07;
+    areaX = pad; areaY = pad;
+    areaW = cv.width - pad * 2;
+    areaH = cv.height - pad * 2;
+  }
+
+  // スケール（用紙基準px/mm）
+  var scale = cv.width / (st.bgVert ? 182 : 257);
+
+  // 自動フォントサイズ計算
+  // 縦書き: 1列の高さ = areaH、列幅 = areaW/n
+  // 横書き: 1行の幅 = areaW、行高さ = areaH/n
+  // 各行の最大文字数を求め、それが収まる最大フォントサイズを求める
+  var maxChars = 0;
+  lines.forEach(function(l){ if(l.length>maxChars) maxChars=l.length; });
+  if (!maxChars) return null;
+
+  var baseFsMax; // スケール後px
+  if (st.bgVert) {
+    // 縦書き: 行の長さ方向=高さ、文字サイズ*文字数≦areaH
+    baseFsMax = Math.floor(areaH / maxChars);
+  } else {
+    // 横書き: 行の長さ方向=幅
+    baseFsMax = Math.floor(areaW / maxChars);
+  }
+  // 上限120px
+  if (baseFsMax > 120) baseFsMax = 120;
+  if (baseFsMax < 4) baseFsMax = 4;
+
+  // kanaOffset をスケール換算
+  var kanaFsMax = baseFsMax + st.kanaOffset * scale;
+  if (kanaFsMax < 1) kanaFsMax = 1;
+
+  return {
+    lines: lines,
+    n: n,
+    pad: pad,
+    areaX: areaX,
+    areaY: areaY,
+    areaW: areaW,
+    areaH: areaH,
+    baseFsMax: baseFsMax,
+    kanaFsMax: kanaFsMax,
+    scale: scale,
+  };
+}
+
+// ============================================================
+// 描画
+// ============================================================
+function render() {
+  if (!cv || !ctx2) return;
+  var w = cv.width, h = cv.height;
+  console.log('[render] w:', w, 'h:', h, 'text:', st.text ? st.text.slice(0,10) : 'none');
+  ctx2.clearRect(0, 0, w, h);
+
+  // 用紙
+  if (pImg) ctx2.drawImage(pImg, 0, 0, w, h);
+  else { ctx2.fillStyle='#fffef9'; ctx2.fillRect(0,0,w,h); }
+
+  var layout = calcLayout();
+  if (!layout) return;
+
+  var pad = layout.pad;
+  var areaW = layout.areaW, areaH = layout.areaH;
+  var lines = layout.lines, n = layout.n;
+  var baseFsMax = layout.baseFsMax, kanaFsMax = layout.kanaFsMax;
+
+  ctx2.fillStyle = '#1a0e05';
+  ctx2.textBaseline = 'top';
+
+  if (st.bgVert) {
+    drawVertLines(lines, n, layout.areaX, layout.areaY, areaW, areaH, baseFsMax, kanaFsMax);
+  } else {
+    drawHoriLines(lines, n, layout.areaX, layout.areaY, areaW, areaH, baseFsMax, kanaFsMax);
+  }
+}
+
+var VMAP = {'（':'︵','）':'︶','「':'﹁','」':'﹂','、':'︑','。':'︒','ー':'｜','…':'⋮','！':'！','？':'？'};
+
+// 縦書き描画（両端揃え）
+function drawVertLines(lines, n, areaX, areaY, areaW, areaH, baseFsMax, kanaFsMax) {
+  var colW = areaW / n;
+  var fam = getFam();
+
+  lines.forEach(function(line, i){
+    if (!line.length) return;
+    var x = areaX + areaW - (i+1)*colW; // 右から左
+    var charX = x + (colW - baseFsMax) / 2; // 列中央（行高さ中央）
+
+    var isLast = (i === lines.length - 1);
+    var maxStep = areaH / line.length;
+    var fs = Math.min(baseFsMax, maxStep);
+    var kfs = Math.min(kanaFsMax, fs + (kanaFsMax - baseFsMax));
+    var totalUsed = fs * line.length;
+    // 最終行: 上端揃え、それ以外: 両端揃え
+    var gapActual = (!isLast && line.length > 1) ? (areaH - totalUsed) / (line.length - 1) : 0;
+
+    for (var j=0; j<line.length; j++) {
+      var ch = line[j];
+      var vch = VMAP[ch] || ch;
+      var curFs = isKana(ch) ? kfs : fs;
+      ctx2.font = curFs + 'px ' + fam;
+      // 各行の高さ中央揃え
+      var rowH = areaH / line.length;
+      var yPos = areaY + j * rowH + (rowH - curFs) / 2;
+      ctx2.fillText(vch, charX + (fs - curFs) / 2, yPos);
+    }
+  });
+}
+
+// 横書き描画（両端揃え）
+function drawHoriLines(lines, n, areaX, areaY, areaW, areaH, baseFsMax, kanaFsMax) {
+  var rowH = areaH / n;
+  var fam = getFam();
+
+  lines.forEach(function(line, i){
+    if (!line.length) return;
+    // 各行の高さ中央揃え
+    var y = areaY + i * rowH + (rowH - baseFsMax) / 2;
+
+    var isLast = (i === lines.length - 1);
+    var maxStepW = areaW / line.length;
+    var fs = Math.min(baseFsMax, maxStepW);
+    var kfs = Math.min(kanaFsMax, fs + (kanaFsMax - baseFsMax));
+    var totalUsed = fs * line.length;
+    // 最終行: 左端揃え、それ以外: 両端揃え
+    var gapActual = (!isLast && line.length > 1) ? (areaW - totalUsed) / (line.length - 1) : 0;
+
+    for (var j=0; j<line.length; j++) {
+      var ch = line[j];
+      var curFs = isKana(ch) ? kfs : fs;
+      ctx2.font = curFs + 'px ' + fam;
+      var xPos = areaX + j * (fs + gapActual) + (fs - curFs) / 2;
+      ctx2.fillText(ch, xPos, y + (fs - curFs) / 2);
+    }
+  });
+}
+
+// ============================================================
+// タブ切替（スマホ）
+// ============================================================
+function spTab(name, btn) {
+  document.querySelectorAll('.sp-tab').forEach(function(b){b.classList.remove('on');});
+  document.querySelectorAll('.sp-panel,.sp-panel-out').forEach(function(p){p.classList.remove('on');});
+  btn.classList.add('on');
+  var panel = document.getElementById('sp-'+name);
+  panel.classList.add('on');
+}
+
+// ============================================================
+// 印刷
+// ============================================================
+function doPrint() {
+  if (!cv) { alert('編集画面で操作してください'); return; }
+  var url = cv.toDataURL('image/png');
+  var isL = !st.bgVert;
+  var win = window.open('', '_blank', 'width=900,height=700');
+  if (!win) { alert('ポップアップを許可してください'); return; }
+  var sc = '<scr'+'ipt>window.onload=function(){window.print();window.onafterprint=function(){window.close();};setTimeout(function(){window.close();},4000);};<'+'/scr'+'ipt>';
+  win.document.write(
+    '<!DOCTYPE html><html><head><meta charset="UTF-8">'+
+    '<style>*{margin:0;padding:0;}@page{size:'+(isL?'B5 landscape':'B5 portrait')+';margin:0;}'+
+    'html,body{width:100%;height:100%;overflow:hidden;background:#fff;}'+
+    'img{width:100%;height:100%;object-fit:contain;display:block;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'+
+    '</style></head><body><img src="'+url+'">'+sc+'</body></html>'
+  );
+  win.document.close();
+}
+
+// ============================================================
+// 保存・読込
+// ============================================================
+// =============================================
+// 保存管理
+// =============================================
+var SAVES_KEY = 'shuji_saves_v1';
+var _owTarget = null; // 上書き対象のキー
+
+function getSaves() {
+  try { return JSON.parse(localStorage.getItem(SAVES_KEY) || '{}'); }
+  catch(e) { return {}; }
+}
+function setSaves(obj) {
+  localStorage.setItem(SAVES_KEY, JSON.stringify(obj));
+}
+
+// ファイル名: テキスト先頭8文字（スペース除く）
+function makeSaveName(text) {
+  var t = (text || '').replace(/\s/g,'');
+  return t.slice(0, 8) || '無題';
+}
+
+// 現在のデータをオブジェクトに
+function currentData() {
+  return {
+    v: 2,
+    bgImg: st.bgImg, bgVert: st.bgVert, bgKey: st.bgKey,
+    text: st.text, font: st.font, kanaOffset: st.kanaOffset,
+    lineCount: st.lineCount, splits: st.splits, range: st.range,
+    savedAt: new Date().toISOString(),
+    name: makeSaveName(st.text)
+  };
+}
+
+// データを st に読み込む
+function loadData(d) {
+  st.bgImg=d.bgImg; st.bgVert=d.bgVert; st.bgKey=d.bgKey;
+  st.text=d.text; st.font=d.font; st.kanaOffset=d.kanaOffset||(-1.5);
+  st.lineCount=d.lineCount||4; st.splits=d.splits||[]; st.range=d.range||null;
+  var mt = document.getElementById('main-text');
+  if (mt) mt.value = st.text;
+}
+
+// 保存一覧を開く
+function openSaves() {
+  renderSavesList();
+  document.getElementById('saves-overlay').classList.add('on');
+}
+function closeSaves() {
+  document.getElementById('saves-overlay').classList.remove('on');
+}
+
+function renderSavesList() {
+  var saves = getSaves();
+  var keys = Object.keys(saves).sort(function(a,b){
+    return (saves[b].savedAt||'') > (saves[a].savedAt||'') ? 1 : -1;
+  });
+  var list = document.getElementById('saves-list');
+  list.innerHTML = '';
+
+  if (keys.length === 0) {
+    list.innerHTML = '<div style="text-align:center;color:var(--text3);padding:20px;font-size:13px;">保存データはありません</div>';
+    return;
+  }
+
+  keys.forEach(function(key){
+    var s = saves[key];
+    var isCurrent = (st.text && makeSaveName(st.text) === key);
+    var date = s.savedAt ? new Date(s.savedAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+
+    var item = document.createElement('div');
+    item.className = 'save-item' + (isCurrent ? ' current' : '');
+
+    item.innerHTML =
+      '<div class="save-icon">📄</div>'+
+      '<div class="save-info">'+
+        '<div class="save-name">'+escHtml(s.name||key)+'</div>'+
+        '<div class="save-meta">'+escHtml(s.text||'').slice(0,20)+(s.text&&s.text.length>20?'…':'')+'　'+date+'</div>'+
+      '</div>'+
+      '<button class="save-overwrite" title="上書き保存">💾 上書き</button>'+
+      '<button class="save-del" title="削除">🗑</button>';
+
+    // 読み込み（行名クリック）
+    item.querySelector('.save-info').onclick = function(){
+      loadData(s);
+      closeSaves();
+      buildEditUI();
+      go('edit');
+      setTimeout(initCanvas, 60);
+    };
+
+    // 上書き保存
+    ;(function(k, sname){
+      item.querySelector('.save-overwrite').onclick = function(e){
+        e.stopPropagation();
+        _owTarget = k;
+        document.getElementById('ow-title').textContent = '「'+sname+'」に上書きしますか？';
+        document.getElementById('ow-sub').textContent =
+          '現在の編集内容で上書き保存します。元のデータは消えます。';
+        document.getElementById('overwrite-overlay').classList.add('on');
+      };
+    })(key, s.name||key);
+
+    // 削除
+    ;(function(k, sname){
+      item.querySelector('.save-del').onclick = function(e){
+        e.stopPropagation();
+        if (confirm('「'+sname+'」を削除しますか？')){
+          var sv = getSaves(); delete sv[k]; setSaves(sv);
+          renderSavesList();
+        }
+      };
+    })(key, s.name||key);
+
+    list.appendChild(item);
+  });
+}
+
+// 新規保存
+function saveAsNew() {
+  var name = makeSaveName(st.text);
+  var saves = getSaves();
+  if (saves[name]) {
+    // 同名が存在 → 上書き確認
+    _owTarget = name;
+    document.getElementById('ow-title').textContent = '「'+name+'」に上書きしますか？';
+    document.getElementById('ow-sub').textContent = '同じ名前のデータが存在します。上書きしますか？';
+    document.getElementById('overwrite-overlay').classList.add('on');
+    return;
+  }
+  try {
+    saves[name] = currentData();
+    setSaves(saves);
+    closeSaves();
+    showSaveToast('「'+name+'」を保存しました');
+  } catch(e) { alert('保存失敗: '+e.message); }
+}
+
+// 上書き確認OK
+function confirmOverwrite() {
+  closeOverwrite();
+  if (!_owTarget) return;
+  try {
+    var saves = getSaves();
+    saves[_owTarget] = currentData();
+    setSaves(saves);
+    closeSaves();
+    showSaveToast('「'+_owTarget+'」を上書き保存しました');
+  } catch(e) { alert('保存失敗: '+e.message); }
+  _owTarget = null;
+}
+function closeOverwrite() {
+  document.getElementById('overwrite-overlay').classList.remove('on');
+}
+
+// 保存完了トースト
+function showSaveToast(msg) {
+  var t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);'+
+    'background:var(--accent);color:#fff;padding:10px 20px;border-radius:30px;'+
+    'font-size:13px;font-weight:700;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.2);'+
+    'pointer-events:none;transition:opacity 0.4s;';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){ t.remove(); }, 400); }, 2000);
+}
+
+// スタート画面「保存から再開」→ 保存一覧を表示
+function loadSaved() {
+  var saves = getSaves();
+  var keys = Object.keys(saves);
+  if (keys.length === 0) { alert('保存データがありません'); return; }
+  // 一覧を開く
+  openSaves();
+}
+
+// 旧形式(shuji_v2)のデータをマイグレーション
+function migrateOldSave() {
+  try {
+    var old = localStorage.getItem('shuji_v2');
+    if (!old) return;
+    var d = JSON.parse(old);
+    if (!d.text) return;
+    var name = makeSaveName(d.text);
+    var saves = getSaves();
+    if (!saves[name]) {
+      d.name = name; d.savedAt = d.savedAt || new Date().toISOString();
+      saves[name] = d; setSaves(saves);
+    }
+    localStorage.removeItem('shuji_v2');
+  } catch(e) {}
+}
+
+// 旧データマイグレーション実行
+migrateOldSave();
+
+// doSave は openSaves に統合されたが互換性のため残す
+function doSave() { openSaves(); }
+
+// ============================================================
+// 初期化
+// ============================================================
+initBgGrid();
+
+return { go:go, resetZoom:resetZoom, loadSaved:loadSaved, goEdit:goEdit, handleFile:handleFile, spTab:spTab, doPrint:doPrint, doSave:doSave, openSaves:openSaves, closeSaves:closeSaves, saveAsNew:saveAsNew, confirmOverwrite:confirmOverwrite, closeOverwrite:closeOverwrite, openFontPopup:openFontPopup, closeFontPopup:closeFontPopup, closeSaveBg:closeSaveBg, doSaveBg:doSaveBg, confirmRange:confirmRange, skipRange:skipRange, openOcrFile:openOcrFile, handleOcrFile:handleOcrFile, openTextEdit:openTextEdit, closeTextEdit:closeTextEdit, applyTextEdit:applyTextEdit };
+})();
+</script>
+</body>
+</html>
