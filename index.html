@@ -520,14 +520,55 @@ canvas { display: block; background: #fffef9; }
 }
 .rc-yes:hover { background: var(--accent2); }
 
-/* ===== カメラ取込ボタン ===== */
+/* ===== カメラ案内ボタン ===== */
 .ocr-camera-btn {
-  display: none; /* PCでは非表示 */
+  display: none;
   width: 100%; margin-top: 8px;
 }
 @media (max-width: 700px) {
   .ocr-camera-btn { display: block; }
 }
+
+/* ===== カメラ案内モーダル ===== */
+.camera-guide-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5); z-index: 3000;
+  align-items: center; justify-content: center;
+}
+.camera-guide-overlay.on { display: flex; }
+.camera-guide-dialog {
+  background: #fff; border-radius: 20px; padding: 28px 22px 22px;
+  width: min(340px, 90vw); text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.camera-guide-icon { font-size: 44px; margin-bottom: 10px; }
+.camera-guide-title { font-size: 17px; font-weight: 800; margin-bottom: 10px; color: var(--text); }
+.camera-guide-body { font-size: 13px; color: var(--text2); line-height: 1.8; margin-bottom: 16px; }
+.camera-guide-steps {
+  background: var(--bg2); border-radius: 12px;
+  padding: 14px 16px; margin-bottom: 20px; text-align: left;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.cg-step { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text); }
+.cg-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.camera-guide-btns { display: flex; gap: 10px; }
+.cg-cancel {
+  flex: 1; padding: 13px; border: 1.5px solid var(--border);
+  border-radius: 50px; background: transparent;
+  color: var(--text2); font-size: 14px; cursor: pointer;
+}
+.cg-ok {
+  flex: 2; padding: 13px; border: none; border-radius: 50px;
+  background: var(--accent); color: #fff;
+  font-size: 14px; font-weight: 700; cursor: pointer;
+}
+.cg-ok:hover { background: var(--accent2); }
 
 /* ===== スマホ編集ヘッダー ===== */
 .sp-edit-hdr {
@@ -695,13 +736,11 @@ canvas { display: block; background: #fffef9; }
     <button class="ocr-btn" style="width:100%;margin-top:10px;" onclick="App.openOcrFile()">
       📎 ファイルから取込（画像・PDF・Excel・Word）
     </button>
-    <!-- カメラ撮影ボタン（スマホのみ表示） -->
-    <button class="ocr-btn ocr-camera-btn" onclick="App.openCameraOcr()">
-      📷 カメラ / 画像から取込
+    <!-- カメラ案内ボタン（スマホのみ） -->
+    <button class="ocr-btn ocr-camera-btn" onclick="App.openCameraGuide()">
+      📷 カメラで撮影して取込
     </button>
-    <!-- カメラ用input（Android Chromeではダイアログからカメラを選択） -->
-    <input type="file" id="camera-file" accept="image/*"
-      style="display:none;" onchange="App.handleOcrFile(event)">
+
     <div class="ocr-loading" id="ocr-loading"></div>
     <div class="hint-box">💡 改行で行を分けることもできます。次の画面で区切り位置を1文字ずつ調整できます。</div>
   </div>
@@ -826,6 +865,26 @@ canvas { display: block; background: #fffef9; }
 </div>
 
 <div id="parea"></div>
+
+<!-- カメラ案内モーダル -->
+<div class="camera-guide-overlay" id="camera-guide-overlay">
+  <div class="camera-guide-dialog">
+    <div class="camera-guide-icon">📷</div>
+    <div class="camera-guide-title">カメラで撮影して取込</div>
+    <div class="camera-guide-body">
+      カメラアプリで文字を撮影し、<br>写真をギャラリーに保存してから<br>「画像を選ぶ」で取り込んでください。
+    </div>
+    <div class="camera-guide-steps">
+      <div class="cg-step"><span class="cg-num">1</span>カメラアプリで文字を撮影・保存</div>
+      <div class="cg-step"><span class="cg-num">2</span>下のボタンで写真を選択</div>
+      <div class="cg-step"><span class="cg-num">3</span>テキストを自動認識して入力</div>
+    </div>
+    <div class="camera-guide-btns">
+      <button class="cg-cancel" onclick="App.closeCameraGuide()">キャンセル</button>
+      <button class="cg-ok" onclick="App.closeCameraGuide(); App.openOcrFile();">📂 画像を選ぶ</button>
+    </div>
+  </div>
+</div>
 
 <!-- 保存一覧ダイアログ -->
 <div class="saves-overlay" id="saves-overlay">
@@ -1199,11 +1258,17 @@ function setupHandleDrag(rcv) {
 
 // ===== OCR / ファイルからテキスト取込 =====
 function openOcrFile() {
-  document.getElementById('ocr-file').click();
+  var inp = document.getElementById('ocr-file');
+  inp.value = '';
+  inp.click();
 }
 
-function openCameraOcr() {
-  document.getElementById('camera-file').click();
+function openCameraGuide() {
+  document.getElementById('camera-guide-overlay').classList.add('on');
+}
+
+function closeCameraGuide() {
+  document.getElementById('camera-guide-overlay').classList.remove('on');
 }
 
 function handleOcrFile(e) {
@@ -2843,7 +2908,7 @@ function doSave() { openSaves(); }
 // ============================================================
 initBgGrid();
 
-return { go:go, goBgNext:goBgNext, switchBgTab:switchBgTab, resetZoom:resetZoom, loadSaved:loadSaved, goEdit:goEdit, handleFile:handleFile, spTab:spTab, doPrint:doPrint, doSave:doSave, openSaves:openSaves, closeSaves:closeSaves, saveAsNew:saveAsNew, confirmOverwrite:confirmOverwrite, closeOverwrite:closeOverwrite, openFontPopup:openFontPopup, closeFontPopup:closeFontPopup, closeSaveBg:closeSaveBg, doSaveBg:doSaveBg, confirmRange:confirmRange, confirmEditRange:confirmEditRange, toggleRangeAdjust:toggleRangeAdjust, skipRange:skipRange, openOcrFile:openOcrFile, openCameraOcr:openCameraOcr, handleOcrFile:handleOcrFile, openTextEdit:openTextEdit, closeTextEdit:closeTextEdit, applyTextEdit:applyTextEdit };
+return { go:go, goBgNext:goBgNext, switchBgTab:switchBgTab, resetZoom:resetZoom, loadSaved:loadSaved, goEdit:goEdit, handleFile:handleFile, spTab:spTab, doPrint:doPrint, doSave:doSave, openSaves:openSaves, closeSaves:closeSaves, saveAsNew:saveAsNew, confirmOverwrite:confirmOverwrite, closeOverwrite:closeOverwrite, openFontPopup:openFontPopup, closeFontPopup:closeFontPopup, closeSaveBg:closeSaveBg, doSaveBg:doSaveBg, confirmRange:confirmRange, confirmEditRange:confirmEditRange, toggleRangeAdjust:toggleRangeAdjust, skipRange:skipRange, openOcrFile:openOcrFile, openCameraGuide:openCameraGuide, closeCameraGuide:closeCameraGuide, handleOcrFile:handleOcrFile, openTextEdit:openTextEdit, closeTextEdit:closeTextEdit, applyTextEdit:applyTextEdit };
 })();
 
 // ページ読み込み完了時に診断
