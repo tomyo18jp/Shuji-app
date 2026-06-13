@@ -697,10 +697,10 @@ canvas { display: block; background: #fffef9; }
     </button>
     <!-- カメラ撮影ボタン（スマホのみ表示） -->
     <button class="ocr-btn ocr-camera-btn" onclick="App.openCameraOcr()">
-      📷 カメラで撮影して取込
+      📷 カメラ / 画像から取込
     </button>
-    <!-- カメラ用input（capture="environment"でスマホの背面カメラを起動） -->
-    <input type="file" id="camera-file" accept="image/*" capture="environment"
+    <!-- カメラ用input（Android Chromeではダイアログからカメラを選択） -->
+    <input type="file" id="camera-file" accept="image/*"
       style="display:none;" onchange="App.handleOcrFile(event)">
     <div class="ocr-loading" id="ocr-loading"></div>
     <div class="hint-box">💡 改行で行を分けることもできます。次の画面で区切り位置を1文字ずつ調整できます。</div>
