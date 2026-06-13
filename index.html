@@ -520,6 +520,15 @@ canvas { display: block; background: #fffef9; }
 }
 .rc-yes:hover { background: var(--accent2); }
 
+/* ===== カメラ取込ボタン ===== */
+.ocr-camera-btn {
+  display: none; /* PCでは非表示 */
+  width: 100%; margin-top: 8px;
+}
+@media (max-width: 700px) {
+  .ocr-camera-btn { display: block; }
+}
+
 /* ===== スマホ編集ヘッダー ===== */
 .sp-edit-hdr {
   display: none; /* PCでは非表示 */
@@ -682,9 +691,17 @@ canvas { display: block; background: #fffef9; }
   <div class="text-body">
     <div class="field-lbl">課題テキスト</div>
     <textarea class="main-ta" id="main-text" rows="7" placeholder="例：春夏秋冬&#10;山川草木"></textarea>
+    <!-- ファイル取込ボタン（PC・スマホ共通） -->
     <button class="ocr-btn" style="width:100%;margin-top:10px;" onclick="App.openOcrFile()">
-      📎 ファイルからテキスト取込（画像・PDF・Excel・Word）
+      📎 ファイルから取込（画像・PDF・Excel・Word）
     </button>
+    <!-- カメラ撮影ボタン（スマホのみ表示） -->
+    <button class="ocr-btn ocr-camera-btn" onclick="App.openCameraOcr()">
+      📷 カメラで撮影して取込
+    </button>
+    <!-- カメラ用input（capture="environment"でスマホの背面カメラを起動） -->
+    <input type="file" id="camera-file" accept="image/*" capture="environment"
+      style="display:none;" onchange="App.handleOcrFile(event)">
     <div class="ocr-loading" id="ocr-loading"></div>
     <div class="hint-box">💡 改行で行を分けることもできます。次の画面で区切り位置を1文字ずつ調整できます。</div>
   </div>
@@ -1183,6 +1200,10 @@ function setupHandleDrag(rcv) {
 // ===== OCR / ファイルからテキスト取込 =====
 function openOcrFile() {
   document.getElementById('ocr-file').click();
+}
+
+function openCameraOcr() {
+  document.getElementById('camera-file').click();
 }
 
 function handleOcrFile(e) {
@@ -2822,7 +2843,7 @@ function doSave() { openSaves(); }
 // ============================================================
 initBgGrid();
 
-return { go:go, goBgNext:goBgNext, switchBgTab:switchBgTab, resetZoom:resetZoom, loadSaved:loadSaved, goEdit:goEdit, handleFile:handleFile, spTab:spTab, doPrint:doPrint, doSave:doSave, openSaves:openSaves, closeSaves:closeSaves, saveAsNew:saveAsNew, confirmOverwrite:confirmOverwrite, closeOverwrite:closeOverwrite, openFontPopup:openFontPopup, closeFontPopup:closeFontPopup, closeSaveBg:closeSaveBg, doSaveBg:doSaveBg, confirmRange:confirmRange, confirmEditRange:confirmEditRange, toggleRangeAdjust:toggleRangeAdjust, skipRange:skipRange, openOcrFile:openOcrFile, handleOcrFile:handleOcrFile, openTextEdit:openTextEdit, closeTextEdit:closeTextEdit, applyTextEdit:applyTextEdit };
+return { go:go, goBgNext:goBgNext, switchBgTab:switchBgTab, resetZoom:resetZoom, loadSaved:loadSaved, goEdit:goEdit, handleFile:handleFile, spTab:spTab, doPrint:doPrint, doSave:doSave, openSaves:openSaves, closeSaves:closeSaves, saveAsNew:saveAsNew, confirmOverwrite:confirmOverwrite, closeOverwrite:closeOverwrite, openFontPopup:openFontPopup, closeFontPopup:closeFontPopup, closeSaveBg:closeSaveBg, doSaveBg:doSaveBg, confirmRange:confirmRange, confirmEditRange:confirmEditRange, toggleRangeAdjust:toggleRangeAdjust, skipRange:skipRange, openOcrFile:openOcrFile, openCameraOcr:openCameraOcr, handleOcrFile:handleOcrFile, openTextEdit:openTextEdit, closeTextEdit:closeTextEdit, applyTextEdit:applyTextEdit };
 })();
 
 // ページ読み込み完了時に診断
