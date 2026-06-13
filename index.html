@@ -3,22 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <!-- 編集画面は横向き推奨 -->
 <title>習字教室</title>
 <style>
 :root {
-  --bg: #f5f0e8;
-  --bg2: #ede7da;
-  --bg3: #e4ddd0;
-  --accent: #2c6e49;
-  --accent2: #3a8a5c;
-  --orange: #e07b39;
-  --text: #1a1a1a;
-  --text2: #555;
-  --text3: #999;
-  --border: #d0c8b8;
-  --card: #fff;
+  /* パステル水色テーマ */
+  --bg:      #e8f4f8;   /* 最も薄い水色（メイン背景） */
+  --bg2:     #d0e9f2;   /* セカンダリ背景 */
+  --bg3:     #b8dded;   /* サードバック */
+  --accent:  #2a7fa5;   /* メインアクション（濃い水色） */
+  --accent2: #1d6688;   /* ホバー（さらに濃い） */
+  --orange:  #1a4f6e;   /* 最濃（印刷ボタン等） */
+  --text:    #0d2d3d;   /* テキスト（濃い青緑） */
+  --text2:   #3a6070;   /* セカンダリテキスト */
+  --text3:   #7aaabb;   /* ヒントテキスト */
+  --border:  #a8d3e5;   /* ボーダー */
+  --card:    #f0f9fc;   /* カード背景 */
   --radius: 14px;
-  --shadow: 0 2px 12px rgba(0,0,0,0.09);
+  --shadow: 0 2px 12px rgba(42,127,165,0.12);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
@@ -33,15 +35,15 @@ input, textarea, select { font-family: inherit; }
 /* ===== スタート ===== */
 #s-start {
   align-items: center; justify-content: center;
-  background: linear-gradient(145deg, #2c6e49 0%, #1a4a30 60%, #0f2e1c 100%);
+  background: linear-gradient(160deg, #c5e8f5 0%, #9dd2ea 40%, #6bb8de 100%);
 }
 .start-box { text-align: center; padding: 40px 28px; }
-.start-logo { font-size: clamp(36px,8vw,64px); font-family: 'Yuji Syuku', serif; color: #f0e0b0; letter-spacing: 0.4em; text-shadow: 0 2px 20px rgba(0,0,0,0.3); margin-bottom: 8px; }
-.start-tagline { font-size: 12px; color: rgba(240,224,176,0.6); letter-spacing: 0.3em; margin-bottom: 56px; }
+.start-logo { font-size: clamp(36px,8vw,64px); font-family: 'Yuji Syuku', serif; color: #0d2d3d; letter-spacing: 0.4em; text-shadow: 0 2px 12px rgba(255,255,255,0.6); margin-bottom: 8px; }
+.start-tagline { font-size: 12px; color: #2a7fa5; letter-spacing: 0.3em; margin-bottom: 56px; }
 .btn-primary { display: block; width: 230px; margin: 0 auto 14px; padding: 18px 0; border: none; border-radius: 50px; font-size: 16px; font-weight: 700; letter-spacing: 0.15em; transition: all 0.2s; }
-.btn-start-new { background: #f0e0b0; color: #1a4a30; }
-.btn-start-new:hover { background: #fff; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
-.btn-start-load { background: transparent; color: rgba(240,224,176,0.6); border: 1px solid rgba(240,224,176,0.25); font-weight: 400; }
+.btn-start-new { background: #2a7fa5; color: #fff; box-shadow: 0 4px 16px rgba(42,127,165,0.35); }
+.btn-start-new:hover { background: #1d6688; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
+.btn-start-load { background: rgba(255,255,255,0.7); color: #2a7fa5; border: 1.5px solid rgba(42,127,165,0.4); font-weight: 400; }
 .btn-start-load:hover { border-color: rgba(240,224,176,0.6); color: #f0e0b0; }
 
 /* ===== 共通ヘッダー ===== */
@@ -66,7 +68,7 @@ input, textarea, select { font-family: inherit; }
   letter-spacing: 0.1em; cursor: pointer; transition: all 0.15s;
   border-bottom: 3px solid transparent; margin-bottom: -2px;
 }
-.bg-tab.on { color: var(--accent); border-bottom-color: var(--accent); background: #f0f7f3; }
+.bg-tab.on { color: var(--accent); border-bottom-color: var(--accent); background: #ddf0f8; }
 .bg-tab:hover:not(.on) { color: var(--text2); background: var(--bg2); }
 
 /* 2列グリッド（1画面に4つ） */
@@ -103,8 +105,8 @@ input, textarea, select { font-family: inherit; }
   gap: 8px; padding: 28px 12px; background: var(--card); transition: all 0.2s; box-shadow: var(--shadow);
   min-height: 120px;
 }
-.upload-card:hover { border-color: var(--accent); background: #f0f7f3; }
-.upload-card.sel { border-color: var(--accent); border-style: solid; background: #f0f7f3; }
+.upload-card:hover { border-color: var(--accent); background: #ddf0f8; }
+.upload-card.sel { border-color: var(--accent); border-style: solid; background: #ddf0f8; }
 .upload-icon { font-size: 28px; }
 .upload-text { font-size: 11px; color: var(--text3); text-align: center; line-height: 1.5; }
 
@@ -151,7 +153,7 @@ input, textarea, select { font-family: inherit; }
   display: flex; align-items: center; justify-content: center; gap: 6px;
   transition: all 0.15s; cursor: pointer;
 }
-.ocr-btn:hover { border-color: var(--accent); color: var(--accent); background: #f0f7f3; }
+.ocr-btn:hover { border-color: var(--accent); color: var(--accent); background: #ddf0f8; }
 .ocr-loading { font-size: 11px; color: var(--text3); margin-top: 6px; min-height: 16px; }
 
 /* ===== 保存管理ダイアログ ===== */
@@ -180,7 +182,7 @@ input, textarea, select { font-family: inherit; }
   border: 1.5px solid var(--border); border-radius: 12px; background: var(--bg);
   transition: all 0.15s;
 }
-.save-item.current { border-color: var(--accent); background: #e8f4ec; }
+.save-item.current { border-color: var(--accent); background: #d8eef8; }
 .save-icon { font-size: 22px; flex-shrink: 0; }
 .save-info { flex: 1; min-width: 0; cursor: pointer; }
 .save-info:hover .save-name { color: var(--accent); }
@@ -203,7 +205,7 @@ input, textarea, select { font-family: inherit; }
   background: transparent; color: var(--text2); font-size: 14px;
   letter-spacing: 0.05em; transition: all 0.2s; cursor: pointer;
 }
-.saves-new:hover { border-color: var(--accent); color: var(--accent); background: #f0f7f3; }
+.saves-new:hover { border-color: var(--accent); color: var(--accent); background: #ddf0f8; }
 .overwrite-overlay {
   display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
   z-index: 3000; align-items: center; justify-content: center;
@@ -291,7 +293,7 @@ textarea.main-ta {
   resize: vertical; outline: none; transition: border-color 0.2s;
 }
 textarea.main-ta:focus { border-color: var(--accent); }
-.hint-box { background: #e8f4ec; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #2c6e49; line-height: 1.7; }
+.hint-box { background: #d8eef8; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #2c6e49; line-height: 1.7; }
 
 /* ===== 共通ボタン ===== */
 .btn-wrap { padding: 14px 20px; flex-shrink: 0; background: #fff; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
@@ -302,11 +304,19 @@ textarea.main-ta:focus { border-color: var(--accent); }
 .btn-sub:hover { border-color: var(--accent); color: var(--accent); }
 
 /* ===== 編集画面 ===== */
-#s-edit { flex-direction: row; background: var(--bg2); overflow: hidden; height: 100vh; min-height: 0; }
+#s-edit {
+  flex-direction: row; background: var(--bg2); overflow: hidden; height: 100vh; min-height: 0;
+}
+/* スマホは横向き強制表示 */
+@media (max-width: 700px) {
+  #s-edit {
+    height: 100svh;
+  }
+}
 
 /* --- サイドバー --- */
 .sidebar {
-  width: 260px; background: #fff; border-right: 1px solid var(--border);
+  width: 200px; background: #fff; border-right: 1px solid var(--border);
   display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto;
   box-shadow: 2px 0 8px rgba(0,0,0,0.06);
 }
@@ -317,11 +327,11 @@ textarea.main-ta:focus { border-color: var(--accent); }
 /* フォント */
 .font-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .f-btn { padding: 8px 4px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text2); font-size: 13px; text-align: center; transition: all 0.15s; line-height: 1.3; }
-.f-btn:hover { border-color: var(--accent); color: var(--accent); background: #f0f7f3; }
+.f-btn:hover { border-color: var(--accent); color: var(--accent); background: #ddf0f8; }
 .f-btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
 /* 仮名オフセット */
 .kana-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-.kana-lbl { font-size: 11px; color: var(--text2); flex: 1; }
+.kana-lbl { font-size: 10px; color: var(--text2); flex: 1; }
 .kana-val { font-size: 13px; font-weight: 700; color: var(--text); width: 48px; text-align: center; }
 .adj-btn { width: 30px; height: 30px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text2); font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
 .adj-btn:hover { border-color: var(--accent); color: var(--accent); }
@@ -331,7 +341,7 @@ textarea.main-ta:focus { border-color: var(--accent); }
 .split-idx { font-size: 10px; color: var(--text3); width: 20px; text-align: center; }
 .split-preview { flex: 1; font-size: 11px; color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .split-btn { width: 28px; height: 28px; border: 1.5px solid var(--border); border-radius: 7px; background: #fff; color: var(--text2); font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
-.split-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: #f0f7f3; }
+.split-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: #ddf0f8; }
 .split-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 /* 印刷・保存 */
 .sb-actions { padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; margin-top: auto; border-top: 1px solid var(--bg2); }
@@ -388,8 +398,8 @@ canvas { display: block; background: #fffef9; }
   border: 2px solid var(--border); border-radius: 12px; padding: 10px 8px;
   background: var(--bg); cursor: pointer; transition: all 0.15s; text-align: center;
 }
-.font-card:hover { border-color: var(--accent); background: #f0f7f3; }
-.font-card.on { border-color: var(--accent); background: #e8f4ec; }
+.font-card:hover { border-color: var(--accent); background: #ddf0f8; }
+.font-card.on { border-color: var(--accent); background: #d8eef8; }
 .font-card-sample { font-size: 22px; color: var(--text); line-height: 1.3; margin-bottom: 4px; display: block; }
 .font-card-name { font-size: 10px; color: var(--text2); font-family: sans-serif; }
 .font-card-note { font-size: 9px; color: var(--text3); font-family: sans-serif; margin-top: 1px; }
@@ -529,6 +539,21 @@ canvas { display: block; background: #fffef9; }
   .ocr-camera-btn { display: block; }
 }
 
+/* ===== 行文字数カウント ===== */
+.count-col {
+  display: flex; flex-direction: column;
+  position: relative; flex-shrink: 0; width: 28px;
+  overflow: visible;
+}
+.count-badge {
+  position: absolute; left: 2px;
+  background: rgba(42,127,165,0.15);
+  color: var(--accent); font-size: 9px; font-weight: 700;
+  border-radius: 6px; padding: 1px 3px;
+  white-space: nowrap; line-height: 1.4;
+  pointer-events: none;
+}
+
 /* ===== カメラ案内モーダル ===== */
 .camera-guide-overlay {
   display: none; position: fixed; inset: 0;
@@ -595,7 +620,7 @@ canvas { display: block; background: #fffef9; }
 /* ===== 編集画面 長押しドラッグ ===== */
 .lp-indicator {
   position: absolute; border-radius: 50%;
-  background: rgba(44,110,73,0.2); border: 2px solid rgba(44,110,73,0.5);
+  background: rgba(42,127,165,0.2); border: 2px solid rgba(42,127,165,0.5);
   transform: translate(-50%,-50%) scale(0);
   transition: transform 0.4s ease-out, opacity 0.4s;
   pointer-events: none; z-index: 5;
@@ -605,38 +630,83 @@ canvas { display: block; background: #fffef9; }
 .lp-indicator.done   { transform: translate(-50%,-50%) scale(1.4); opacity: 0; }
 /* 範囲調整ボタン（サイドバー） */
 .range-adjust-btn {
-  width: 100%; padding: 11px; border: 1.5px solid var(--border); border-radius: 50px;
-  background: var(--bg); color: var(--text2); font-size: 13px; margin-top: 8px;
+  width: 100%; padding: 9px; border: 1.5px solid var(--border); border-radius: 50px;
+  background: var(--bg); color: var(--text2); font-size: 12px; margin-top: 0px;
   transition: all 0.2s; cursor: pointer; display: flex; align-items: center;
   justify-content: center; gap: 6px;
 }
-.range-adjust-btn:hover { border-color: var(--accent); color: var(--accent); background: #f0f7f3; }
-.range-adjust-btn.active { border-color: var(--accent); background: #e8f4ec; color: var(--accent); font-weight: 700; }
+.range-adjust-btn:hover { border-color: var(--accent); color: var(--accent); background: #ddf0f8; }
+.range-adjust-btn.active { border-color: var(--accent); background: #d8eef8; color: var(--accent); font-weight: 700; }
 
 /* ===== 印刷 ===== */
 #parea { display: none; }
 @media print { body > * { display: none !important; } #parea { display: block !important; position: fixed; inset: 0; } }
 
+/* ===== 文字色スライダー ===== */
+.color-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.color-lbl { font-size: 10px; color: var(--text2); flex: 1; }
+.color-slider {
+  flex: 2; -webkit-appearance: none; appearance: none;
+  height: 4px; border-radius: 2px; outline: none;
+  background: linear-gradient(to right, #1a0e05, #c0b0a0);
+  cursor: pointer;
+}
+.color-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px;
+  border-radius: 50%; background: var(--accent);
+  border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  cursor: pointer;
+}
+.color-val { font-size: 10px; color: var(--text2); width: 32px; text-align: right; }
+
+/* ===== トレースモードトグル ===== */
+.trace-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.trace-lbl { font-size: 10px; color: var(--text2); flex: 1; }
+.toggle-switch {
+  position: relative; width: 36px; height: 20px; flex-shrink: 0;
+}
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-track {
+  position: absolute; inset: 0; border-radius: 20px;
+  background: var(--bg3); transition: background 0.2s; cursor: pointer;
+}
+.toggle-track::after {
+  content: ''; position: absolute; left: 3px; top: 3px;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #fff; transition: left 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle-switch input:checked + .toggle-track { background: var(--accent); }
+.toggle-switch input:checked + .toggle-track::after { left: 19px; }
+
+/* ===== 印刷サイズ選択 ===== */
+.print-size-row { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+.ps-btn {
+  padding: 5px 8px; border: 1.5px solid var(--border); border-radius: 7px;
+  background: var(--bg); color: var(--text2); font-size: 10px; font-weight: 700;
+  cursor: pointer; transition: all 0.15s;
+}
+.ps-btn:hover { border-color: var(--accent); color: var(--accent); }
+.ps-btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ===== エクスポート/インポートボタン ===== */
+.exim-row { display: flex; gap: 6px; margin-top: 4px; }
+.exim-btn {
+  flex: 1; padding: 9px 4px; border: 1.5px solid var(--border); border-radius: 10px;
+  background: var(--bg); color: var(--text2); font-size: 11px;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  cursor: pointer; transition: all 0.15s;
+}
+.exim-btn:hover { border-color: var(--accent); color: var(--accent); background: #ddf0f8; }
+
 /* ===== レスポンシブ ===== */
 @media (max-width: 700px) {
-  #s-edit { flex-direction: column !important; height: 100dvh; overflow: hidden; }
-  .sidebar { display: none; }
-  .sp-edit-hdr { display: flex; }
-  .sp-bottom { display: block; }
-  .edit-main { padding: 4px 2px; align-items: center; justify-content: center; flex: 1; min-height: 0; overflow: hidden; }
-}
-@media (orientation: landscape) and (max-width: 900px) {
-  /* 横向き: ボトムシートを横に小さく */
-  #s-edit { flex-direction: row !important; }
+  /* スマホ: 常にサイドバー表示（横向き固定） */
+  #s-edit { flex-direction: row !important; height: 100svh; overflow: hidden; }
+  .sidebar { display: flex; width: 170px; }
   .sp-edit-hdr { display: none; }
-  .sidebar { display: flex; width: 200px; font-size: 12px; }
   .sp-bottom { display: none; }
-  .edit-main { padding: 4px 2px; align-items: center; justify-content: center; }
-  .sb-sec { padding: 8px 10px; }
-  .sb-lbl { font-size: 9px; margin-bottom: 6px; }
-  .sb-actions { padding: 8px 10px; gap: 6px; }
-  .btn-print { padding: 10px; font-size: 13px; }
-  .btn-save  { padding: 8px;  font-size: 12px; }
+  .edit-main { padding: 4px 2px; align-items: center; justify-content: center; flex: 1; min-height: 0; overflow: hidden; }
 }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -757,39 +827,59 @@ canvas { display: block; background: #fffef9; }
       <button class="hdr-back" onclick="App.go('text')">← 戻る</button>
       <div class="sb-hdr-title">編集</div>
     </div>
-
     <div class="sb-sec">
       <div class="sb-lbl">フォント</div>
       <button class="font-select-btn" id="font-select-btn" onclick="App.openFontPopup()">
         <span class="font-select-preview" id="font-select-preview">春</span>
-        <span class="font-select-label" id="font-select-label">楷書 標準</span>
+        <span class="font-select-label" id="font-select-label">楷書</span>
         <span class="font-select-arrow">▼</span>
       </button>
-      <div class="kana-row" style="margin-top:10px;">
+      <div class="kana-row" style="margin-top:8px;">
         <span class="kana-lbl">文字サイズ</span>
         <button class="adj-btn" id="pc-scale-d">－</button>
-        <span class="kana-val" id="pc-scale-v" style="width:36px;">100%</span>
+        <span class="kana-val" id="pc-scale-v" style="width:34px;">100%</span>
         <button class="adj-btn" id="pc-scale-i">＋</button>
       </div>
-      <div class="kana-row" style="margin-top:8px;">
+      <div class="kana-row" style="margin-top:4px;">
         <span class="kana-lbl">仮名</span>
         <button class="adj-btn" id="pc-kana-d">－</button>
         <span class="kana-val" id="pc-kana-v">-1.0pt</span>
         <button class="adj-btn" id="pc-kana-i">＋</button>
       </div>
-      <div class="kana-row" style="margin-top:6px;">
+      <div class="kana-row" style="margin-top:4px;">
         <span class="kana-lbl">英数</span>
         <button class="adj-btn" id="pc-alpha-d">－</button>
         <span class="kana-val" id="pc-alpha-v">-1.0pt</span>
         <button class="adj-btn" id="pc-alpha-i">＋</button>
       </div>
     </div>
-
+    <!-- 文字色・トレース -->
+    <div class="sb-sec">
+      <div class="sb-lbl">文字色・出力</div>
+      <div class="color-row">
+        <span class="color-lbl">文字の濃さ</span>
+        <input type="range" class="color-slider" id="pc-color-slider" min="0" max="100" value="100" oninput="App.onColorSlider(this.value)">
+        <span class="color-val" id="pc-color-val">100%</span>
+      </div>
+      <div class="trace-row">
+        <span class="trace-lbl">🖊 お手本（薄字）モード</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="pc-trace-toggle" onchange="App.onTraceToggle(this.checked)">
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+      <div class="sb-lbl" style="margin-top:10px;">印刷サイズ</div>
+      <div class="print-size-row" id="pc-print-size"></div>
+    </div>
     <div class="sb-actions">
-      <button class="btn-print" onclick="App.doPrint()">🖨️ 印刷する</button>
-      <button class="range-adjust-btn" id="range-adjust-btn" onclick="App.toggleRangeAdjust()">📐 テキスト範囲を調整</button>
+      <button class="btn-print" onclick="App.doPrint()">🖨️ 印刷</button>
+      <button class="range-adjust-btn" id="range-adjust-btn" onclick="App.toggleRangeAdjust()">📐 範囲調整</button>
       <button class="btn-save" onclick="App.openTextEdit()" style="background:var(--bg);border:1.5px solid var(--border);color:var(--text2);">✏️ テキスト編集</button>
       <button class="btn-save" onclick="App.openSaves()">💾 保存</button>
+      <div class="exim-row">
+        <button class="exim-btn" onclick="App.exportData()">📤 書き出し</button>
+        <button class="exim-btn" onclick="App.importData()">📥 読み込み</button>
+      </div>
     </div>
   </div>
 
@@ -823,6 +913,8 @@ canvas { display: block; background: #fffef9; }
       </div>
       <!-- 右ボタン列（縦書き:下ボタン / 横書き:▶ボタン） -->
       <div class="split-col" id="split-col-right"></div>
+      <!-- 各行文字数表示 -->
+      <div class="count-col" id="count-col"></div>
     </div>
   </div>
 
@@ -1006,6 +1098,9 @@ var st = {
   lineCount: 4,        // 行数
   range: null,          // テキスト配置範囲 {x,y,w,h}（用紙px基準）
   splits: [],          // 各行の文字数配列 [n1, n2, ...] 合計=text.length
+  textColor: 100,     // 文字の濃さ 0-100
+  traceMode: false,   // お手本（薄字）トレースモード
+  printSize: 'B5',    // 印刷サイズ
 };
 
 // ============================================================
@@ -1937,6 +2032,8 @@ function buildEditUI() {
   bindKana('pc-kana'); bindKana('sp-kana');
   updateScaleDisplay();
   updateKanaDisplay();
+  initColorSlider();
+  initPrintSizeBtns();
 }
 
 function openFontPopup() {
@@ -1994,6 +2091,8 @@ function buildSplitOverlay() {
   if (!colL || !colR || !cv) return;
   colL.innerHTML = '';
   colR.innerHTML = '';
+  var countColEl = document.getElementById('count-col');
+  if (countColEl) countColEl.innerHTML = '';
 
   var lines = getLines();
   var n = lines.length;
@@ -2020,6 +2119,8 @@ function buildSplitOverlay() {
   colR.style.height = cv.height * scaleY + 'px';
   colL.style.position = 'relative';
   colR.style.position = 'relative';
+  var ccol = document.getElementById('count-col');
+  if (ccol) { ccol.style.height = cv.height * scaleY + 'px'; ccol.style.position = 'relative'; }
 
   if (n <= 1) return;
 
@@ -2062,6 +2163,16 @@ function buildSplitOverlay() {
       buildSplitOverlay(); render();
     };})(i);
     colR.appendChild(downBtn);
+
+    // 文字数バッジ
+    var countCol = document.getElementById('count-col');
+    if (countCol) {
+      var badge = document.createElement('div');
+      badge.className = 'count-badge';
+      badge.textContent = line.length + '文字';
+      badge.style.top = (btnCY - 10) + 'px';
+      countCol.appendChild(badge);
+    }
   });
 }
 
@@ -2115,6 +2226,128 @@ function updateKanaDisplay() {
   var at = (st.alphaOffset >= 0 ? '+' : '') + (st.alphaOffset||0).toFixed(1) + 'pt';
   document.querySelectorAll('[id$="-kana-v"]').forEach(function(el){ el.textContent = kt; });
   document.querySelectorAll('[id$="-alpha-v"]').forEach(function(el){ el.textContent = at; });
+}
+
+// ============================================================
+// 文字色・濃さ
+// ============================================================
+function initColorSlider() {
+  var slider = document.getElementById('pc-color-slider');
+  var val    = document.getElementById('pc-color-val');
+  if (slider) {
+    slider.value = st.textColor !== undefined ? st.textColor : 100;
+    if (val) val.textContent = slider.value + '%';
+  }
+  // トレースモード
+  var tog = document.getElementById('pc-trace-toggle');
+  if (tog) tog.checked = !!st.traceMode;
+}
+
+function onColorSlider(v) {
+  st.textColor = parseInt(v);
+  var val = document.getElementById('pc-color-val');
+  if (val) val.textContent = v + '%';
+  render();
+}
+
+function onTraceToggle(checked) {
+  st.traceMode = checked;
+  // トレースモード時は薄字で再描画
+  render();
+  showSaveToast(checked ? '🖊 お手本モード ON（なぞり書き用の薄字）' : 'お手本モード OFF');
+}
+
+// ============================================================
+// 印刷サイズ
+// ============================================================
+var PRINT_SIZES = [
+  { k:'A4',   label:'A4',   css:'A4'        },
+  { k:'B5',   label:'B5',   css:'B5'        },
+  { k:'A3',   label:'A3',   css:'A3'        },
+  { k:'hansi',label:'半紙', css:'210mm 297mm' }, // 縦長半紙近似
+];
+
+function initPrintSizeBtns() {
+  var wrap = document.getElementById('pc-print-size');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  PRINT_SIZES.forEach(function(ps){
+    var btn = document.createElement('button');
+    btn.className = 'ps-btn' + (st.printSize === ps.k ? ' on' : '');
+    btn.textContent = ps.label;
+    btn.onclick = function(){
+      st.printSize = ps.k;
+      wrap.querySelectorAll('.ps-btn').forEach(function(b){ b.classList.toggle('on', b.textContent === ps.label); });
+    };
+    wrap.appendChild(btn);
+  });
+}
+
+// ============================================================
+// エクスポート / インポート
+// ============================================================
+function exportData() {
+  var saves = getSaves();
+  var keys = Object.keys(saves);
+  if (keys.length === 0) { alert('保存データがありません'); return; }
+
+  // 全保存データ + 現在の編集内容をまとめてJSON出力
+  var payload = {
+    version: 2,
+    exportedAt: new Date().toISOString(),
+    saves: saves
+  };
+
+  var json = JSON.stringify(payload, null, 2);
+  var blob = new Blob([json], {type:'application/json'});
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href = url;
+  a.download = '習字教室_' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 1000);
+  showSaveToast('📤 ' + keys.length + '件のデータを書き出しました');
+}
+
+var _importInput = null;
+function importData() {
+  if (!_importInput) {
+    _importInput = document.createElement('input');
+    _importInput.type = 'file';
+    _importInput.accept = '.json,application/json';
+    _importInput.onchange = function(e){
+      var f = e.target.files[0]; if (!f) return;
+      var rd = new FileReader();
+      rd.onload = function(ev){
+        try {
+          var data = JSON.parse(ev.target.result);
+          var saves;
+          // 新形式: { version, saves, ... }
+          if (data.saves && typeof data.saves === 'object') {
+            saves = data.saves;
+          } else {
+            // 旧形式または直接savesオブジェクト
+            saves = data;
+          }
+          var cur = getSaves();
+          var added = 0;
+          Object.keys(saves).forEach(function(k){
+            if (!cur[k]) { cur[k] = saves[k]; added++; }
+          });
+          setSaves(cur);
+          showSaveToast('📥 ' + added + '件のデータを読み込みました');
+          openSaves();
+        } catch(ex) {
+          alert('読み込みに失敗しました。正しいJSONファイルを選択してください。');
+        }
+      };
+      rd.readAsText(f, 'UTF-8');
+      _importInput.value = '';
+    };
+    document.body.appendChild(_importInput);
+  }
+  _importInput.click();
 }
 
 // ============================================================
@@ -2557,11 +2790,12 @@ function calcLayout() {
   if (baseFsMax > 300) baseFsMax = 300;
   if (baseFsMax < 4) baseFsMax = 4;
 
-  // オフセットをスケール換算
-  var kanaFsMax  = baseFsMax + (st.kanaOffset  || -1.0) * scale;
-  var alphaFsMax = baseFsMax + (st.alphaOffset || -1.0) * scale;
-  if (kanaFsMax  < 1) kanaFsMax  = 1;
-  if (alphaFsMax < 1) alphaFsMax = 1;
+  // オフセットをpt→px換算してbaseFsMに加算
+  // kanaOffset/alphaOffset は「漢字との差(pt)」なので
+  // baseFsMax に比例させて追従させる（スケールアップ時も差を維持）
+  var ptToPx = scale * 0.352778; // 1pt = 0.352778mm
+  var kanaFsMax  = Math.max(1, baseFsMax + (st.kanaOffset  || -1.0) * ptToPx);
+  var alphaFsMax = Math.max(1, baseFsMax + (st.alphaOffset || -1.0) * ptToPx);
 
   return {
     lines: lines, n: n, pad: pad,
@@ -2602,32 +2836,57 @@ function render() {
   var lines = layout.lines, n = layout.n;
   var baseFsMax = layout.baseFsMax, kanaFsMax = layout.kanaFsMax, alphaFsMax = layout.alphaFsMax;
 
-  ctx2.fillStyle = '#1a0e05';
+  // 文字色計算
+  var colorPct = (st.textColor !== undefined ? st.textColor : 100);
+  var isTrace  = !!st.traceMode;
+  var alpha;
+  if (isTrace) {
+    // お手本モード: 常に薄い（約15%の透明度）
+    alpha = 0.15;
+  } else {
+    // 通常: 濃さスライダーに従う (100%→不透明, 0%→ほぼ透明)
+    alpha = colorPct / 100;
+  }
+  // RGB: 濃さに応じて墨色（26,14,5）〜薄墨（180,160,140）
+  var r = Math.round(26  + (180-26)  * (1 - colorPct/100));
+  var g = Math.round(14  + (160-14)  * (1 - colorPct/100));
+  var b2 = Math.round(5  + (140-5)   * (1 - colorPct/100));
+  var fillColor = isTrace
+    ? 'rgba(26,14,5,0.15)'
+    : ('rgba('+r+','+g+','+b2+','+alpha+')');
+
+  ctx2.fillStyle = fillColor;
   ctx2.textBaseline = 'top';
 
   if (st.bgVert) {
-    drawVertLines(lines, n, layout.areaX, layout.areaY, areaW, areaH, baseFsMax, kanaFsMax, alphaFsMax);
+    drawVertLines(lines, n, layout.areaX, layout.areaY, areaW, areaH, baseFsMax, kanaFsMax, alphaFsMax, fillColor);
   } else {
-    drawHoriLines(lines, n, layout.areaX, layout.areaY, areaW, areaH, baseFsMax, kanaFsMax, alphaFsMax);
+    drawHoriLines(lines, n, layout.areaX, layout.areaY, areaW, areaH, baseFsMax, kanaFsMax, alphaFsMax, fillColor);
   }
 }
 
 var VMAP = {'（':'︵','）':'︶','「':'﹁','」':'﹂','、':'︑','。':'︒','ー':'｜','…':'⋮','！':'！','？':'？'};
 
 // 縦書き描画（両端揃え）
-function drawVertLines(lines, n, areaX, areaY, areaW, areaH, baseFsMax, kanaFsMax, alphaFsMax) {
+function drawVertLines(lines, n, areaX, areaY, areaW, areaH, baseFsMax, kanaFsMax, alphaFsMax, fillColor) {
   var colW = areaW / n;
   var fam = getFam();
+
+  // kana/alphaはcalcLayoutで計算済みの値をそのまま使用
+  var kfsGlobal = Math.max(1, kanaFsMax);
+  var afsGlobal = Math.max(1, alphaFsMax);
 
   lines.forEach(function(line, i){
     if (!line.length) return;
     var x = areaX + areaW - (i+1)*colW; // 右から左
-    var charX = x + (colW - baseFsMax) / 2; // 列中央（行高さ中央）
+    var charX = x + (colW - baseFsMax) / 2; // 列中央
 
     var isLast = (i === lines.length - 1);
     var maxStep = areaH / line.length;
-    var fs = Math.min(baseFsMax, maxStep);
-    var kfs = Math.min(kanaFsMax, fs + (kanaFsMax - baseFsMax));
+    var fs  = Math.min(baseFsMax, maxStep);
+    // kana/alphaは全行共通ratio（最大文字数行基準）
+    var kfs = kfsGlobal;
+    var afs = afsGlobal;
     var totalUsed = fs * line.length;
     // 最終行: 上端揃え、それ以外: 両端揃え
     var gapActual = (!isLast && line.length > 1) ? (areaH - totalUsed) / (line.length - 1) : 0;
@@ -2637,28 +2896,35 @@ function drawVertLines(lines, n, areaX, areaY, areaW, areaH, baseFsMax, kanaFsMa
       var vch = VMAP[ch] || ch;
       var curFs = isKana(ch) ? kfs : (isAlpha(ch) ? afs : fs);
       ctx2.font = curFs + 'px ' + fam;
-      var rowH = areaH / line.length;
-      var yPos = areaY + j * rowH + (rowH - curFs) / 2;
+      if (fillColor) ctx2.fillStyle = fillColor;
+      // 文字を行幅・gap中央に配置
+      var stepH = fs + gapActual;
+      var yPos = isLast
+        ? areaY + j * fs + (fs - curFs) / 2
+        : areaY + j * stepH + (stepH - curFs) / 2;
       ctx2.fillText(vch, charX + (fs - curFs) / 2, yPos);
     }
   });
 }
 
 // 横書き描画（両端揃え）
-function drawHoriLines(lines, n, areaX, areaY, areaW, areaH, baseFsMax, kanaFsMax, alphaFsMax) {
+function drawHoriLines(lines, n, areaX, areaY, areaW, areaH, baseFsMax, kanaFsMax, alphaFsMax, fillColor) {
   var rowH = areaH / n;
   var fam = getFam();
 
+  // kana/alphaはcalcLayoutで計算済みの値をそのまま使用
+  var kfsGlobalH = Math.max(1, kanaFsMax);
+  var afsGlobalH = Math.max(1, alphaFsMax);
+
   lines.forEach(function(line, i){
     if (!line.length) return;
-    // 各行の高さ中央揃え
     var y = areaY + i * rowH + (rowH - baseFsMax) / 2;
 
     var isLast = (i === lines.length - 1);
     var maxStepW = areaW / line.length;
     var fs = Math.min(baseFsMax, maxStepW);
-    var kfs = Math.max(1, fs + (kanaFsMax  - baseFsMax));
-    var afs = Math.max(1, fs + (alphaFsMax - baseFsMax));
+    var kfs = kfsGlobalH;
+    var afs = afsGlobalH;
     var totalUsed = fs * line.length;
     var gapActual = (!isLast && line.length > 1) ? (areaW - totalUsed) / (line.length - 1) : 0;
 
@@ -2666,6 +2932,7 @@ function drawHoriLines(lines, n, areaX, areaY, areaW, areaH, baseFsMax, kanaFsMa
       var ch = line[j];
       var curFs = isKana(ch) ? kfs : (isAlpha(ch) ? alphaFsMax : fs);
       ctx2.font = curFs + 'px ' + fam;
+      if (fillColor) ctx2.fillStyle = fillColor;
       var xPos = areaX + j * (fs + gapActual) + (fs - curFs) / 2;
       ctx2.fillText(ch, xPos, y + (fs - curFs) / 2);
     }
@@ -2690,15 +2957,28 @@ function doPrint() {
   if (!cv) { alert('編集画面で操作してください'); return; }
   var url = cv.toDataURL('image/png');
   var isL = !st.bgVert;
+
+  // 印刷サイズ設定
+  var sizeMap = {
+    'A4':    isL ? 'A4 landscape' : 'A4 portrait',
+    'B5':    isL ? 'B5 landscape' : 'B5 portrait',
+    'A3':    isL ? 'A3 landscape' : 'A3 portrait',
+    'hansi': isL ? '364mm 257mm'  : '257mm 364mm', // 半紙（縦）
+  };
+  var pageSize = sizeMap[st.printSize || 'B5'] || (isL ? 'B5 landscape' : 'B5 portrait');
+
   var win = window.open('', '_blank', 'width=900,height=700');
   if (!win) { alert('ポップアップを許可してください'); return; }
   var sc = '<scr'+'ipt>window.onload=function(){window.print();window.onafterprint=function(){window.close();};setTimeout(function(){window.close();},4000);};<'+'/scr'+'ipt>';
+  var traceNote = st.traceMode
+    ? '<div style="position:fixed;bottom:6mm;right:6mm;font-size:9pt;color:#aaa;font-family:sans-serif;">お手本なぞり書き用</div>'
+    : '';
   win.document.write(
     '<!DOCTYPE html><html><head><meta charset="UTF-8">'+
-    '<style>*{margin:0;padding:0;}@page{size:'+(isL?'B5 landscape':'B5 portrait')+';margin:0;}'+
+    '<style>*{margin:0;padding:0;}@page{size:'+pageSize+';margin:0;}'+
     'html,body{width:100%;height:100%;overflow:hidden;background:#fff;}'+
     'img{width:100%;height:100%;object-fit:contain;display:block;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'+
-    '</style></head><body><img src="'+url+'">'+sc+'</body></html>'
+    '</style></head><body><img src="'+url+'">'+traceNote+sc+'</body></html>'
   );
   win.document.close();
 }
@@ -2732,7 +3012,11 @@ function currentData() {
     v: 2,
     bgImg: st.bgImg, bgVert: st.bgVert, bgKey: st.bgKey,
     text: st.text, font: st.font, kanaOffset: st.kanaOffset,
-    lineCount: st.lineCount, splits: st.splits, range: st.range, alphaOffset: st.alphaOffset||-1.0, fontScale: st.fontScale||100,
+    lineCount: st.lineCount, splits: st.splits, range: st.range,
+    alphaOffset: st.alphaOffset||-1.0, fontScale: st.fontScale||100,
+    textColor: st.textColor !== undefined ? st.textColor : 100,
+    traceMode: !!st.traceMode,
+    printSize: st.printSize || 'B5',
     savedAt: new Date().toISOString(),
     name: makeSaveName(st.text)
   };
@@ -2742,7 +3026,10 @@ function currentData() {
 function loadData(d) {
   st.bgImg=d.bgImg; st.bgVert=d.bgVert; st.bgKey=d.bgKey;
   st.text=d.text; st.font=d.font; st.kanaOffset=d.kanaOffset||(-1.5);
-  st.lineCount=d.lineCount||4; st.splits=d.splits||[]; st.range=d.range||null; st.alphaOffset=d.alphaOffset||-1.0; st.fontScale=d.fontScale||100; st.alphaOffset=d.alphaOffset||-1.0; st.fontScale=d.fontScale||100;
+  st.lineCount=d.lineCount||4; st.splits=d.splits||[]; st.range=d.range||null; st.alphaOffset=d.alphaOffset||-1.0; st.fontScale=d.fontScale||100;
+  st.textColor = (d.textColor !== undefined) ? d.textColor : 100;
+  st.traceMode = !!d.traceMode;
+  st.printSize  = d.printSize || 'B5';
   var mt = document.getElementById('main-text');
   if (mt) mt.value = st.text;
 }
@@ -2908,7 +3195,7 @@ function doSave() { openSaves(); }
 // ============================================================
 initBgGrid();
 
-return { go:go, goBgNext:goBgNext, switchBgTab:switchBgTab, resetZoom:resetZoom, loadSaved:loadSaved, goEdit:goEdit, handleFile:handleFile, spTab:spTab, doPrint:doPrint, doSave:doSave, openSaves:openSaves, closeSaves:closeSaves, saveAsNew:saveAsNew, confirmOverwrite:confirmOverwrite, closeOverwrite:closeOverwrite, openFontPopup:openFontPopup, closeFontPopup:closeFontPopup, closeSaveBg:closeSaveBg, doSaveBg:doSaveBg, confirmRange:confirmRange, confirmEditRange:confirmEditRange, toggleRangeAdjust:toggleRangeAdjust, skipRange:skipRange, openOcrFile:openOcrFile, openCameraGuide:openCameraGuide, closeCameraGuide:closeCameraGuide, handleOcrFile:handleOcrFile, openTextEdit:openTextEdit, closeTextEdit:closeTextEdit, applyTextEdit:applyTextEdit };
+return { go:go, goBgNext:goBgNext, switchBgTab:switchBgTab, resetZoom:resetZoom, loadSaved:loadSaved, goEdit:goEdit, handleFile:handleFile, spTab:spTab, doPrint:doPrint, doSave:doSave, openSaves:openSaves, closeSaves:closeSaves, saveAsNew:saveAsNew, confirmOverwrite:confirmOverwrite, closeOverwrite:closeOverwrite, openFontPopup:openFontPopup, closeFontPopup:closeFontPopup, closeSaveBg:closeSaveBg, doSaveBg:doSaveBg, confirmRange:confirmRange, confirmEditRange:confirmEditRange, toggleRangeAdjust:toggleRangeAdjust, skipRange:skipRange, openOcrFile:openOcrFile, openCameraGuide:openCameraGuide, closeCameraGuide:closeCameraGuide, handleOcrFile:handleOcrFile, openTextEdit:openTextEdit, closeTextEdit:closeTextEdit, applyTextEdit:applyTextEdit, onColorSlider:onColorSlider, onTraceToggle:onTraceToggle, exportData:exportData, importData:importData };
 })();
 
 // ページ読み込み完了時に診断
