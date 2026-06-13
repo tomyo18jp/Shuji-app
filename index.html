@@ -53,7 +53,30 @@ input, textarea, select { font-family: inherit; }
 
 /* ===== 用紙選択 ===== */
 #s-bg { background: var(--bg); }
-.bg-scroll { flex: 1; overflow-y: auto; padding: 20px; }
+.bg-scroll { flex: 1; overflow-y: auto; padding: 14px; }
+
+/* 縦横タブ */
+.bg-tabs {
+  display: flex; border-bottom: 2px solid var(--border);
+  background: #fff; flex-shrink: 0;
+}
+.bg-tab {
+  flex: 1; padding: 12px 0; border: none; background: transparent;
+  color: var(--text3); font-size: 15px; font-weight: 700;
+  letter-spacing: 0.1em; cursor: pointer; transition: all 0.15s;
+  border-bottom: 3px solid transparent; margin-bottom: -2px;
+}
+.bg-tab.on { color: var(--accent); border-bottom-color: var(--accent); background: #f0f7f3; }
+.bg-tab:hover:not(.on) { color: var(--text2); background: var(--bg2); }
+
+/* 2列グリッド（1画面に4つ） */
+.bg-grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+/* アップロードカードも2列に */
+.bg-grid2 .upload-card { min-height: 100px; }
 .bg-section-title { font-size: 12px; font-weight: 700; color: var(--text2); letter-spacing: 0.15em; margin-bottom: 12px; padding-left: 2px; }
 .bg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 14px; margin-bottom: 28px; }
 .bg-card {
@@ -63,7 +86,7 @@ input, textarea, select { font-family: inherit; }
 }
 .bg-card:hover { border-color: var(--accent2); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
 .bg-card.sel { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(44,110,73,0.18); }
-.bg-preview { width: 100%; aspect-ratio: 3/4; background: #fffef9; overflow: hidden; }
+.bg-preview { width: 100%; aspect-ratio: 3/4; background: #fffef9; overflow: hidden; max-height: 160px; }
 .bg-preview.yoko { aspect-ratio: 4/3; }
 .bg-preview svg { width: 100%; height: 100%; }
 .bg-meta { padding: 10px 12px 8px; }
@@ -497,6 +520,15 @@ canvas { display: block; background: #fffef9; }
 }
 .rc-yes:hover { background: var(--accent2); }
 
+/* ===== スマホ編集ヘッダー ===== */
+.sp-edit-hdr {
+  display: none; /* PCでは非表示 */
+  align-items: center; gap: 12px; padding: 8px 14px;
+  background: #fff; border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.sp-edit-title { font-size: 15px; font-weight: 700; color: var(--text); }
+
 /* ===== ピンチアウト ===== */
 .zoom-reset-btn {
   position: fixed; bottom: 160px; right: 14px; z-index: 300;
@@ -539,8 +571,22 @@ canvas { display: block; background: #fffef9; }
 @media (max-width: 700px) {
   #s-edit { flex-direction: column !important; height: 100dvh; overflow: hidden; }
   .sidebar { display: none; }
+  .sp-edit-hdr { display: flex; }
   .sp-bottom { display: block; }
-  .edit-main { padding: 6px 4px; align-items: flex-start; justify-content: flex-start; flex: 1; min-height: 0; overflow: hidden; }
+  .edit-main { padding: 4px 2px; align-items: center; justify-content: center; flex: 1; min-height: 0; overflow: hidden; }
+}
+@media (orientation: landscape) and (max-width: 900px) {
+  /* 横向き: ボトムシートを横に小さく */
+  #s-edit { flex-direction: row !important; }
+  .sp-edit-hdr { display: none; }
+  .sidebar { display: flex; width: 200px; font-size: 12px; }
+  .sp-bottom { display: none; }
+  .edit-main { padding: 4px 2px; align-items: center; justify-content: center; }
+  .sb-sec { padding: 8px 10px; }
+  .sb-lbl { font-size: 9px; margin-bottom: 6px; }
+  .sb-actions { padding: 8px 10px; gap: 6px; }
+  .btn-print { padding: 10px; font-size: 13px; }
+  .btn-save  { padding: 8px;  font-size: 12px; }
 }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -571,13 +617,23 @@ canvas { display: block; background: #fffef9; }
     <div class="hdr-title">用紙を選ぶ</div>
     <div class="hdr-step">STEP 1 / 4</div>
   </div>
+  <!-- 縦横切替タブ -->
+  <div class="bg-tabs">
+    <button class="bg-tab on" id="bg-tab-tate" onclick="App.switchBgTab('tate')">縦書き</button>
+    <button class="bg-tab" id="bg-tab-yoko" onclick="App.switchBgTab('yoko')">横書き</button>
+  </div>
   <div class="bg-scroll">
-    <div class="bg-section-title">縦書き用</div>
-    <div class="bg-grid" id="bg-tate"></div>
-    <div class="bg-section-title">横書き用</div>
-    <div class="bg-grid" id="bg-yoko"></div>
-    <div class="bg-section-title">ファイルから取り込む</div>
-    <div class="bg-grid" id="bg-upload"></div>
+    <!-- 縦書きグリッド -->
+    <div id="bg-tate-panel">
+      <div class="bg-grid2" id="bg-tate"></div>
+    </div>
+    <!-- 横書きグリッド -->
+    <div id="bg-yoko-panel" style="display:none;">
+      <div class="bg-grid2" id="bg-yoko"></div>
+    </div>
+    <!-- ファイル取込 -->
+    <div class="bg-section-title" style="margin-top:16px;">ファイルから取り込む</div>
+    <div class="bg-grid2" id="bg-upload"></div>
   </div>
   <div class="btn-wrap">
     <button class="btn-next" id="bg-next" disabled onclick="App.goBgNext()">テキスト範囲を指定する →</button>
@@ -654,10 +710,22 @@ canvas { display: block; background: #fffef9; }
         <span class="font-select-arrow">▼</span>
       </button>
       <div class="kana-row" style="margin-top:10px;">
-        <span class="kana-lbl">仮名・英数サイズ</span>
+        <span class="kana-lbl">文字サイズ</span>
+        <button class="adj-btn" id="pc-scale-d">－</button>
+        <span class="kana-val" id="pc-scale-v" style="width:36px;">100%</span>
+        <button class="adj-btn" id="pc-scale-i">＋</button>
+      </div>
+      <div class="kana-row" style="margin-top:8px;">
+        <span class="kana-lbl">仮名</span>
         <button class="adj-btn" id="pc-kana-d">－</button>
-        <span class="kana-val" id="pc-kana-v">-1.5pt</span>
+        <span class="kana-val" id="pc-kana-v">-1.0pt</span>
         <button class="adj-btn" id="pc-kana-i">＋</button>
+      </div>
+      <div class="kana-row" style="margin-top:6px;">
+        <span class="kana-lbl">英数</span>
+        <button class="adj-btn" id="pc-alpha-d">－</button>
+        <span class="kana-val" id="pc-alpha-v">-1.0pt</span>
+        <button class="adj-btn" id="pc-alpha-i">＋</button>
       </div>
     </div>
 
@@ -667,6 +735,12 @@ canvas { display: block; background: #fffef9; }
       <button class="btn-save" onclick="App.openTextEdit()" style="background:var(--bg);border:1.5px solid var(--border);color:var(--text2);">✏️ テキスト編集</button>
       <button class="btn-save" onclick="App.openSaves()">💾 保存</button>
     </div>
+  </div>
+
+  <!-- スマホ用ミニヘッダー（戻るボタン） -->
+  <div class="sp-edit-hdr">
+    <button class="hdr-back" onclick="App.go('text')">← 戻る</button>
+    <span class="sp-edit-title">編集</span>
   </div>
 
   <!-- キャンバス -->
@@ -708,11 +782,23 @@ canvas { display: block; background: #fffef9; }
         <span class="font-select-label" id="sp-font-label">楷書 標準</span>
         <span class="font-select-arrow">▼</span>
       </button>
-      <div class="kana-row" style="flex:1;min-width:140px;">
-        <span class="kana-lbl">仮名・英数</span>
+      <div class="kana-row" style="flex:1;min-width:110px;">
+        <span class="kana-lbl">文字サイズ</span>
+        <button class="adj-btn" id="sp-scale-d">－</button>
+        <span class="kana-val" id="sp-scale-v" style="width:36px;">100%</span>
+        <button class="adj-btn" id="sp-scale-i">＋</button>
+      </div>
+      <div class="kana-row" style="flex:1;min-width:90px;">
+        <span class="kana-lbl">仮名</span>
         <button class="adj-btn" id="sp-kana-d">－</button>
-        <span class="kana-val" id="sp-kana-v">-1.5pt</span>
+        <span class="kana-val" id="sp-kana-v">-1.0pt</span>
         <button class="adj-btn" id="sp-kana-i">＋</button>
+      </div>
+      <div class="kana-row" style="flex:1;min-width:90px;">
+        <span class="kana-lbl">英数</span>
+        <button class="adj-btn" id="sp-alpha-d">－</button>
+        <span class="kana-val" id="sp-alpha-v">-1.0pt</span>
+        <button class="adj-btn" id="sp-alpha-i">＋</button>
       </div>
     </div>
     <div id="sp-out" class="sp-panel-out">
@@ -838,7 +924,9 @@ var st = {
   bgImg: null, bgVert: true, bgKey: null,
   text: '',
   font: 'kaisho1',
-  kanaOffset: -1.5,   // 仮名・英数のフォントサイズ調整（pt単位、スケール前）
+  kanaOffset: -1.0,   // 仮名のフォントサイズ調整（pt単位）
+  alphaOffset: -1.0,  // 英数のフォントサイズ調整（pt単位）
+  fontScale: 100,     // フォントサイズスケール（%）
   lineCount: 4,        // 行数
   range: null,          // テキスト配置範囲 {x,y,w,h}（用紙px基準）
   splits: [],          // 各行の文字数配列 [n1, n2, ...] 合計=text.length
@@ -887,7 +975,7 @@ function svgLines(rows, cols, vert) {
       r.push('<line x1="'+p+'" y1="'+y+'" x2="'+(W-p)+'" y2="'+y+'" stroke="#c8b48a" stroke-width="'+(i===0||i===rows?1.2:0.6)+'"/>');
     }
   }
-  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" style="background:#fffef9">'+r.join('')+'</svg>';
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" style="background:#fffef9">'+r.join('')+'</svg>';
 }
 function svgGenkou(cols, rows, vert) {
   var W = vert ? 182 : 257, H = vert ? 257 : 182, p = 10;
@@ -897,28 +985,34 @@ function svgGenkou(cols, rows, vert) {
   for (row=0; row<nr; row++)
     for (c=0; c<nc; c++)
       r.push('<rect x="'+(p+c*cw)+'" y="'+(p+row*rh)+'" width="'+cw+'" height="'+rh+'" fill="none" stroke="#c8b48a" stroke-width="0.5"/>');
-  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" style="background:#fffef9">'+r.join('')+'</svg>';
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" style="background:#fffef9">'+r.join('')+'</svg>';
 }
 
 var BGS_TATE = [
-  { k:'h10t', n:'半紙',      d:'縦書き・10列', v:true, svg:function(){return svgLines(16,10,true);} },
-  { k:'b8t',  n:'B5縦書き', d:'縦書き・8列',  v:true, svg:function(){return svgLines(16,8,true);} },
-  { k:'g20t', n:'原稿縦',   d:'縦書き20×10', v:true, svg:function(){return svgGenkou(20,10,true);} },
+  { k:'wt',  n:'白紙',      d:'縦書き・罫線なし', v:true,  svg:function(){return svgBlank(true);} },
+  { k:'b8t', n:'B5縦書き', d:'縦書き・8列',      v:true,  svg:function(){return svgLines(16,8,true);} },
 ];
 var BGS_YOKO = [
-  { k:'n12y', n:'ノート横',   d:'横書き・12行', v:false, svg:function(){return svgLines(12,0,false);} },
-  { k:'b8y',  n:'B5横書き',  d:'横書き・8行',  v:false, svg:function(){return svgLines(8,0,false);} },
-  { k:'g10y', n:'原稿横',    d:'横書き10×20', v:false, svg:function(){return svgGenkou(10,20,false);} },
+  { k:'wy',  n:'白紙',      d:'横書き・罫線なし', v:false, svg:function(){return svgBlank(false);} },
+  { k:'b8y', n:'B5横書き', d:'横書き・8行',      v:false, svg:function(){return svgLines(8,0,false);} },
 ];
+
+function svgBlank(vert) {
+  var W = vert ? 182 : 257, H = vert ? 257 : 182;
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" style="background:#fffef9">'+
+    '<rect x="1" y="1" width="'+(W-2)+'" height="'+(H-2)+'" fill="none" stroke="#c8b48a" stroke-width="1.5"/>'+
+    '</svg>';
+}
 
 // ============================================================
 // 文字種判定
 // ============================================================
 function isKana(ch) {
   var code = ch.charCodeAt(0);
-  return (code>=0x3040&&code<=0x309F)||(code>=0x30A0&&code<=0x30FF)||
-         (code>=0xFF00&&code<=0xFFEF)||
-         /[a-zA-Z0-9\uff10-\uff19\uff21-\uff3a\uff41-\uff5a]/.test(ch);
+  return (code>=0x3040&&code<=0x309F)||(code>=0x30A0&&code<=0x30FF)||(code>=0xFF00&&code<=0xFFEF);
+}
+function isAlpha(ch) {
+  return /[a-zA-Z0-9０-９Ａ-Ｚａ-ｚ]/.test(ch);
 }
 
 // ============================================================
@@ -1322,6 +1416,20 @@ function saveCustomBgs(arr) {
   localStorage.setItem('shuji_custom_bgs', JSON.stringify(arr));
 }
 
+function switchBgTab(tab) {
+  var tatePanel = document.getElementById('bg-tate-panel');
+  var yokoPanel = document.getElementById('bg-yoko-panel');
+  var tatBtn = document.getElementById('bg-tab-tate');
+  var yokBtn = document.getElementById('bg-tab-yoko');
+  if (tab === 'tate') {
+    tatePanel.style.display = ''; yokoPanel.style.display = 'none';
+    tatBtn.classList.add('on');   yokBtn.classList.remove('on');
+  } else {
+    tatePanel.style.display = 'none'; yokoPanel.style.display = '';
+    tatBtn.classList.remove('on');    yokBtn.classList.add('on');
+  }
+}
+
 function initBgGrid() {
   buildBgSection('bg-tate', BGS_TATE);
   buildBgSection('bg-yoko', BGS_YOKO);
@@ -1413,9 +1521,9 @@ function rebuildCustomSection() {
 
   sec.appendChild(grid);
   // アップロードカードの前（bg-uploadセクションの前）に挿入
-  var uploadSection = document.querySelector('.bg-section-title:last-of-type');
-  if (uploadSection) scroll.insertBefore(sec, uploadSection);
-  else scroll.appendChild(sec);
+  // カスタム用紙はファイル取込の後に表示
+  var scroll = document.querySelector('.bg-scroll');
+  if (scroll) scroll.appendChild(sec);
 }
 
 function escHtml(s){
@@ -1738,7 +1846,10 @@ function getLines() {
 // ============================================================
 function buildEditUI() {
   updateFontBtn();
+  buildSplitOverlay();
+  bindScale('pc'); bindScale('sp');
   bindKana('pc-kana'); bindKana('sp-kana');
+  updateScaleDisplay();
   updateKanaDisplay();
 }
 
@@ -1872,21 +1983,52 @@ function rebuildSplits() {
   buildSplitOverlay();
 }
 
+function bindScale(prefix) {
+  var sd = document.getElementById(prefix+'-scale-d');
+  var si = document.getElementById(prefix+'-scale-i');
+  if (sd) sd.onclick = function(){
+    st.fontScale = Math.max(10, (st.fontScale||100) - 5);
+    updateScaleDisplay(); render();
+  };
+  if (si) si.onclick = function(){
+    st.fontScale = Math.min(200, (st.fontScale||100) + 5);
+    updateScaleDisplay(); render();
+  };
+}
+
+function updateScaleDisplay() {
+  var txt = (st.fontScale||100) + '%';
+  document.querySelectorAll('[id$="-scale-v"]').forEach(function(el){ el.textContent = txt; });
+}
+
 function bindKana(prefix) {
-  document.getElementById(prefix+'-d').onclick = function(){
+  var kd = document.getElementById(prefix+'-d');
+  var ki = document.getElementById(prefix+'-i');
+  var ad = document.getElementById(prefix.replace('-kana','')+'-alpha-d');
+  var ai = document.getElementById(prefix.replace('-kana','')+'-alpha-i');
+  if (kd) kd.onclick = function(){
     st.kanaOffset = Math.round((st.kanaOffset - 0.5)*10)/10;
     updateKanaDisplay(); render();
   };
-  document.getElementById(prefix+'-i').onclick = function(){
+  if (ki) ki.onclick = function(){
     st.kanaOffset = Math.round((st.kanaOffset + 0.5)*10)/10;
-    if (st.kanaOffset > 0) st.kanaOffset = 0;
+    updateKanaDisplay(); render();
+  };
+  if (ad) ad.onclick = function(){
+    st.alphaOffset = Math.round((st.alphaOffset - 0.5)*10)/10;
+    updateKanaDisplay(); render();
+  };
+  if (ai) ai.onclick = function(){
+    st.alphaOffset = Math.round((st.alphaOffset + 0.5)*10)/10;
     updateKanaDisplay(); render();
   };
 }
 
 function updateKanaDisplay() {
-  var txt = (st.kanaOffset >= 0 ? '+' : '') + st.kanaOffset.toFixed(1) + 'pt';
-  document.querySelectorAll('[id$="-kana-v"]').forEach(function(el){ el.textContent = txt; });
+  var kt = (st.kanaOffset >= 0 ? '+' : '') + (st.kanaOffset||0).toFixed(1) + 'pt';
+  var at = (st.alphaOffset >= 0 ? '+' : '') + (st.alphaOffset||0).toFixed(1) + 'pt';
+  document.querySelectorAll('[id$="-kana-v"]').forEach(function(el){ el.textContent = kt; });
+  document.querySelectorAll('[id$="-alpha-v"]').forEach(function(el){ el.textContent = at; });
 }
 
 // ============================================================
@@ -1901,13 +2043,16 @@ function initCanvas() {
 
   var isSp = window.innerWidth <= 700;
   var vw = window.innerWidth, vh = window.innerHeight;
-  // spBottomの高さを取得
-  var spBottom = document.getElementById('sp-bottom') || document.querySelector('.sp-bottom');
-  var spH = (isSp && spBottom) ? (spBottom.offsetHeight || 130) : 0;
-  var sidebarW = isSp ? 0 : 260;
-  var btnW = isSp ? 44 : 76;
-  var mw = Math.max(120, vw - sidebarW - btnW - (isSp ? 8 : 48));
-  var mh = Math.max(200, vh - spH - (isSp ? 20 : 48));
+  var isLandscape = vw > vh;
+  // 各UI要素の実際の高さ・幅を取得
+  var spHdr = document.querySelector('.sp-edit-hdr');
+  var spBot = document.querySelector('.sp-bottom');
+  var spHdrH = (isSp && !isLandscape && spHdr) ? (spHdr.offsetHeight || 44) : 0;
+  var spBotH = (isSp && !isLandscape && spBot) ? (spBot.offsetHeight || 130) : 0;
+  var sidebarW = (!isSp || isLandscape) ? 260 : 0;
+  var btnW = 48; // split-colボタン列 左右合計
+  var mw = Math.max(100, vw - sidebarW - btnW - (isSp ? 8 : 48));
+  var mh = Math.max(100, vh - spHdrH - spBotH - (isSp ? 8 : 48));
 
   if (!st.bgImg) {
     // 用紙なし: アスペクト比だけ設定
@@ -1928,8 +2073,10 @@ function initCanvas() {
     pImg = img;
     dbg('img loaded: '+img.naturalWidth+'x'+img.naturalHeight);
     var imgRat = img.naturalWidth / img.naturalHeight;
-    var w = mw, h = mw / imgRat;
-    if (h > mh) { h = mh; w = mh * imgRat; }
+    // 縦横どちら向きでも用紙全体が収まるよう fit
+    var w, h;
+    if (mw / mh > imgRat) { h = mh; w = mh * imgRat; }
+    else { w = mw; h = mw / imgRat; }
     cv.width = Math.round(w); cv.height = Math.round(h);
     cv.style.width = cv.width+'px'; cv.style.height = cv.height+'px';
     render();
@@ -2315,30 +2462,28 @@ function calcLayout() {
 
   var baseFsMax; // スケール後px
   if (st.bgVert) {
-    // 縦書き: 行の長さ方向=高さ、文字サイズ*文字数≦areaH
     baseFsMax = Math.floor(areaH / maxChars);
   } else {
-    // 横書き: 行の長さ方向=幅
     baseFsMax = Math.floor(areaW / maxChars);
   }
-  // 上限120px
-  if (baseFsMax > 120) baseFsMax = 120;
+  // スケール倍率を適用（両端揃えのまま文字を拡大縮小）
+  baseFsMax = Math.round(baseFsMax * (st.fontScale || 100) / 100);
+  if (baseFsMax > 300) baseFsMax = 300;
   if (baseFsMax < 4) baseFsMax = 4;
 
-  // kanaOffset をスケール換算
-  var kanaFsMax = baseFsMax + st.kanaOffset * scale;
-  if (kanaFsMax < 1) kanaFsMax = 1;
+  // オフセットをスケール換算
+  var kanaFsMax  = baseFsMax + (st.kanaOffset  || -1.0) * scale;
+  var alphaFsMax = baseFsMax + (st.alphaOffset || -1.0) * scale;
+  if (kanaFsMax  < 1) kanaFsMax  = 1;
+  if (alphaFsMax < 1) alphaFsMax = 1;
 
   return {
-    lines: lines,
-    n: n,
-    pad: pad,
-    areaX: areaX,
-    areaY: areaY,
-    areaW: areaW,
-    areaH: areaH,
+    lines: lines, n: n, pad: pad,
+    areaX: areaX, areaY: areaY,
+    areaW: areaW, areaH: areaH,
     baseFsMax: baseFsMax,
     kanaFsMax: kanaFsMax,
+    alphaFsMax: alphaFsMax,
     scale: scale,
   };
 }
@@ -2369,22 +2514,22 @@ function render() {
   var pad = layout.pad;
   var areaW = layout.areaW, areaH = layout.areaH;
   var lines = layout.lines, n = layout.n;
-  var baseFsMax = layout.baseFsMax, kanaFsMax = layout.kanaFsMax;
+  var baseFsMax = layout.baseFsMax, kanaFsMax = layout.kanaFsMax, alphaFsMax = layout.alphaFsMax;
 
   ctx2.fillStyle = '#1a0e05';
   ctx2.textBaseline = 'top';
 
   if (st.bgVert) {
-    drawVertLines(lines, n, layout.areaX, layout.areaY, areaW, areaH, baseFsMax, kanaFsMax);
+    drawVertLines(lines, n, layout.areaX, layout.areaY, areaW, areaH, baseFsMax, kanaFsMax, alphaFsMax);
   } else {
-    drawHoriLines(lines, n, layout.areaX, layout.areaY, areaW, areaH, baseFsMax, kanaFsMax);
+    drawHoriLines(lines, n, layout.areaX, layout.areaY, areaW, areaH, baseFsMax, kanaFsMax, alphaFsMax);
   }
 }
 
 var VMAP = {'（':'︵','）':'︶','「':'﹁','」':'﹂','、':'︑','。':'︒','ー':'｜','…':'⋮','！':'！','？':'？'};
 
 // 縦書き描画（両端揃え）
-function drawVertLines(lines, n, areaX, areaY, areaW, areaH, baseFsMax, kanaFsMax) {
+function drawVertLines(lines, n, areaX, areaY, areaW, areaH, baseFsMax, kanaFsMax, alphaFsMax) {
   var colW = areaW / n;
   var fam = getFam();
 
@@ -2404,9 +2549,8 @@ function drawVertLines(lines, n, areaX, areaY, areaW, areaH, baseFsMax, kanaFsMa
     for (var j=0; j<line.length; j++) {
       var ch = line[j];
       var vch = VMAP[ch] || ch;
-      var curFs = isKana(ch) ? kfs : fs;
+      var curFs = isKana(ch) ? kfs : (isAlpha(ch) ? afs : fs);
       ctx2.font = curFs + 'px ' + fam;
-      // 各行の高さ中央揃え
       var rowH = areaH / line.length;
       var yPos = areaY + j * rowH + (rowH - curFs) / 2;
       ctx2.fillText(vch, charX + (fs - curFs) / 2, yPos);
@@ -2415,7 +2559,7 @@ function drawVertLines(lines, n, areaX, areaY, areaW, areaH, baseFsMax, kanaFsMa
 }
 
 // 横書き描画（両端揃え）
-function drawHoriLines(lines, n, areaX, areaY, areaW, areaH, baseFsMax, kanaFsMax) {
+function drawHoriLines(lines, n, areaX, areaY, areaW, areaH, baseFsMax, kanaFsMax, alphaFsMax) {
   var rowH = areaH / n;
   var fam = getFam();
 
@@ -2427,14 +2571,14 @@ function drawHoriLines(lines, n, areaX, areaY, areaW, areaH, baseFsMax, kanaFsMa
     var isLast = (i === lines.length - 1);
     var maxStepW = areaW / line.length;
     var fs = Math.min(baseFsMax, maxStepW);
-    var kfs = Math.min(kanaFsMax, fs + (kanaFsMax - baseFsMax));
+    var kfs = Math.max(1, fs + (kanaFsMax  - baseFsMax));
+    var afs = Math.max(1, fs + (alphaFsMax - baseFsMax));
     var totalUsed = fs * line.length;
-    // 最終行: 左端揃え、それ以外: 両端揃え
     var gapActual = (!isLast && line.length > 1) ? (areaW - totalUsed) / (line.length - 1) : 0;
 
     for (var j=0; j<line.length; j++) {
       var ch = line[j];
-      var curFs = isKana(ch) ? kfs : fs;
+      var curFs = isKana(ch) ? kfs : (isAlpha(ch) ? alphaFsMax : fs);
       ctx2.font = curFs + 'px ' + fam;
       var xPos = areaX + j * (fs + gapActual) + (fs - curFs) / 2;
       ctx2.fillText(ch, xPos, y + (fs - curFs) / 2);
@@ -2502,7 +2646,7 @@ function currentData() {
     v: 2,
     bgImg: st.bgImg, bgVert: st.bgVert, bgKey: st.bgKey,
     text: st.text, font: st.font, kanaOffset: st.kanaOffset,
-    lineCount: st.lineCount, splits: st.splits, range: st.range,
+    lineCount: st.lineCount, splits: st.splits, range: st.range, alphaOffset: st.alphaOffset||-1.0, fontScale: st.fontScale||100,
     savedAt: new Date().toISOString(),
     name: makeSaveName(st.text)
   };
@@ -2512,7 +2656,7 @@ function currentData() {
 function loadData(d) {
   st.bgImg=d.bgImg; st.bgVert=d.bgVert; st.bgKey=d.bgKey;
   st.text=d.text; st.font=d.font; st.kanaOffset=d.kanaOffset||(-1.5);
-  st.lineCount=d.lineCount||4; st.splits=d.splits||[]; st.range=d.range||null;
+  st.lineCount=d.lineCount||4; st.splits=d.splits||[]; st.range=d.range||null; st.alphaOffset=d.alphaOffset||-1.0; st.fontScale=d.fontScale||100; st.alphaOffset=d.alphaOffset||-1.0; st.fontScale=d.fontScale||100;
   var mt = document.getElementById('main-text');
   if (mt) mt.value = st.text;
 }
@@ -2678,12 +2822,28 @@ function doSave() { openSaves(); }
 // ============================================================
 initBgGrid();
 
-return { go:go, goBgNext:goBgNext, resetZoom:resetZoom, loadSaved:loadSaved, goEdit:goEdit, handleFile:handleFile, spTab:spTab, doPrint:doPrint, doSave:doSave, openSaves:openSaves, closeSaves:closeSaves, saveAsNew:saveAsNew, confirmOverwrite:confirmOverwrite, closeOverwrite:closeOverwrite, openFontPopup:openFontPopup, closeFontPopup:closeFontPopup, closeSaveBg:closeSaveBg, doSaveBg:doSaveBg, confirmRange:confirmRange, confirmEditRange:confirmEditRange, toggleRangeAdjust:toggleRangeAdjust, skipRange:skipRange, openOcrFile:openOcrFile, handleOcrFile:handleOcrFile, openTextEdit:openTextEdit, closeTextEdit:closeTextEdit, applyTextEdit:applyTextEdit };
+return { go:go, goBgNext:goBgNext, switchBgTab:switchBgTab, resetZoom:resetZoom, loadSaved:loadSaved, goEdit:goEdit, handleFile:handleFile, spTab:spTab, doPrint:doPrint, doSave:doSave, openSaves:openSaves, closeSaves:closeSaves, saveAsNew:saveAsNew, confirmOverwrite:confirmOverwrite, closeOverwrite:closeOverwrite, openFontPopup:openFontPopup, closeFontPopup:closeFontPopup, closeSaveBg:closeSaveBg, doSaveBg:doSaveBg, confirmRange:confirmRange, confirmEditRange:confirmEditRange, toggleRangeAdjust:toggleRangeAdjust, skipRange:skipRange, openOcrFile:openOcrFile, handleOcrFile:handleOcrFile, openTextEdit:openTextEdit, closeTextEdit:closeTextEdit, applyTextEdit:applyTextEdit };
 })();
 
 // ページ読み込み完了時に診断
 window.addEventListener('DOMContentLoaded', function(){
   dbg('JS OK / ' + navigator.userAgent.slice(0,50));
+});
+
+// 画面回転時にcanvasを再描画
+window.addEventListener('orientationchange', function(){
+  setTimeout(function(){
+    if (document.getElementById('s-edit').classList.contains('on')) {
+      initCanvas();
+    }
+  }, 300);
+});
+window.addEventListener('resize', function(){
+  if (document.getElementById('s-edit') &&
+      document.getElementById('s-edit').classList.contains('on')) {
+    clearTimeout(window._resizeTimer);
+    window._resizeTimer = setTimeout(initCanvas, 300);
+  }
 });
 </script>
 </body>
