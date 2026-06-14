@@ -1156,9 +1156,9 @@ canvas { display: block; background: #fffef9; }
     <button class="ocr-btn" style="width:100%;margin-top:10px;" onclick="App.openOcrFile()">
       📎 ファイルから取込（画像・PDF・Excel・Word）
     </button>
-    <!-- カメラ案内ボタン（スマホのみ） -->
+    <!-- Google レンズ案内ボタン（スマホのみ） -->
     <button class="ocr-btn ocr-camera-btn" onclick="App.openCameraGuide()">
-      📷 カメラで撮影して取込
+      🔍 Google レンズでテキストを読み取る
     </button>
 
     <div class="ocr-loading" id="ocr-loading"></div>
@@ -1343,19 +1343,20 @@ canvas { display: block; background: #fffef9; }
 <!-- カメラ案内モーダル -->
 <div class="camera-guide-overlay" id="camera-guide-overlay">
   <div class="camera-guide-dialog">
-    <div class="camera-guide-icon">📷</div>
-    <div class="camera-guide-title">カメラで撮影して取込</div>
+    <div class="camera-guide-icon">🔍</div>
+    <div class="camera-guide-title">Google レンズで読み取る</div>
     <div class="camera-guide-body">
-      カメラアプリで文字を撮影し、<br>写真をギャラリーに保存してから<br>「画像を選ぶ」で取り込んでください。
+      Google レンズで文字を認識し、<br>テキストをコピーしてここに貼り付けてください。
     </div>
     <div class="camera-guide-steps">
-      <div class="cg-step"><span class="cg-num">1</span>カメラアプリで文字を撮影・保存</div>
-      <div class="cg-step"><span class="cg-num">2</span>下のボタンで写真を選択</div>
-      <div class="cg-step"><span class="cg-num">3</span>テキストを自動認識して入力</div>
+      <div class="cg-step"><span class="cg-num">1</span>下のボタンでGoogle レンズを開く</div>
+      <div class="cg-step"><span class="cg-num">2</span>読み取りたい文字にかざして認識</div>
+      <div class="cg-step"><span class="cg-num">3</span>テキストを「すべて選択→コピー」</div>
+      <div class="cg-step"><span class="cg-num">4</span>このアプリに戻って入力欄に貼り付け</div>
     </div>
-    <div class="camera-guide-btns">
-      <button class="cg-cancel" onclick="App.closeCameraGuide()">キャンセル</button>
-      <button class="cg-ok" onclick="App.closeCameraGuide(); App.openOcrFile();">📂 画像を選ぶ</button>
+    <div class="camera-guide-btns" style="flex-direction:column;gap:8px;">
+      <button class="cg-ok" id="lens-open-btn" onclick="App.openGoogleLens()">🔍 Google レンズを開く</button>
+      <button class="cg-cancel" onclick="App.closeCameraGuide()" style="text-align:center;">閉じる</button>
     </div>
   </div>
 </div>
@@ -1796,6 +1797,40 @@ function openCameraGuide() {
 
 function closeCameraGuide() {
   document.getElementById('camera-guide-overlay').classList.remove('on');
+}
+
+// Google レンズを開く
+// Android: google.lens:// スキーム → Google アプリの検索バー長押しでレンズ
+// iOS: Google アプリ or Google フォト経由
+function openGoogleLens() {
+  var ua = navigator.userAgent || '';
+  var isAndroid = /Android/i.test(ua);
+  var isIOS     = /iPhone|iPad|iPod/i.test(ua);
+
+  if (isAndroid) {
+    // Android: Google レンズの直接起動を試みる
+    // intent:// スキームでGoogle Lensアクティビティを呼ぶ
+    var intent = 'intent://lens.google.com/v3/mr/upload'
+      + '#Intent;scheme=https;package=com.google.ar.lens;end';
+    // まず intent:// を試し、失敗したら Web版へ
+    var link = document.createElement('a');
+    link.href = intent;
+    link.click();
+    // 2秒後に開けていなければWeb版を案内
+    setTimeout(function(){
+      if (document.visibilityState !== 'hidden') {
+        window.open('https://lens.google.com/', '_blank');
+      }
+    }, 2000);
+  } else if (isIOS) {
+    // iOS: Google アプリのレンズ、または Web版
+    // googlegmail:// や googlechrome:// は使えないので Web版へ誘導
+    window.open('https://lens.google.com/', '_blank');
+  } else {
+    // PC: Web版Google レンズ
+    window.open('https://lens.google.com/', '_blank');
+  }
+  closeCameraGuide();
 }
 
 function handleOcrFile(e) {
@@ -4031,7 +4066,7 @@ function doSave() { openSaves(); }
 // ============================================================
 initBgGrid();
 
-return { go:go, goBgNext:goBgNext, switchBgTab:switchBgTab, resetZoom:resetZoom, loadSaved:loadSaved, goEdit:goEdit, handleFile:handleFile, spTab:spTab, doPrint:doPrint, doSave:doSave, openSaves:openSaves, closeSaves:closeSaves, saveAsNew:saveAsNew, confirmOverwrite:confirmOverwrite, closeOverwrite:closeOverwrite, openFontPopup:openFontPopup, closeFontPopup:closeFontPopup, closeSaveBg:closeSaveBg, doSaveBg:doSaveBg, confirmRange:confirmRange, confirmEditRange:confirmEditRange, toggleRangeAdjust:toggleRangeAdjust, skipRange:skipRange, openOcrFile:openOcrFile, openCameraGuide:openCameraGuide, closeCameraGuide:closeCameraGuide, handleOcrFile:handleOcrFile, openTextEdit:openTextEdit, closeTextEdit:closeTextEdit, applyTextEdit:applyTextEdit, onColorSlider:onColorSlider, onTraceToggle:onTraceToggle, exportData:exportData, importData:importData, toggleHist:toggleHist, setSaveBgDir:setSaveBgDir, closePrintPreview:closePrintPreview, execPrint:execPrint };
+return { go:go, goBgNext:goBgNext, switchBgTab:switchBgTab, resetZoom:resetZoom, loadSaved:loadSaved, goEdit:goEdit, handleFile:handleFile, spTab:spTab, doPrint:doPrint, doSave:doSave, openSaves:openSaves, closeSaves:closeSaves, saveAsNew:saveAsNew, confirmOverwrite:confirmOverwrite, closeOverwrite:closeOverwrite, openFontPopup:openFontPopup, closeFontPopup:closeFontPopup, closeSaveBg:closeSaveBg, doSaveBg:doSaveBg, confirmRange:confirmRange, confirmEditRange:confirmEditRange, toggleRangeAdjust:toggleRangeAdjust, skipRange:skipRange, openOcrFile:openOcrFile, openCameraGuide:openCameraGuide, closeCameraGuide:closeCameraGuide, handleOcrFile:handleOcrFile, openTextEdit:openTextEdit, closeTextEdit:closeTextEdit, applyTextEdit:applyTextEdit, onColorSlider:onColorSlider, onTraceToggle:onTraceToggle, exportData:exportData, importData:importData, toggleHist:toggleHist, setSaveBgDir:setSaveBgDir, closePrintPreview:closePrintPreview, execPrint:execPrint, openGoogleLens:openGoogleLens };
 })();
 
 // ページ読み込み完了時に診断
