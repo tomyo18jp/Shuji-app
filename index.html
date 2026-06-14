@@ -2714,6 +2714,10 @@ function goEdit() {
   buildEditUI();
   dbg('goEdit: bgImg='+(st.bgImg?st.bgImg.slice(0,20):'NULL')+' text='+st.text.slice(0,8));
   go('edit');
+  // 用紙が横長レイアウトなのに画面が縦向きなら横向きを提案
+  if (typeof OrientCtrl !== 'undefined') {
+    OrientCtrl.suggestRotate(st.bgVert, st.bgImg);
+  }
   setTimeout(initCanvas, 300);
 }
 
