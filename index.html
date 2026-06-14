@@ -1346,13 +1346,13 @@ canvas { display: block; background: #fffef9; }
     <div class="camera-guide-icon">🔍</div>
     <div class="camera-guide-title">Google レンズで読み取る</div>
     <div class="camera-guide-body">
-      Google レンズで文字を認識し、<br>テキストをコピーしてここに貼り付けてください。
+      Google レンズでテキストをコピーしてから<br>このアプリに戻ると<strong>自動で貼り付け</strong>します。
     </div>
     <div class="camera-guide-steps">
       <div class="cg-step"><span class="cg-num">1</span>下のボタンでGoogle レンズを開く</div>
       <div class="cg-step"><span class="cg-num">2</span>読み取りたい文字にかざして認識</div>
       <div class="cg-step"><span class="cg-num">3</span>テキストを「すべて選択→コピー」</div>
-      <div class="cg-step"><span class="cg-num">4</span>このアプリに戻って入力欄に貼り付け</div>
+      <div class="cg-step"><span class="cg-num">4</span>このアプリに戻ると自動で貼り付け ✨</div>
     </div>
     <div class="camera-guide-btns" style="flex-direction:column;gap:8px;">
       <button class="cg-ok" id="lens-open-btn" onclick="App.openGoogleLens()">🔍 Google レンズを開く</button>
@@ -1807,31 +1807,86 @@ function openGoogleLens() {
   var isAndroid = /Android/i.test(ua);
   var isIOS     = /iPhone|iPad|iPod/i.test(ua);
 
+  // アプリに戻ったとき自動貼り付けを試みるフラグを立てる
+  _lensWaiting = true;
+
   if (isAndroid) {
-    // Android: Google レンズの直接起動を試みる
-    // intent:// スキームでGoogle Lensアクティビティを呼ぶ
     var intent = 'intent://lens.google.com/v3/mr/upload'
       + '#Intent;scheme=https;package=com.google.ar.lens;end';
-    // まず intent:// を試し、失敗したら Web版へ
     var link = document.createElement('a');
     link.href = intent;
     link.click();
-    // 2秒後に開けていなければWeb版を案内
     setTimeout(function(){
       if (document.visibilityState !== 'hidden') {
         window.open('https://lens.google.com/', '_blank');
       }
     }, 2000);
   } else if (isIOS) {
-    // iOS: Google アプリのレンズ、または Web版
-    // googlegmail:// や googlechrome:// は使えないので Web版へ誘導
     window.open('https://lens.google.com/', '_blank');
   } else {
-    // PC: Web版Google レンズ
     window.open('https://lens.google.com/', '_blank');
   }
   closeCameraGuide();
 }
+
+// ===== Google レンズからの帰還時 クリップボード自動貼り付け =====
+var _lensWaiting = false;
+
+// 貼り付け処理
+function _pasteFromClipboard() {
+  if (!_lensWaiting) return;
+  if (!navigator.clipboard || !navigator.clipboard.readText) {
+    // clipboard API非対応 → トースト案内のみ
+    _showPasteHint();
+    _lensWaiting = false;
+    return;
+  }
+  navigator.clipboard.readText().then(function(text) {
+    _lensWaiting = false;
+    if (!text || !text.trim()) {
+      _showPasteHint();
+      return;
+    }
+    // テキスト入力欄に自動セット
+    var ta = document.getElementById('main-text');
+    if (ta) {
+      ta.value = text.trim();
+      // cleanOcrText 相当の処理（全角スペース付与）
+      var cleaned = cleanOcrText(text);
+      ta.value = cleaned;
+      // テキスト画面にいなければ遷移
+      if (!document.getElementById('s-text').classList.contains('on')) {
+        go('text');
+      }
+      showSaveToast('📋 クリップボードから貼り付けました');
+      ta.focus();
+    }
+  }).catch(function() {
+    _lensWaiting = false;
+    _showPasteHint();
+  });
+}
+
+// クリップボードAPIが使えない場合のヒント表示
+function _showPasteHint() {
+  var ta = document.getElementById('main-text');
+  if (ta) {
+    ta.focus();
+    ta.placeholder = '長押しして「貼り付け」を選んでください';
+    setTimeout(function(){
+      ta.placeholder = '例：春夏秋冬\n山川草木';
+    }, 4000);
+  }
+  showSaveToast('📋 入力欄を長押しして「貼り付け」してください');
+}
+
+// visibilitychange：このタブ/アプリがフォアグラウンドに戻ったとき
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible' && _lensWaiting) {
+    // 少し待ってからクリップボードを読む（OS がクリップボードを更新するまでの猶予）
+    setTimeout(_pasteFromClipboard, 600);
+  }
+});
 
 function handleOcrFile(e) {
   var f = e.target.files[0];
