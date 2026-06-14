@@ -4322,63 +4322,38 @@ window.addEventListener('resize', function(){
 });
 
 // ============================================================
-// 横向き全画面コントロール
+// 画面向き変更コントロール（用紙選択時の案内のみ・起動時ダイアログなし）
 // ============================================================
 var OrientCtrl = (function(){
-  var STORED_KEY = 'shuji_orient_asked';
-  var _active = false;
+  var _active  = false;
   var _fallback = false;
-  var _mode = 'fullscreen'; // 'fullscreen' | 'rotate-yoko' | 'rotate-tate'
+  var _mode = 'rotate-yoko';
 
   function isMobile() {
     return ('ontouchstart' in window || navigator.maxTouchPoints > 0)
         && window.screen.width < 1024;
   }
 
-  function init() {
-    if (!isMobile()) return;
-    var ans = localStorage.getItem(STORED_KEY);
-    if (ans === 'ok') {
-      showDialog('fullscreen');
-    } else if (ans === 'skip') {
-      // スキップ済み
-    } else {
-      showDialog('fullscreen');
-    }
-  }
-
-  // ダイアログをモードに応じて表示
   function showDialog(mode) {
-    _mode = mode || 'fullscreen';
-    var icon  = document.getElementById('od-icon');
-    var title = document.getElementById('od-title');
-    var body  = document.getElementById('od-body');
-    var okBtn = document.getElementById('od-ok-btn');
+    _mode = mode;
+    var icon      = document.getElementById('od-icon');
+    var title     = document.getElementById('od-title');
+    var body      = document.getElementById('od-body');
+    var okBtn     = document.getElementById('od-ok-btn');
     var cancelBtn = document.getElementById('od-cancel-btn');
 
     if (_mode === 'rotate-yoko') {
-      if (icon)  icon.textContent  = '↔️📄';
-      if (title) title.textContent = '横向きに変更しますか？';
-      if (body)  body.innerHTML    =
-        '横書き用紙を選択しました。<br>画面を<strong>横向き</strong>に切り替えると<br>見やすくなります。';
-      if (okBtn)    okBtn.textContent    = '横向きに変更';
+      if (icon)      icon.textContent      = '↔️📄';
+      if (title)     title.textContent     = '横向きに変更しますか？';
+      if (body)      body.innerHTML        = '選択した用紙は<strong>横長レイアウト</strong>です。<br>画面を横向きにすると見やすくなります。';
+      if (okBtn)     okBtn.textContent     = '横向きに変更';
       if (cancelBtn) cancelBtn.textContent = 'このまま縦向きで';
-    } else if (_mode === 'rotate-tate') {
-      if (icon)  icon.textContent  = '↕️📄';
-      if (title) title.textContent = '縦向きに変更しますか？';
-      if (body)  body.innerHTML    =
-        '縦書き用紙を選択しました。<br>画面を<strong>縦向き</strong>に切り替えると<br>見やすくなります。';
-      if (okBtn)    okBtn.textContent    = '縦向きに変更';
-      if (cancelBtn) cancelBtn.textContent = 'このまま横向きで';
     } else {
-      // fullscreen（起動時）
-      if (icon)  icon.textContent  = '📱↔️';
-      if (title) title.textContent = '横向き全画面で使う';
-      if (body)  body.innerHTML    =
-        '画面を横向き・全画面に固定すると<br>編集しやすくなります。<br>' +
-        '<small style="color:var(--text3);">※ブラウザの設定により動作が異なる場合があります</small>';
-      if (okBtn)    okBtn.textContent    = 'OK';
-      if (cancelBtn) cancelBtn.textContent = 'このまま使う';
+      if (icon)      icon.textContent      = '↕️📄';
+      if (title)     title.textContent     = '縦向きに変更しますか？';
+      if (body)      body.innerHTML        = '選択した用紙は<strong>縦長レイアウト</strong>です。<br>画面を縦向きにすると見やすくなります。';
+      if (okBtn)     okBtn.textContent     = '縦向きに変更';
+      if (cancelBtn) cancelBtn.textContent = 'このまま横向きで';
     }
     var ov = document.getElementById('orient-overlay');
     if (ov) ov.classList.add('on');
@@ -4389,98 +4364,65 @@ var OrientCtrl = (function(){
     if (ov) ov.classList.remove('on');
   }
 
-  // 用紙選択時の向き変更提案（スマホのみ）
-  function suggestRotate(toBgVert) {
+  // 用紙選択時に呼ぶ：用紙画像の縦横比で判定
+  function suggestRotate(bgVert, bgImgUrl) {
     if (!isMobile()) return;
-    var isPortrait = window.innerHeight > window.innerWidth;
-    // 横書き用紙 & 縦向き画面 → 横向き提案
-    if (!toBgVert && isPortrait) {
-      showDialog('rotate-yoko');
+
+    var imgUrl = bgImgUrl || (typeof st !== 'undefined' ? st.bgImg : null);
+
+    function judgeAndShow(isLandscapePaper) {
+      var isPortraitScreen = window.innerHeight > window.innerWidth;
+      if (isLandscapePaper && isPortraitScreen) {
+        showDialog('rotate-yoko');
+      } else if (!isLandscapePaper && !isPortraitScreen) {
+        showDialog('rotate-tate');
+      }
+      // 向きが合っている → 何もしない
     }
-    // 縦書き用紙 & 横向き画面 → 縦向き提案
-    else if (toBgVert && !isPortrait) {
-      showDialog('rotate-tate');
+
+    if (imgUrl && imgUrl.indexOf('data:image') === 0) {
+      var img = new Image();
+      img.onload  = function() { judgeAndShow(img.naturalWidth > img.naturalHeight); };
+      img.onerror = function() { judgeAndShow(!bgVert); }; // fallback: SVG横書き=横長
+      img.src = imgUrl;
+    } else {
+      // SVG系：bgVert=false（横書き）→横長、bgVert=true（縦書きSVG）→縦長
+      judgeAndShow(!bgVert);
     }
-    // 向きが既に合っている → 何もしない
   }
 
-  // OKタップ
   function activate() {
     hideDialog();
-    if (_mode === 'rotate-yoko') {
-      // 横向きへ
-      _lockOrientation('landscape');
-      return;
-    }
-    if (_mode === 'rotate-tate') {
-      // 縦向きへ
-      _lockOrientation('portrait');
-      return;
-    }
-    // fullscreen モード（起動時）
-    localStorage.setItem(STORED_KEY, 'ok');
-    var el = document.documentElement;
-    var fsPromise = null;
-    if (el.requestFullscreen)            fsPromise = el.requestFullscreen();
-    else if (el.webkitRequestFullscreen) fsPromise = el.webkitRequestFullscreen();
-
-    function tryLock() {
-      try {
-        if (screen.orientation && screen.orientation.lock) {
-          screen.orientation.lock('landscape').then(function(){
-            _active = true; _fallback = false;
-            document.body.classList.remove('force-landscape');
-          }).catch(applyFallback);
-        } else { applyFallback(); }
-      } catch(e) { applyFallback(); }
-    }
-    if (fsPromise && typeof fsPromise.then === 'function') {
-      fsPromise.then(tryLock).catch(tryLock);
-    } else { tryLock(); }
+    _lockOrientation(_mode === 'rotate-yoko' ? 'landscape' : 'portrait');
   }
 
   function _lockOrientation(dir) {
     try {
       if (screen.orientation && screen.orientation.lock) {
         screen.orientation.lock(dir).catch(function(){
-          // lockが使えない場合はCSS fallback（縦向きは解除、横向きは適用）
           if (dir === 'landscape') applyFallback();
-          else {
-            document.body.classList.remove('force-landscape');
-            _fallback = false;
-          }
+          else { document.body.classList.remove('force-landscape'); _fallback = false; }
         });
       } else {
         if (dir === 'landscape') applyFallback();
         else document.body.classList.remove('force-landscape');
       }
-    } catch(e) {
-      if (dir === 'landscape') applyFallback();
-    }
+    } catch(e) { if (dir === 'landscape') applyFallback(); }
   }
 
   function applyFallback() {
-    var isPortrait = window.innerHeight > window.innerWidth;
-    if (isPortrait) {
+    if (window.innerHeight > window.innerWidth) {
       document.body.classList.add('force-landscape');
       _fallback = true;
       setTimeout(function(){
         if (document.getElementById('s-edit') &&
-            document.getElementById('s-edit').classList.contains('on')) {
-          initCanvas();
-        }
+            document.getElementById('s-edit').classList.contains('on')) initCanvas();
       }, 150);
     }
     _active = true;
   }
 
-  function dismiss() {
-    hideDialog();
-    // fullscreenモードのスキップのみ記憶する
-    if (_mode === 'fullscreen') {
-      localStorage.setItem(STORED_KEY, 'skip');
-    }
-  }
+  function dismiss() { hideDialog(); }
 
   document.addEventListener('fullscreenchange', function(){
     if (!document.fullscreenElement && _active) {
@@ -4496,15 +4438,11 @@ var OrientCtrl = (function(){
       _fallback = false; _active = false;
     }
   });
-
   window.addEventListener('resize', function(){
     if (_active && _fallback) {
-      var isPortrait = window.innerHeight > window.innerWidth;
-      document.body.classList.toggle('force-landscape', isPortrait);
+      document.body.classList.toggle('force-landscape', window.innerHeight > window.innerWidth);
     }
   });
-
-  window.addEventListener('DOMContentLoaded', function(){ init(); });
 
   return { activate: activate, dismiss: dismiss, suggestRotate: suggestRotate };
 })();
