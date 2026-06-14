@@ -414,10 +414,20 @@ canvas { display: block; background: #fffef9; }
 .font-select-label { font-size: 11px; color: var(--text2); font-family: sans-serif; }
 .font-select-arrow { font-size: 12px; color: var(--text3); }
 
-/* ===== 用紙左右の区切りボタン列 ===== */
+/* ===== 用紙周囲の区切りボタン列 ===== */
+/* 縦書き用：用紙全体を縦方向に積む wrapper */
+.edit-paper-col {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+}
 .edit-paper-row {
   display: flex; align-items: center; gap: 10px;
 }
+/* 縦書き用：上下の横方向ボタン行 */
+.split-row {
+  position: relative; flex-shrink: 0; height: 28px; min-width: 100px;
+  overflow: visible; display: none; /* buildSplitOverlay で必要時に show */
+}
+/* 横書き用：左右の縦方向ボタン列 */
 .split-col {
   position: relative; flex-shrink: 0; width: 28px; min-height: 100px;
   overflow: visible;
@@ -471,6 +481,16 @@ canvas { display: block; background: #fffef9; }
   background: var(--accent); color: #fff; font-size: 14px; font-weight: 700; transition: all 0.2s;
 }
 .savebg-save:hover { background: var(--accent2); }
+
+/* 縦書き/横書き選択トグル（用紙取込ダイアログ内） */
+.savebg-dir-row { display: flex; gap: 8px; }
+.savebg-dir-btn {
+  flex: 1; padding: 10px 6px; border: 2px solid var(--border); border-radius: 10px;
+  background: var(--bg); color: var(--text2); font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all 0.15s; text-align: center; line-height: 1.4;
+}
+.savebg-dir-btn:hover { border-color: var(--accent); color: var(--accent); }
+.savebg-dir-btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
 
 /* ===== カスタム用紙カード =====*/
 .custom-card-del {
@@ -552,6 +572,19 @@ canvas { display: block; background: #fffef9; }
   border-radius: 6px; padding: 1px 3px;
   white-space: nowrap; line-height: 1.4;
   pointer-events: none;
+}
+/* 縦書き用：上下行の文字数バッジは split-row 上に表示 */
+.count-row {
+  position: relative; height: 16px; overflow: visible;
+}
+.count-badge-h {
+  position: absolute; top: 1px;
+  background: rgba(42,127,165,0.15);
+  color: var(--accent); font-size: 9px; font-weight: 700;
+  border-radius: 6px; padding: 1px 4px;
+  white-space: nowrap; line-height: 1.4;
+  pointer-events: none;
+  transform: translateX(-50%);
 }
 
 /* ===== カメラ案内モーダル ===== */
@@ -638,7 +671,90 @@ canvas { display: block; background: #fffef9; }
 .range-adjust-btn:hover { border-color: var(--accent); color: var(--accent); background: #ddf0f8; }
 .range-adjust-btn.active { border-color: var(--accent); background: #d8eef8; color: var(--accent); font-weight: 700; }
 
-/* ===== 印刷 ===== */
+/* ===== テキスト履歴 ===== */
+.hist-toggle {
+  display: flex; align-items: center; gap: 6px;
+  background: transparent; border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 9px 14px; width: 100%;
+  color: var(--text2); font-size: 13px; cursor: pointer;
+  transition: all 0.15s; margin-top: 8px;
+}
+.hist-toggle:hover { border-color: var(--accent); color: var(--accent); background: #ddf0f8; }
+.hist-toggle .ht-arrow { margin-left: auto; font-size: 11px; transition: transform 0.2s; }
+.hist-toggle.open .ht-arrow { transform: rotate(180deg); }
+.hist-panel {
+  display: none; border: 1.5px solid var(--border); border-radius: 10px;
+  overflow: hidden; margin-top: 4px; background: var(--card);
+}
+.hist-panel.on { display: block; }
+.hist-empty { padding: 14px; text-align: center; font-size: 12px; color: var(--text3); }
+.hist-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px; border-bottom: 1px solid var(--bg2);
+  cursor: pointer; transition: background 0.12s;
+}
+.hist-item:last-child { border-bottom: none; }
+.hist-item:hover { background: #ddf0f8; }
+.hist-text {
+  flex: 1; font-size: 13px; color: var(--text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.hist-date { font-size: 10px; color: var(--text3); flex-shrink: 0; }
+.hist-del {
+  width: 24px; height: 24px; border: none; border-radius: 50%;
+  background: transparent; color: var(--text3); font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; cursor: pointer; transition: all 0.12s;
+}
+.hist-del:hover { background: #fee; color: #c00; }
+/* ===== 印刷プレビューダイアログ ===== */
+#print-overlay {
+  display: none; position: fixed; inset: 0; z-index: 5000;
+  background: rgba(0,0,0,0.55); align-items: center; justify-content: center;
+}
+#print-overlay.on { display: flex; }
+#print-dialog {
+  background: #fff; border-radius: 20px; padding: 22px 22px 18px;
+  width: min(520px, 95vw); max-height: 92vh;
+  display: flex; flex-direction: column; gap: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: orient-pop 0.2s cubic-bezier(.34,1.56,.64,1);
+}
+.pd-title {
+  font-size: 16px; font-weight: 800; color: var(--text);
+  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+}
+.pd-close {
+  width: 30px; height: 30px; border: none; border-radius: 50%;
+  background: var(--bg2); color: var(--text2); font-size: 15px; cursor: pointer;
+}
+.pd-preview-wrap {
+  flex: 1; min-height: 120px; display: flex; align-items: center; justify-content: center;
+  background: #e0e0e0; border-radius: 10px; padding: 14px; overflow: hidden; position: relative;
+}
+/* 用紙の影シミュレーション */
+.pd-preview-wrap canvas {
+  display: block; box-shadow: 0 4px 18px rgba(0,0,0,0.28); background: #fff;
+  max-width: 100%; max-height: 320px; object-fit: contain;
+}
+.pd-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex-shrink: 0; }
+.pd-lbl { font-size: 11px; font-weight: 700; color: var(--text2); letter-spacing: 0.12em; white-space: nowrap; min-width: 56px; }
+.pd-opts { display: flex; gap: 5px; flex-wrap: wrap; }
+.pd-btn {
+  padding: 6px 13px; border: 1.5px solid var(--border); border-radius: 8px;
+  background: var(--bg); color: var(--text2); font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: all 0.12s; white-space: nowrap;
+}
+.pd-btn:hover { border-color: var(--accent); color: var(--accent); background: #ddf0f8; }
+.pd-btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.pd-note { font-size: 10px; color: var(--text3); line-height: 1.6; flex-shrink: 0; }
+.pd-print-btn {
+  padding: 15px; border: none; border-radius: 50px; flex-shrink: 0;
+  background: var(--accent); color: #fff; font-size: 15px; font-weight: 800;
+  cursor: pointer; transition: background 0.15s; letter-spacing: 0.08em;
+}
+.pd-print-btn:hover { background: var(--accent2); }
+
 #parea { display: none; }
 @media print { body > * { display: none !important; } #parea { display: block !important; position: fixed; inset: 0; } }
 
@@ -708,6 +824,170 @@ canvas { display: block; background: #fffef9; }
   .sp-bottom { display: none; }
   .edit-main { padding: 4px 2px; align-items: center; justify-content: center; flex: 1; min-height: 0; overflow: hidden; }
 }
+
+/* ===== 横向き全画面ダイアログ ===== */
+#orient-overlay {
+  display: none; position: fixed; inset: 0; z-index: 99000;
+  background: rgba(0,0,0,0.55); align-items: center; justify-content: center;
+}
+#orient-overlay.on { display: flex; }
+#orient-dialog {
+  background: #fff; border-radius: 22px; padding: 32px 28px 26px;
+  width: min(340px, 88vw); text-align: center;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.35);
+  animation: orient-pop 0.22s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes orient-pop {
+  from { transform: scale(0.82); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+#orient-dialog .od-icon  { font-size: 52px; margin-bottom: 12px; }
+#orient-dialog .od-title { font-size: 17px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+#orient-dialog .od-body  { font-size: 13px; color: var(--text2); line-height: 1.75; margin-bottom: 24px; }
+#orient-dialog .od-btns  { display: flex; gap: 10px; }
+#orient-dialog .od-cancel {
+  flex: 1; padding: 13px; border: 1.5px solid var(--border); border-radius: 50px;
+  background: transparent; color: var(--text2); font-size: 14px; cursor: pointer;
+}
+#orient-dialog .od-ok {
+  flex: 2; padding: 13px; border: none; border-radius: 50px;
+  background: var(--accent); color: #fff; font-size: 15px; font-weight: 800;
+  cursor: pointer; letter-spacing: 0.05em; transition: background 0.15s;
+}
+#orient-dialog .od-ok:hover { background: var(--accent2); }
+
+/* ===== アプリ終了ボタン（スマホのみ・常時表示） ===== */
+#exit-btn {
+  display: none; /* JS で制御 */
+  position: fixed; top: 10px; right: 10px; z-index: 91000;
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.8);
+  background: rgba(13,45,61,0.78);
+  color: #fff; font-size: 11px; font-weight: 700;
+  flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  cursor: pointer; letter-spacing: 0;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.40);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  transition: background 0.15s, transform 0.15s;
+  line-height: 1.1;
+  touch-action: manipulation;
+}
+#exit-btn.show { display: flex; }
+#exit-btn:active { background: rgba(180,30,30,0.9); transform: scale(0.93); }
+#exit-btn .exit-icon { font-size: 16px; line-height: 1; }
+#exit-btn .exit-lbl  { font-size: 8px; opacity: 0.9; letter-spacing: 0.05em; }
+
+/* ===== 終了確認ダイアログ ===== */
+#exit-overlay {
+  display: none; position: fixed; inset: 0; z-index: 92000;
+  background: rgba(0,0,0,0.6); align-items: center; justify-content: center;
+}
+#exit-overlay.on { display: flex; }
+#exit-dialog {
+  background: #fff; border-radius: 22px; padding: 28px 24px 22px;
+  width: min(320px, 88vw); text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  animation: orient-pop 0.2s cubic-bezier(.34,1.56,.64,1);
+}
+#exit-dialog .ex-icon  { font-size: 40px; margin-bottom: 10px; }
+#exit-dialog .ex-title { font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+#exit-dialog .ex-sub   { font-size: 12px; color: var(--text2); margin-bottom: 22px; line-height: 1.7; }
+#exit-dialog .ex-btns  { display: flex; flex-direction: column; gap: 8px; }
+#exit-dialog .ex-save {
+  padding: 14px; border: none; border-radius: 50px;
+  background: var(--accent); color: #fff; font-size: 15px; font-weight: 800;
+  cursor: pointer; transition: background 0.15s;
+}
+#exit-dialog .ex-save:hover { background: var(--accent2); }
+#exit-dialog .ex-nosave {
+  padding: 13px; border: 1.5px solid var(--border); border-radius: 50px;
+  background: transparent; color: var(--text2); font-size: 14px; cursor: pointer;
+  transition: border-color 0.15s;
+}
+#exit-dialog .ex-nosave:hover { border-color: #c00; color: #c00; }
+#exit-dialog .ex-cancel {
+  padding: 10px; border: none; background: transparent;
+  color: var(--text3); font-size: 12px; cursor: pointer; text-decoration: underline;
+}
+/* portrait時に body全体を90度回転させて疑似ランドスケープ */
+@media (orientation: portrait) {
+  body.force-landscape {
+    width: 100vh;
+    height: 100vw;
+    transform-origin: top left;
+    transform: rotate(90deg) translateY(-100%);
+    overflow: hidden;
+    position: fixed;
+    top: 0; left: 0;
+  }
+}
+
+/* ===== ユーザー選択画面 ===== */
+#s-user {
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center; min-height: 100vh;
+  background: linear-gradient(160deg, #c5e8f5 0%, #9dd2ea 40%, #6bb8de 100%);
+}
+#s-user.on { display: flex; }
+.user-box {
+  background: rgba(255,255,255,0.92); border-radius: 22px;
+  padding: 32px 28px 28px; width: min(380px, 90vw);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.18);
+}
+.user-logo { font-size: clamp(22px,5vw,32px); font-family: 'Yuji Syuku',serif; color: var(--text); letter-spacing: 0.3em; margin-bottom: 4px; text-align: center; }
+.user-sub  { font-size: 11px; color: var(--text3); letter-spacing: 0.2em; text-align: center; margin-bottom: 24px; }
+.user-section-title { font-size: 10px; font-weight: 700; color: var(--text3); letter-spacing: 0.2em; margin-bottom: 8px; }
+/* 新規ユーザー入力 */
+.user-new-row { display: flex; gap: 8px; margin-bottom: 20px; }
+.user-name-input {
+  flex: 1; padding: 11px 14px; border: 1.5px solid var(--border);
+  border-radius: 10px; font-size: 15px; color: var(--text); outline: none;
+  transition: border-color 0.2s; background: #fff;
+}
+.user-name-input:focus { border-color: var(--accent); }
+.user-add-btn {
+  padding: 11px 18px; border: none; border-radius: 10px;
+  background: var(--accent); color: #fff; font-size: 14px; font-weight: 700;
+  cursor: pointer; white-space: nowrap; transition: background 0.15s;
+}
+.user-add-btn:hover { background: var(--accent2); }
+/* ユーザー一覧 */
+.user-list { display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; }
+.user-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 12px;
+  background: var(--bg); cursor: pointer; transition: all 0.15s;
+}
+.user-item:hover { border-color: var(--accent); background: #ddf0f8; }
+.user-avatar {
+  width: 34px; height: 34px; border-radius: 50%; background: var(--accent);
+  color: #fff; font-size: 15px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.user-meta { font-size: 10px; color: var(--text3); margin-top: 1px; }
+.user-del {
+  width: 26px; height: 26px; border: none; border-radius: 50%;
+  background: transparent; color: var(--text3); font-size: 13px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all 0.12s;
+}
+.user-del:hover { background: #fee; color: #c00; }
+.user-empty { text-align: center; padding: 20px 0; font-size: 13px; color: var(--text3); }
+/* ヘッダー内ユーザーバッジ */
+.hdr-user-badge {
+  margin-left: auto; display: flex; align-items: center; gap: 6px;
+  background: var(--bg2); border-radius: 20px; padding: 5px 12px 5px 8px;
+  cursor: pointer; transition: background 0.15s; border: none;
+}
+.hdr-user-badge:hover { background: var(--bg3); }
+.hdr-user-avatar {
+  width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+  color: #fff; font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.hdr-user-name { font-size: 11px; color: var(--text2); font-weight: 700; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -721,12 +1001,67 @@ canvas { display: block; background: #fffef9; }
   <button onclick="document.getElementById('debug-panel').style.display='none'" style="margin-top:4px;padding:3px 10px;border:none;border-radius:4px;background:#333;color:#fff;cursor:pointer;font-size:11px;">閉じる</button>
 </div>
 
-<div id="s-start" class="screen on">
+<!-- アプリ終了ボタン（スマホ全画面時・常時表示） -->
+<button id="exit-btn" onclick="ExitCtrl.ask()">
+  <span class="exit-icon">✕</span>
+  <span class="exit-lbl">終了</span>
+</button>
+
+<!-- 終了確認ダイアログ -->
+<div id="exit-overlay">
+  <div id="exit-dialog">
+    <div class="ex-icon">📋</div>
+    <div class="ex-title">アプリを終了しますか？</div>
+    <div class="ex-sub" id="exit-sub">現在の編集内容を保存してから終了できます。</div>
+    <div class="ex-btns">
+      <button class="ex-save"   onclick="ExitCtrl.saveAndExit()">💾 保存して終了</button>
+      <button class="ex-nosave" onclick="ExitCtrl.exitWithout()">保存せず終了</button>
+      <button class="ex-cancel" onclick="ExitCtrl.cancel()">キャンセル</button>
+    </div>
+  </div>
+</div>
+<div id="orient-overlay">
+  <div id="orient-dialog">
+    <div class="od-icon">📱↔️</div>
+    <div class="od-title">横向き全画面で使う</div>
+    <div class="od-body">
+      画面を横向き・全画面に固定すると<br>
+      編集しやすくなります。<br>
+      <small style="color:var(--text3);">※ブラウザの設定により動作が異なる場合があります</small>
+    </div>
+    <div class="od-btns">
+      <button class="od-cancel" onclick="OrientCtrl.dismiss()">このまま使う</button>
+      <button class="od-ok"     onclick="OrientCtrl.activate()">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- ユーザー選択画面（最初に表示） -->
+<div id="s-user" class="on">
+  <div class="user-box">
+    <div class="user-logo">習字教室</div>
+    <div class="user-sub">課題プリント作成</div>
+    <div class="user-section-title">➕ 新しいユーザーを追加</div>
+    <div class="user-new-row">
+      <input type="text" class="user-name-input" id="user-name-input"
+             placeholder="名前を入力（例：山田先生）" maxlength="20"
+             onkeydown="if(event.key==='Enter')UserCtrl.addUser()">
+      <button class="user-add-btn" onclick="UserCtrl.addUser()">追加</button>
+    </div>
+    <div class="user-section-title">👤 ユーザーを選んでスタート</div>
+    <div class="user-list" id="user-list">
+      <div class="user-empty">まだユーザーがいません</div>
+    </div>
+  </div>
+</div>
+
+<div id="s-start" class="screen">
   <div class="start-box">
     <div class="start-logo">習字教室</div>
     <div class="start-tagline">課題プリント作成</div>
     <button class="btn-primary btn-start-new" onclick="App.go('bg')">✏️ 新規作成</button>
     <button class="btn-primary btn-start-load" onclick="App.loadSaved()">📂 保存から再開</button>
+    <button class="btn-primary btn-start-load" onclick="UserCtrl.showUserScreen()" style="margin-top:8px;font-size:13px;padding:12px 0;">👤 ユーザー切り替え</button>
   </div>
 </div>
 
@@ -736,6 +1071,10 @@ canvas { display: block; background: #fffef9; }
     <button class="hdr-back" onclick="App.go('start')">← 戻る</button>
     <div class="hdr-title">用紙を選ぶ</div>
     <div class="hdr-step">STEP 1 / 4</div>
+    <button class="hdr-user-badge" onclick="UserCtrl.showUserScreen()" id="hdr-badge-bg">
+      <div class="hdr-user-avatar" id="hdr-avatar-bg">?</div>
+      <span class="hdr-user-name" id="hdr-name-bg">-</span>
+    </button>
   </div>
   <!-- 縦横切替タブ -->
   <div class="bg-tabs">
@@ -798,10 +1137,20 @@ canvas { display: block; background: #fffef9; }
     <button class="hdr-back" onclick="App.go('bg')">← 戻る</button>
     <div class="hdr-title">テキストを入力</div>
     <div class="hdr-step">STEP 3 / 4</div>
+    <button class="hdr-user-badge" onclick="UserCtrl.showUserScreen()" id="hdr-badge-text">
+      <div class="hdr-user-avatar" id="hdr-avatar-text">?</div>
+      <span class="hdr-user-name" id="hdr-name-text">-</span>
+    </button>
   </div>
   <div class="text-body">
     <div class="field-lbl">課題テキスト</div>
     <textarea class="main-ta" id="main-text" rows="7" placeholder="例：春夏秋冬&#10;山川草木"></textarea>
+    <!-- テキスト履歴 -->
+    <button class="hist-toggle" id="hist-toggle" onclick="App.toggleHist()">
+      <span>🕐 過去に使ったテキスト</span>
+      <span class="ht-arrow">▼</span>
+    </button>
+    <div class="hist-panel" id="hist-panel"></div>
     <!-- ファイル取込ボタン（PC・スマホ共通） -->
     <button class="ocr-btn" style="width:100%;margin-top:10px;" onclick="App.openOcrFile()">
       📎 ファイルから取込（画像・PDF・Excel・Word）
@@ -868,8 +1217,6 @@ canvas { display: block; background: #fffef9; }
           <span class="toggle-track"></span>
         </label>
       </div>
-      <div class="sb-lbl" style="margin-top:10px;">印刷サイズ</div>
-      <div class="print-size-row" id="pc-print-size"></div>
     </div>
     <div class="sb-actions">
       <button class="btn-print" onclick="App.doPrint()">🖨️ 印刷</button>
@@ -893,28 +1240,34 @@ canvas { display: block; background: #fffef9; }
   <div class="edit-main" id="edit-main">
 
     <button class="zoom-reset-btn" id="zoom-reset-btn" onclick="App.resetZoom()">⊙<span style="font-size:8px;">戻す</span></button>
-    <div class="edit-paper-row" id="edit-paper-row">
-      <!-- 左ボタン列（縦書き:上ボタン / 横書き:◀ボタン） -->
-      <div class="split-col" id="split-col-left"></div>
-      <!-- 用紙 -->
-      <div class="paper-wrap" id="paper-wrap" style="position:relative;">
-        <canvas id="cv"></canvas>
-        <!-- 現在の範囲表示（確定済み） -->
-        <div class="range-fill" id="edit-rng-fill" style="pointer-events:none;display:none;"></div>
-        <!-- 四隅ハンドル（確定済み範囲） -->
-        <div class="range-handle" id="edit-h-tl" data-corner="tl" style="display:none;"></div>
-        <div class="range-handle" id="edit-h-tr" data-corner="tr" style="display:none;"></div>
-        <div class="range-handle" id="edit-h-bl" data-corner="bl" style="display:none;"></div>
-        <div class="range-handle" id="edit-h-br" data-corner="br" style="display:none;"></div>
-        <!-- ドラッグ中の新範囲プレビュー -->
-        <div id="edit-drag-preview" style="display:none;position:absolute;background:rgba(74,144,226,0.15);border:2.5px dashed rgba(74,144,226,0.8);border-radius:3px;pointer-events:none;"></div>
-        <!-- 長押し検知オーバーレイ（ハンドル外の用紙全体） -->
-        <div id="edit-drag-overlay" style="position:absolute;inset:0;cursor:crosshair;display:none;touch-action:none;"></div>
+    <div class="edit-paper-col" id="edit-paper-col">
+      <!-- 縦書き用：上ボタン列 -->
+      <div class="split-row" id="split-row-top"></div>
+      <div class="edit-paper-row" id="edit-paper-row">
+        <!-- 横書き用：左ボタン列 -->
+        <div class="split-col" id="split-col-left"></div>
+        <!-- 用紙 -->
+        <div class="paper-wrap" id="paper-wrap" style="position:relative;">
+          <canvas id="cv"></canvas>
+          <!-- 現在の範囲表示（確定済み） -->
+          <div class="range-fill" id="edit-rng-fill" style="pointer-events:none;display:none;"></div>
+          <!-- 四隅ハンドル（確定済み範囲） -->
+          <div class="range-handle" id="edit-h-tl" data-corner="tl" style="display:none;"></div>
+          <div class="range-handle" id="edit-h-tr" data-corner="tr" style="display:none;"></div>
+          <div class="range-handle" id="edit-h-bl" data-corner="bl" style="display:none;"></div>
+          <div class="range-handle" id="edit-h-br" data-corner="br" style="display:none;"></div>
+          <!-- ドラッグ中の新範囲プレビュー -->
+          <div id="edit-drag-preview" style="display:none;position:absolute;background:rgba(74,144,226,0.15);border:2.5px dashed rgba(74,144,226,0.8);border-radius:3px;pointer-events:none;"></div>
+          <!-- 長押し検知オーバーレイ（ハンドル外の用紙全体） -->
+          <div id="edit-drag-overlay" style="position:absolute;inset:0;cursor:crosshair;display:none;touch-action:none;"></div>
+        </div>
+        <!-- 横書き用：右ボタン列 -->
+        <div class="split-col" id="split-col-right"></div>
+        <!-- 各行文字数表示 -->
+        <div class="count-col" id="count-col"></div>
       </div>
-      <!-- 右ボタン列（縦書き:下ボタン / 横書き:▶ボタン） -->
-      <div class="split-col" id="split-col-right"></div>
-      <!-- 各行文字数表示 -->
-      <div class="count-col" id="count-col"></div>
+      <!-- 縦書き用：下ボタン列 -->
+      <div class="split-row" id="split-row-bottom"></div>
     </div>
   </div>
 
@@ -957,6 +1310,34 @@ canvas { display: block; background: #fffef9; }
 </div>
 
 <div id="parea"></div>
+
+<!-- 印刷プレビューダイアログ -->
+<div id="print-overlay">
+  <div id="print-dialog">
+    <div class="pd-title">
+      🖨️ 印刷プレビュー
+      <button class="pd-close" onclick="App.closePrintPreview()">✕</button>
+    </div>
+    <!-- プレビュー -->
+    <div class="pd-preview-wrap">
+      <canvas id="pd-preview-canvas"></canvas>
+    </div>
+    <!-- 用紙サイズ -->
+    <div class="pd-row">
+      <span class="pd-lbl">用紙サイズ</span>
+      <div class="pd-opts" id="pd-size-opts"></div>
+    </div>
+    <!-- 印刷向き -->
+    <div class="pd-row">
+      <span class="pd-lbl">印刷の向き</span>
+      <div class="pd-opts" id="pd-orient-opts"></div>
+    </div>
+    <div class="pd-note">
+      ※「印刷の向き」はプリンタ用紙の向きです。課題プリントの縦横とは独立して設定できます。
+    </div>
+    <button class="pd-print-btn" onclick="App.execPrint()">🖨️ 印刷する</button>
+  </div>
+</div>
 
 <!-- カメラ案内モーダル -->
 <div class="camera-guide-overlay" id="camera-guide-overlay">
@@ -1031,10 +1412,17 @@ canvas { display: block; background: #fffef9; }
 <div class="savebg-overlay" id="savebg-overlay">
   <div class="savebg-dialog">
     <div class="savebg-title">📄 用紙をデフォルトに追加</div>
-    <div class="savebg-sub">取り込んだ用紙に名前と行数を設定して保存します。<br>次回から用紙選択画面に表示されます。</div>
+    <div class="savebg-sub">取り込んだ用紙に名前・向き・行数を設定して保存します。<br>次回から用紙選択画面に表示されます。</div>
     <div class="savebg-field">
       <label class="savebg-label">用紙名</label>
       <input class="savebg-input" id="savebg-name" type="text" placeholder="例：書道教室オリジナル" maxlength="20">
+    </div>
+    <div class="savebg-field">
+      <label class="savebg-label">向き</label>
+      <div class="savebg-dir-row">
+        <button class="savebg-dir-btn on" id="savebg-dir-tate" onclick="App.setSaveBgDir(true)">縦書き</button>
+        <button class="savebg-dir-btn"    id="savebg-dir-yoko" onclick="App.setSaveBgDir(false)">横書き</button>
+      </div>
     </div>
     <div class="savebg-field">
       <label class="savebg-label">行数</label>
@@ -1165,7 +1553,7 @@ var BGS_TATE = [
 ];
 var BGS_YOKO = [
   { k:'wy',  n:'白紙',      d:'横書き・罫線なし', v:false, svg:function(){return svgBlank(false);} },
-  { k:'b8y', n:'B5横書き', d:'横書き・8行',      v:false, svg:function(){return svgLines(8,0,false);} },
+  { k:'b5y', n:'B5横書き', d:'横書き・5行',      v:false, svg:function(){return svgLines(5,0,false);} },
 ];
 
 function svgBlank(vert) {
@@ -1190,6 +1578,10 @@ function isAlpha(ch) {
 // 画面遷移
 // ============================================================
 function go(name) {
+  // ユーザー未選択ならユーザー画面へ（UserCtrlが存在する場合のみ）
+  if (name !== 'start' && typeof UserCtrl !== 'undefined' && !UserCtrl.currentUser()) {
+    UserCtrl.showUserScreen(); return;
+  }
   document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on');});
   document.getElementById('s-'+name).classList.add('on');
   if (name === 'range') { setTimeout(initRangeScreen, 60); }
@@ -1352,6 +1744,33 @@ function setupHandleDrag(rcv) {
 }
 
 // ===== OCR / ファイルからテキスト取込 =====
+
+// テキストクリーン処理（共通）
+// ・改行・タブなどの空白を除去
+// ・「・・」など句読点の連続重複を除去
+// ・文頭に全角スペースを追加
+// ・上限200文字
+function cleanOcrText(raw) {
+  var t = raw || '';
+  // 改行・タブ・半角スペースを除去（全角スペースU+3000は保持）
+  t = t.replace(/[\r\n\t \u00a0]/g, '');
+  // 句読点・中点の2連続以上を1つに圧縮（「・・」→「・」「。。」→「。」など）
+  t = t.replace(/([・。、！？…]{1})\1+/g, '$1');
+  // 先頭の全角スペースがなければ追加
+  if (t.length > 0 && t.charAt(0) !== '\u3000') {
+    t = '\u3000' + t;
+  }
+  return t.slice(0, 201); // 全角スペース1文字分多めに許容
+}
+
+// テキストをフォームにセットするヘルパー
+function setOcrResult(text, loading, okMsg, ngMsg) {
+  var cleaned = cleanOcrText(text);
+  document.getElementById('main-text').value = cleaned;
+  loading.textContent = cleaned.length > 1 ? okMsg : ngMsg;
+  setTimeout(function(){ loading.textContent=''; }, 3000);
+}
+
 function openOcrFile() {
   var inp = document.getElementById('ocr-file');
   inp.value = '';
@@ -1380,10 +1799,7 @@ function handleOcrFile(e) {
   if (type === 'text/plain' || name.endsWith('.txt') || name.endsWith('.csv')) {
     var rd = new FileReader();
     rd.onload = function(ev){
-      var text = ev.target.result.replace(/\s+/g,'').slice(0,200);
-      document.getElementById('main-text').value = text;
-      loading.textContent = text ? '✅ テキストを取り込みました' : '⚠️ テキストが見つかりませんでした';
-      setTimeout(function(){ loading.textContent=''; }, 3000);
+      setOcrResult(ev.target.result, loading, '✅ テキストを取り込みました', '⚠️ テキストが見つかりませんでした');
     };
     rd.readAsText(f, 'UTF-8');
     return;
@@ -1392,9 +1808,7 @@ function handleOcrFile(e) {
   // PDF
   if (type === 'application/pdf' || name.endsWith('.pdf')) {
     extractTextFromPdf(f, function(text){
-      document.getElementById('main-text').value = text;
-      loading.textContent = text ? '✅ テキストを取り込みました' : '⚠️ テキストが見つかりませんでした';
-      setTimeout(function(){ loading.textContent=''; }, 3000);
+      setOcrResult(text, loading, '✅ テキストを取り込みました', '⚠️ テキストが見つかりませんでした');
     });
     return;
   }
@@ -1402,9 +1816,7 @@ function handleOcrFile(e) {
   // Excel (.xlsx/.xls)
   if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
     extractTextFromExcel(f, function(text){
-      document.getElementById('main-text').value = text;
-      loading.textContent = text ? '✅ テキストを取り込みました' : '⚠️ テキストが見つかりませんでした';
-      setTimeout(function(){ loading.textContent=''; }, 3000);
+      setOcrResult(text, loading, '✅ テキストを取り込みました', '⚠️ テキストが見つかりませんでした');
     });
     return;
   }
@@ -1412,18 +1824,14 @@ function handleOcrFile(e) {
   // Word (.docx/.doc)
   if (name.endsWith('.docx') || name.endsWith('.doc')) {
     extractTextFromWord(f, function(text){
-      document.getElementById('main-text').value = text;
-      loading.textContent = text ? '✅ テキストを取り込みました' : '⚠️ テキストが見つかりませんでした';
-      setTimeout(function(){ loading.textContent=''; }, 3000);
+      setOcrResult(text, loading, '✅ テキストを取り込みました', '⚠️ テキストが見つかりませんでした');
     });
     return;
   }
 
   // 画像 → OCR
   runOcr(f, function(text){
-    document.getElementById('main-text').value = text;
-    loading.textContent = text ? '✅ テキストを取り込みました' : '⚠️ テキストが認識できませんでした';
-    setTimeout(function(){ loading.textContent=''; }, 3000);
+    setOcrResult(text, loading, '✅ テキストを取り込みました', '⚠️ テキストが認識できませんでした');
   });
 }
 
@@ -1441,7 +1849,7 @@ function extractTextFromExcel(f, cb) {
             row.forEach(function(cell){ text += String(cell||''); });
           });
         });
-        cb(text.replace(/\s+/g,'').slice(0,200));
+        cb(text);
       } catch(e){ cb(''); }
     };
     rd.readAsArrayBuffer(f);
@@ -1460,7 +1868,7 @@ function extractTextFromWord(f, cb) {
     rd.onload = function(ev){
       mammoth.extractRawText({arrayBuffer: ev.target.result})
         .then(function(result){
-          cb(result.value.replace(/\s+/g,'').slice(0,200));
+          cb(result.value);
         }).catch(function(){ cb(''); });
     };
     rd.readAsArrayBuffer(f);
@@ -1492,7 +1900,7 @@ function extractTextFromPdf(f, cb) {
               results.push(str);
               done++;
               if (done >= Math.min(total, 3)) {
-                cb(results.join('').replace(/\s+/g,'').slice(0, 200));
+                cb(results.join(''));
               }
             });
           });
@@ -1540,7 +1948,7 @@ function runOcr(f, cb) {
         if(loading) loading.textContent='⏳ 認識中… '+Math.round(m.progress*100)+'%';
       }}
     }).then(function(result){
-      var text = result.data.text.replace(/\s+/g,'').slice(0,200);
+      var text = result.data.text;
       cb(text);
     }).catch(function(){ cb(''); });
   } // end doRecognize
@@ -1588,13 +1996,13 @@ function skipRange() {
 // ============================================================
 function loadCustomBgs() {
   try {
-    var raw = localStorage.getItem('shuji_custom_bgs');
+    var raw = localStorage.getItem(UserCtrl.key('custom_bgs'));
     return raw ? JSON.parse(raw) : [];
   } catch(e) { return []; }
 }
 
 function saveCustomBgs(arr) {
-  localStorage.setItem('shuji_custom_bgs', JSON.stringify(arr));
+  localStorage.setItem(UserCtrl.key('custom_bgs'), JSON.stringify(arr));
 }
 
 function switchBgTab(tab) {
@@ -1627,36 +2035,34 @@ function initBgGrid() {
 
 function rebuildCustomSection() {
   var customs = loadCustomBgs();
-  // カスタムセクションを削除して再構築
-  var existing = document.getElementById('bg-custom-section');
-  if (existing) existing.remove();
+
+  // 縦書き・横書きそれぞれの既存カスタムカードをクリア
+  ['bg-tate','bg-yoko'].forEach(function(gridId){
+    var g = document.getElementById(gridId);
+    if (!g) return;
+    g.querySelectorAll('.bg-card[data-custom]').forEach(function(c){ c.remove(); });
+  });
+
+  // 旧カスタムセクションが残っていれば削除（後方互換）
+  var old = document.getElementById('bg-custom-section');
+  if (old) old.remove();
+
   if (customs.length === 0) return;
 
-  var scroll = document.querySelector('.bg-scroll');
-  var sec = document.createElement('div');
-  sec.id = 'bg-custom-section';
-
-  var title = document.createElement('div');
-  title.className = 'bg-section-title';
-  title.textContent = 'カスタム用紙';
-  sec.appendChild(title);
-
-  var grid = document.createElement('div');
-  grid.className = 'bg-grid';
-
   customs.forEach(function(bg, idx){
+    var isVert = bg.vert;
+    var gridId = isVert ? 'bg-tate' : 'bg-yoko';
+    var g = document.getElementById(gridId);
+    if (!g) return;
+
     var card = document.createElement('div');
     card.className = 'bg-card';
+    card.dataset.custom = '1';  // カスタムカードの識別フラグ
     card.style.position = 'relative';
-
-    var isVert = bg.vert;
-    var img = new Image();
-    img.onload = function(){};
-    img.src = bg.img;
 
     card.innerHTML =
       '<div class="bg-preview'+(isVert?'':' yoko')+'" style="background:#f5f0e8;">' +
-        '<img src="'+bg.img+'" style="width:100%;height:100%;object-fit:cover;">' +
+        '<img class="custom-bg-img" style="width:100%;height:100%;object-fit:cover;">' +
       '</div>'+
       '<div class="bg-meta">'+
         '<div class="bg-name">'+escHtml(bg.name)+'</div>'+
@@ -1670,16 +2076,21 @@ function rebuildCustomSection() {
       '</div>'+
       '<button class="custom-card-del" title="削除">✕</button>';
 
+    // img.src は innerHTML 外で安全に代入
+    card.querySelector('.custom-bg-img').src = bg.img;
+
     // 削除ボタン
-    card.querySelector('.custom-card-del').onclick = function(e){
-      e.stopPropagation();
-      if (confirm('"'+bg.name+'" を削除しますか？')){
-        var arr = loadCustomBgs();
-        arr.splice(idx, 1);
-        saveCustomBgs(arr);
-        rebuildCustomSection();
-      }
-    };
+    ;(function(bgName, bgIdx){
+      card.querySelector('.custom-card-del').onclick = function(e){
+        e.stopPropagation();
+        if (confirm('"'+bgName+'" を削除しますか？')){
+          var arr = loadCustomBgs();
+          arr.splice(bgIdx, 1);
+          saveCustomBgs(arr);
+          rebuildCustomSection();
+        }
+      };
+    })(bg.name, idx);
 
     // 行数ボタン
     card.querySelectorAll('.ln-btn').forEach(function(btn){
@@ -1688,6 +2099,13 @@ function rebuildCustomSection() {
         var n = parseInt(btn.dataset.n);
         selectCustomBg(bg, n, card);
         card.querySelectorAll('.ln-btn').forEach(function(b){b.classList.toggle('on', parseInt(b.dataset.n)===n);});
+        // 行数をlocalStorageに即時反映（固定保存）
+        var arr = loadCustomBgs();
+        var target = arr.find(function(b){ return b.name === bg.name; });
+        if (target) {
+          target.lines = n;
+          saveCustomBgs(arr);
+        }
       };
     });
 
@@ -1697,14 +2115,8 @@ function rebuildCustomSection() {
       card.querySelectorAll('.ln-btn').forEach(function(b){b.classList.toggle('on', parseInt(b.dataset.n)===bg.lines);});
     };
 
-    grid.appendChild(card);
+    g.appendChild(card);
   });
-
-  sec.appendChild(grid);
-  // アップロードカードの前（bg-uploadセクションの前）に挿入
-  // カスタム用紙はファイル取込の後に表示
-  var scroll = document.querySelector('.bg-scroll');
-  if (scroll) scroll.appendChild(sec);
 }
 
 function escHtml(s){
@@ -1725,11 +2137,18 @@ function selectCustomBg(bg, lines, card){
 var _pendingBgImg = null;
 var _pendingBgVert = true;
 var _saveBgLines = 4;
+var _saveBgVert = true;  // ダイアログ内で選択中の向き
 
-function openSaveBgDialog(){
+function openSaveBgDialog(presetName){
   _pendingBgImg = st.bgImg;
   _pendingBgVert = st.bgVert;
   _saveBgLines = st.lineCount || 4;
+  // 画像の縦横比から向きを初期推定
+  _saveBgVert = st.bgVert;
+
+  // 向きボタン初期状態
+  document.getElementById('savebg-dir-tate').classList.toggle('on', _saveBgVert);
+  document.getElementById('savebg-dir-yoko').classList.toggle('on', !_saveBgVert);
 
   // 行数ボタン構築
   var wrap = document.getElementById('savebg-lines');
@@ -1745,10 +2164,26 @@ function openSaveBgDialog(){
     wrap.appendChild(b);
   });
 
-  // 名前入力欄をクリア
-  document.getElementById('savebg-name').value = '';
+  // ファイル名をプリセット（空なら空欄のまま）
+  var inp = document.getElementById('savebg-name');
+  inp.value = presetName || '';
   document.getElementById('savebg-overlay').classList.add('on');
-  setTimeout(function(){ document.getElementById('savebg-name').focus(); }, 100);
+  // ファイル名がある場合はフォーカスを行数ボタンへ、ない場合は名前欄へ
+  setTimeout(function(){
+    if (presetName) {
+      var onBtn = wrap.querySelector('.savebg-ln.on');
+      if (onBtn) onBtn.focus();
+    } else {
+      inp.focus();
+    }
+  }, 100);
+}
+
+// 向き選択ボタン
+function setSaveBgDir(isVert) {
+  _saveBgVert = isVert;
+  document.getElementById('savebg-dir-tate').classList.toggle('on',  isVert);
+  document.getElementById('savebg-dir-yoko').classList.toggle('on', !isVert);
 }
 
 function closeSaveBg(){
@@ -1766,23 +2201,28 @@ function doSaveBg(){
     arr = arr.filter(function(b){ return b.name !== name; });
   }
 
-  arr.push({ name: name, vert: _pendingBgVert, lines: _saveBgLines, img: _pendingBgImg });
+  arr.push({ name: name, vert: _saveBgVert, lines: _saveBgLines, img: _pendingBgImg });
   saveCustomBgs(arr);
 
   // st に反映
   st.lineCount = _saveBgLines;
+  st.bgVert = _saveBgVert;
 
   closeSaveBg();
   rebuildCustomSection();
 
-  // 追加したカードを選択状態にする
+  // 追加した向きのタブに切り替え、カードを選択状態にする
+  switchBgTab(_saveBgVert ? 'tate' : 'yoko');
   setTimeout(function(){
     var customs = loadCustomBgs();
-    var lastIdx = customs.length - 1;
-    var cards = document.querySelectorAll('#bg-custom-section .bg-card');
-    if (cards[lastIdx]) {
-      cards[lastIdx].click();
-    }
+    // 同じ向きのカスタムカードを探して選択
+    var allCards = document.querySelectorAll('#bg-custom-section .bg-card');
+    allCards.forEach(function(card){
+      var nameEl = card.querySelector('.bg-name');
+      if (nameEl && nameEl.textContent === name) {
+        card.click();
+      }
+    });
   }, 100);
 }
 
@@ -1886,7 +2326,9 @@ function svgToDataUrl(svg, cb) {
 // ファイル取込
 function handleFile(e) {
   var f = e.target.files[0]; if(!f) return;
-  if (f.type==='application/pdf') { loadPdf(f); return; }
+  // 拡張子を除いたファイル名をデフォルト用紙名として渡す
+  var baseName = f.name.replace(/\.[^.]+$/, '').slice(0, 20);
+  if (f.type==='application/pdf') { loadPdf(f, baseName); return; }
   var rd = new FileReader();
   rd.onload = function(ev){
     var img = new Image();
@@ -1896,14 +2338,14 @@ function handleFile(e) {
       document.querySelectorAll('.bg-card,.upload-card').forEach(function(c){c.classList.remove('sel');});
       document.getElementById('upload-card').classList.add('sel');
       document.getElementById('bg-next').disabled = false;
-      openSaveBgDialog();
+      openSaveBgDialog(baseName);
     };
     img.src = ev.target.result;
   };
   rd.readAsDataURL(f);
 }
 
-function loadPdf(f) {
+function loadPdf(f, baseName) {
   var PDFJS_SRC = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
   var PDFJS_WORKER = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
   function doPdf(){
@@ -1922,7 +2364,7 @@ function loadPdf(f) {
           document.querySelectorAll('.bg-card,.upload-card').forEach(function(x){x.classList.remove('sel');});
           document.getElementById('upload-card').classList.add('sel');
           document.getElementById('bg-next').disabled=false;
-          openSaveBgDialog();
+          openSaveBgDialog(baseName || '');
         });
       });
     }).catch(function(e){ alert('PDF読み込みエラー: '+e.message); });
@@ -1944,6 +2386,94 @@ function loadPdf(f) {
 }
 
 // ============================================================
+// テキスト履歴
+// ============================================================
+var HIST_KEY = 'shuji_text_hist'; // ベースキー
+var HIST_MAX = 20;
+
+function getHist() {
+  try { return JSON.parse(localStorage.getItem(UserCtrl.key('text_hist')) || '[]'); }
+  catch(e) { return []; }
+}
+function saveHist(arr) {
+  localStorage.setItem(UserCtrl.key('text_hist'), JSON.stringify(arr));
+}
+// テキストを履歴に追加（重複除去、最新を先頭）
+function pushHist(text) {
+  if (!text || !text.trim()) return;
+  var arr = getHist();
+  arr = arr.filter(function(h){ return h.text !== text; });
+  arr.unshift({ text: text, date: new Date().toISOString() });
+  if (arr.length > HIST_MAX) arr = arr.slice(0, HIST_MAX);
+  saveHist(arr);
+}
+
+function toggleHist() {
+  var tog = document.getElementById('hist-toggle');
+  var panel = document.getElementById('hist-panel');
+  var isOpen = panel.classList.contains('on');
+  if (isOpen) {
+    panel.classList.remove('on');
+    tog.classList.remove('open');
+  } else {
+    renderHist();
+    panel.classList.add('on');
+    tog.classList.add('open');
+  }
+}
+
+function renderHist() {
+  var panel = document.getElementById('hist-panel');
+  if (!panel) return;
+  var arr = getHist();
+  panel.innerHTML = '';
+  if (arr.length === 0) {
+    panel.innerHTML = '<div class="hist-empty">履歴はまだありません</div>';
+    return;
+  }
+  arr.forEach(function(h, idx){
+    var item = document.createElement('div');
+    item.className = 'hist-item';
+    var dateStr = h.date
+      ? new Date(h.date).toLocaleString('ja-JP', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'})
+      : '';
+    var textEl = document.createElement('span');
+    textEl.className = 'hist-text';
+    textEl.textContent = h.text;
+    var dateEl = document.createElement('span');
+    dateEl.className = 'hist-date';
+    dateEl.textContent = dateStr;
+    var delBtn = document.createElement('button');
+    delBtn.className = 'hist-del';
+    delBtn.title = '削除';
+    delBtn.textContent = '✕';
+    // クリック：テキストを選択
+    ;(function(t){
+      item.onclick = function(){
+        document.getElementById('main-text').value = t;
+        // パネルを閉じる
+        document.getElementById('hist-panel').classList.remove('on');
+        document.getElementById('hist-toggle').classList.remove('open');
+      };
+    })(h.text);
+    // 削除ボタン
+    ;(function(i){
+      delBtn.onclick = function(e){
+        e.stopPropagation();
+        var arr2 = getHist();
+        arr2.splice(i, 1);
+        saveHist(arr2);
+        renderHist();
+      };
+    })(idx);
+    item.appendChild(textEl);
+    item.appendChild(dateEl);
+    item.appendChild(delBtn);
+    panel.appendChild(item);
+  });
+}
+
+// ============================================================
 // 編集画面へ
 // ============================================================
 var cv, ctx2, pImg;
@@ -1956,6 +2486,8 @@ function goEdit() {
     var oldText = st.text;
     st.text = t;
     reSplitsKeepRatio(oldText, t);
+    // 履歴に保存
+    pushHist(t);
   } else {
     ta.value = st.text;
     if (!st.splits || !st.splits.length) initSplits();
@@ -2033,7 +2565,6 @@ function buildEditUI() {
   updateScaleDisplay();
   updateKanaDisplay();
   initColorSlider();
-  initPrintSizeBtns();
 }
 
 function openFontPopup() {
@@ -2086,94 +2617,180 @@ function updateFontBtn() {
 }
 
 function buildSplitOverlay() {
-  var colL = document.getElementById('split-col-left');
-  var colR = document.getElementById('split-col-right');
-  if (!colL || !colR || !cv) return;
-  colL.innerHTML = '';
-  colR.innerHTML = '';
+  var colL    = document.getElementById('split-col-left');
+  var colR    = document.getElementById('split-col-right');
+  var rowTop  = document.getElementById('split-row-top');
+  var rowBot  = document.getElementById('split-row-bottom');
   var countColEl = document.getElementById('count-col');
+  if (!colL || !colR || !rowTop || !rowBot || !cv) return;
+
+  // 全クリア
+  colL.innerHTML = ''; colR.innerHTML = '';
+  rowTop.innerHTML = ''; rowBot.innerHTML = '';
   if (countColEl) countColEl.innerHTML = '';
 
   var lines = getLines();
   var n = lines.length;
 
-  // テキスト範囲のcanvas座標を取得
-  var rngY, rngH;
+  // canvas→DOM スケール
+  var rect = cv.getBoundingClientRect();
+  var scaleX = rect.width  / cv.width;
+  var scaleY = rect.height / cv.height;
+
+  // テキスト範囲（canvas px）
+  var rngX, rngY, rngW, rngH;
   if (st.range && st.range.rx !== undefined) {
+    rngX = st.range.rx * cv.width;
     rngY = st.range.ry * cv.height;
+    rngW = st.range.rw * cv.width;
     rngH = st.range.rh * cv.height;
   } else {
     var pad = cv.width * 0.07;
-    rngY = pad;
+    rngX = pad; rngY = pad;
+    rngW = cv.width  - pad * 2;
     rngH = cv.height - pad * 2;
   }
 
-  // canvas座標→DOM座標のスケール
-  var rect = cv.getBoundingClientRect();
-  var scaleY = rect.height / cv.height;
-  var domRngY = rngY * scaleY;
-  var domRngH = rngH * scaleY;
+  if (st.bgVert) {
+    // ========== 縦書き：ボタンを上下に配置、文字数バッジを上行に表示 ==========
+    var colW_dom = rngW * scaleX / n;
+    var rngX_dom = rngX * scaleX;
+    var cvW_dom  = cv.width * scaleX;
 
-  // ボタン列全体の高さ・位置を用紙に合わせる（上端オフセットあり）
-  colL.style.height = cv.height * scaleY + 'px';
-  colR.style.height = cv.height * scaleY + 'px';
-  colL.style.position = 'relative';
-  colR.style.position = 'relative';
-  var ccol = document.getElementById('count-col');
-  if (ccol) { ccol.style.height = cv.height * scaleY + 'px'; ccol.style.position = 'relative'; }
+    // 上行：ボタン(28px) + 文字数バッジ(16px) = 44px
+    rowTop.style.display  = 'block';
+    rowBot.style.display  = 'block';
+    rowTop.style.position = 'relative';
+    rowBot.style.position = 'relative';
+    rowTop.style.width    = cvW_dom + 'px';
+    rowBot.style.width    = cvW_dom + 'px';
+    rowTop.style.height   = '44px';   // ボタン28 + バッジ16
+    rowBot.style.height   = '28px';
 
-  if (n <= 1) return;
+    // 横書きボタン列を非表示
+    colL.style.display = 'none';
+    colR.style.display = 'none';
+    if (countColEl) countColEl.style.display = 'none';
 
-  // 各行の高さ（DOM px）
-  var rowH = domRngH / n;
+    if (n <= 1) return;
 
-  lines.forEach(function(line, i){
-    var canUp   = (i > 0 && line.length > 1);
-    var canDown = (i < n-1 && line.length > 1);
-    // この行の中央Y（DOM px, ボタン列の上端からの距離）
-    var btnCY = domRngY + (i + 0.5) * rowH;
-    var btnSize = 28;
+    lines.forEach(function(line, i){
+      var colCenterX = rngX_dom + rngW * scaleX - (i + 0.5) * colW_dom;
+      var btnSize = 28;
+      var canLeft  = (i > 0   && line.length > 1);
+      var canRight = (i < n-1 && line.length > 1);
 
-    // 左列: ▲ボタン
-    var upBtn = document.createElement('button');
-    upBtn.className = 'sc-btn';
-    upBtn.textContent = '▲';
-    upBtn.title = 'この行の先頭を上の行へ';
-    upBtn.disabled = !canUp;
-    upBtn.style.position = 'absolute';
-    upBtn.style.top = (btnCY - btnSize/2) + 'px';
-    upBtn.style.left = '0';
-    ;(function(idx){ upBtn.onclick = function(){
-      if(st.splits[idx]>1){st.splits[idx]--;st.splits[idx-1]++;}
-      buildSplitOverlay(); render();
-    };})(i);
-    colL.appendChild(upBtn);
+      // 上行：▶ボタン（先頭文字を右隣の列へ）
+      var leftBtn = document.createElement('button');
+      leftBtn.className = 'sc-btn';
+      leftBtn.textContent = '▶';
+      leftBtn.title = 'この列の先頭文字を右の列へ';
+      leftBtn.disabled = !canLeft;
+      leftBtn.style.position = 'absolute';
+      leftBtn.style.left = (colCenterX - btnSize/2) + 'px';
+      leftBtn.style.top  = '0';
+      ;(function(idx){ leftBtn.onclick = function(){
+        if(st.splits[idx]>1){st.splits[idx]--;st.splits[idx-1]++;}
+        buildSplitOverlay(); render();
+      };})(i);
+      rowTop.appendChild(leftBtn);
 
-    // 右列: ▼ボタン
-    var downBtn = document.createElement('button');
-    downBtn.className = 'sc-btn';
-    downBtn.textContent = '▼';
-    downBtn.title = 'この行の末尾を下の行へ';
-    downBtn.disabled = !canDown;
-    downBtn.style.position = 'absolute';
-    downBtn.style.top = (btnCY - btnSize/2) + 'px';
-    downBtn.style.left = '0';
-    ;(function(idx){ downBtn.onclick = function(){
-      if(st.splits[idx]>1){st.splits[idx]--;st.splits[idx+1]++;}
-      buildSplitOverlay(); render();
-    };})(i);
-    colR.appendChild(downBtn);
-
-    // 文字数バッジ
-    var countCol = document.getElementById('count-col');
-    if (countCol) {
+      // 文字数バッジ（ボタンの直下、上行の下半分）
       var badge = document.createElement('div');
-      badge.className = 'count-badge';
+      badge.className = 'count-badge-h';
       badge.textContent = line.length + '文字';
-      badge.style.top = (btnCY - 10) + 'px';
-      countCol.appendChild(badge);
+      badge.style.position = 'absolute';
+      badge.style.top = '30px';  // ボタン28px + 2px gap
+      badge.style.left = colCenterX + 'px';
+      badge.style.transform = 'translateX(-50%)';
+      rowTop.appendChild(badge);
+
+      // 下行：◀ボタン（末尾文字を左隣の列へ）
+      var rightBtn = document.createElement('button');
+      rightBtn.className = 'sc-btn';
+      rightBtn.textContent = '◀';
+      rightBtn.title = 'この列の末尾文字を左の列へ';
+      rightBtn.disabled = !canRight;
+      rightBtn.style.position = 'absolute';
+      rightBtn.style.left = (colCenterX - btnSize/2) + 'px';
+      rightBtn.style.top  = '0';
+      ;(function(idx){ rightBtn.onclick = function(){
+        if(st.splits[idx]>1){st.splits[idx]--;st.splits[idx+1]++;}
+        buildSplitOverlay(); render();
+      };})(i);
+      rowBot.appendChild(rightBtn);
+    });
+
+  } else {
+    // ========== 横書き：ボタンを左右に配置（従来通り） ==========
+    rowTop.style.display = 'none';
+    rowBot.style.display = 'none';
+    colL.style.display = '';
+    colR.style.display = '';
+
+    var domRngY = rngY * scaleY;
+    var domRngH = rngH * scaleY;
+    var rowH    = domRngH / n;
+
+    colL.style.height = cv.height * scaleY + 'px';
+    colR.style.height = cv.height * scaleY + 'px';
+    colL.style.position = 'relative';
+    colR.style.position = 'relative';
+
+    if (countColEl) {
+      countColEl.style.display  = '';
+      countColEl.style.height   = cv.height * scaleY + 'px';
+      countColEl.style.position = 'relative';
     }
-  });
+
+    if (n <= 1) return;
+
+    lines.forEach(function(line, i){
+      var canUp   = (i > 0   && line.length > 1);
+      var canDown = (i < n-1 && line.length > 1);
+      var btnCY   = domRngY + (i + 0.5) * rowH;
+      var btnSize = 28;
+
+      // 左列: ▲ボタン
+      var upBtn = document.createElement('button');
+      upBtn.className  = 'sc-btn';
+      upBtn.textContent = '▲';
+      upBtn.title   = 'この行の先頭を上の行へ';
+      upBtn.disabled = !canUp;
+      upBtn.style.position = 'absolute';
+      upBtn.style.top  = (btnCY - btnSize/2) + 'px';
+      upBtn.style.left = '0';
+      ;(function(idx){ upBtn.onclick = function(){
+        if(st.splits[idx]>1){st.splits[idx]--;st.splits[idx-1]++;}
+        buildSplitOverlay(); render();
+      };})(i);
+      colL.appendChild(upBtn);
+
+      // 右列: ▼ボタン
+      var downBtn = document.createElement('button');
+      downBtn.className  = 'sc-btn';
+      downBtn.textContent = '▼';
+      downBtn.title   = 'この行の末尾を下の行へ';
+      downBtn.disabled = !canDown;
+      downBtn.style.position = 'absolute';
+      downBtn.style.top  = (btnCY - btnSize/2) + 'px';
+      downBtn.style.left = '0';
+      ;(function(idx){ downBtn.onclick = function(){
+        if(st.splits[idx]>1){st.splits[idx]--;st.splits[idx+1]++;}
+        buildSplitOverlay(); render();
+      };})(i);
+      colR.appendChild(downBtn);
+
+      // 文字数バッジ
+      if (countColEl) {
+        var badge = document.createElement('div');
+        badge.className = 'count-badge';
+        badge.textContent = line.length + '文字';
+        badge.style.top = (btnCY - 10) + 'px';
+        countColEl.appendChild(badge);
+      }
+    });
+  }
 }
 
 function rebuildSplits() {
@@ -2255,32 +2872,6 @@ function onTraceToggle(checked) {
   // トレースモード時は薄字で再描画
   render();
   showSaveToast(checked ? '🖊 お手本モード ON（なぞり書き用の薄字）' : 'お手本モード OFF');
-}
-
-// ============================================================
-// 印刷サイズ
-// ============================================================
-var PRINT_SIZES = [
-  { k:'A4',   label:'A4',   css:'A4'        },
-  { k:'B5',   label:'B5',   css:'B5'        },
-  { k:'A3',   label:'A3',   css:'A3'        },
-  { k:'hansi',label:'半紙', css:'210mm 297mm' }, // 縦長半紙近似
-];
-
-function initPrintSizeBtns() {
-  var wrap = document.getElementById('pc-print-size');
-  if (!wrap) return;
-  wrap.innerHTML = '';
-  PRINT_SIZES.forEach(function(ps){
-    var btn = document.createElement('button');
-    btn.className = 'ps-btn' + (st.printSize === ps.k ? ' on' : '');
-    btn.textContent = ps.label;
-    btn.onclick = function(){
-      st.printSize = ps.k;
-      wrap.querySelectorAll('.ps-btn').forEach(function(b){ b.classList.toggle('on', b.textContent === ps.label); });
-    };
-    wrap.appendChild(btn);
-  });
 }
 
 // ============================================================
@@ -2368,10 +2959,18 @@ function initCanvas() {
   var spBot = document.querySelector('.sp-bottom');
   var spHdrH = (isSp && !isLandscape && spHdr) ? (spHdr.offsetHeight || 44) : 0;
   var spBotH = (isSp && !isLandscape && spBot) ? (spBot.offsetHeight || 130) : 0;
-  var sidebarW = (!isSp || isLandscape) ? 260 : 0;
-  var btnW = 48; // split-colボタン列 左右合計
-  var mw = Math.max(100, vw - sidebarW - btnW - (isSp ? 8 : 48));
-  var mh = Math.max(100, vh - spHdrH - spBotH - (isSp ? 8 : 48));
+  // サイドバー実幅を取得
+  var sidebar = document.querySelector('.sidebar');
+  var sidebarW = sidebar ? sidebar.offsetWidth : ((!isSp || isLandscape) ? 200 : 0);
+  // 縦書き：上下ボタン行（28px × 2 行 + gap 6px × 2）= 68px
+  // 横書き：左右ボタン列（28px × 2）= 56px
+  var isVert = st.bgVert;
+  var btnH = isVert ? 84 : 0;   // 縦書き：上行(44px)+下行(28px)+gap(6×2)=84px
+  var btnW = isVert ? 0 : 84;   // 横書き：左右col(28×2)+count-col(28)=84px
+  var padH = isSp ? 8 : 32;
+  var padW = isSp ? 8 : 32;
+  var mw = Math.max(100, vw - sidebarW - btnW - padW);
+  var mh = Math.max(100, vh - spHdrH - spBotH - btnH - padH);
 
   if (!st.bgImg) {
     // 用紙なし: アスペクト比だけ設定
@@ -2953,19 +3552,130 @@ function spTab(name, btn) {
 // ============================================================
 // 印刷
 // ============================================================
+// ============================================================
+// 印刷プレビュー
+// ============================================================
+var PRINT_SIZES = [
+  { k:'A3',    label:'A3',   w:297, h:420 },
+  { k:'A4',    label:'A4',   w:210, h:297 },
+  { k:'B4',    label:'B4',   w:257, h:364 },
+  { k:'B5',    label:'B5',   w:182, h:257 },
+  { k:'hansi', label:'半紙', w:242, h:333 },
+];
+
+// 現在の印刷設定（サイズ・向き）
+var _printCfg = { size: 'B5', orient: 'portrait' }; // portrait / landscape
+
 function doPrint() {
   if (!cv) { alert('編集画面で操作してください'); return; }
-  var url = cv.toDataURL('image/png');
-  var isL = !st.bgVert;
+  openPrintPreview();
+}
 
-  // 印刷サイズ設定
-  var sizeMap = {
-    'A4':    isL ? 'A4 landscape' : 'A4 portrait',
-    'B5':    isL ? 'B5 landscape' : 'B5 portrait',
-    'A3':    isL ? 'A3 landscape' : 'A3 portrait',
-    'hansi': isL ? '364mm 257mm'  : '257mm 364mm', // 半紙（縦）
-  };
-  var pageSize = sizeMap[st.printSize || 'B5'] || (isL ? 'B5 landscape' : 'B5 portrait');
+function openPrintPreview() {
+  // デフォルトの向きを課題の縦横から推測（初回のみ）
+  if (!_printCfg._inited) {
+    _printCfg.orient = st.bgVert ? 'portrait' : 'landscape';
+    _printCfg._inited = true;
+  }
+
+  // サイズボタン構築
+  var sizeWrap = document.getElementById('pd-size-opts');
+  sizeWrap.innerHTML = '';
+  PRINT_SIZES.forEach(function(ps){
+    var b = document.createElement('button');
+    b.className = 'pd-btn' + (_printCfg.size === ps.k ? ' on' : '');
+    b.textContent = ps.label;
+    b.onclick = function(){
+      _printCfg.size = ps.k;
+      sizeWrap.querySelectorAll('.pd-btn').forEach(function(x){ x.classList.toggle('on', x.textContent === ps.label); });
+      updatePrintPreview();
+    };
+    sizeWrap.appendChild(b);
+  });
+
+  // 向きボタン構築
+  var orientWrap = document.getElementById('pd-orient-opts');
+  orientWrap.innerHTML = '';
+  [{ k:'portrait', label:'縦向き ▯' }, { k:'landscape', label:'横向き ▭' }].forEach(function(o){
+    var b = document.createElement('button');
+    b.className = 'pd-btn' + (_printCfg.orient === o.k ? ' on' : '');
+    b.textContent = o.label;
+    b.onclick = function(){
+      _printCfg.orient = o.k;
+      orientWrap.querySelectorAll('.pd-btn').forEach(function(x){ x.classList.toggle('on', x === b); });
+      updatePrintPreview();
+    };
+    orientWrap.appendChild(b);
+  });
+
+  document.getElementById('print-overlay').classList.add('on');
+  updatePrintPreview();
+}
+
+function closePrintPreview() {
+  document.getElementById('print-overlay').classList.remove('on');
+}
+
+function updatePrintPreview() {
+  var pv = document.getElementById('pd-preview-canvas');
+  if (!pv || !cv) return;
+
+  // 用紙寸法（mm）
+  var ps = PRINT_SIZES.find(function(x){ return x.k === _printCfg.size; }) || PRINT_SIZES[1];
+  var isLand = _printCfg.orient === 'landscape';
+  var paperW_mm = isLand ? ps.h : ps.w;  // 横向きなら長辺が幅
+  var paperH_mm = isLand ? ps.w : ps.h;
+
+  // プレビューキャンバスのサイズ（最大 400×320px に収める）
+  var maxW = 380, maxH = 300;
+  var ratio = paperW_mm / paperH_mm;
+  var pvW, pvH;
+  if (maxW / maxH > ratio) { pvH = maxH; pvW = Math.round(maxH * ratio); }
+  else                      { pvW = maxW; pvH = Math.round(maxW / ratio); }
+
+  pv.width  = pvW * 2; // Retina
+  pv.height = pvH * 2;
+  pv.style.width  = pvW + 'px';
+  pv.style.height = pvH + 'px';
+
+  var ctx = pv.getContext('2d');
+  ctx.scale(2, 2);
+
+  // 白紙背景
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, pvW, pvH);
+
+  // 課題画像を用紙内に contain で描画
+  var imgRat = cv.width / cv.height;
+  var paperRat = paperW_mm / paperH_mm;
+  var iw, ih, ix, iy;
+  var margin = 8; // px
+  var drawW = pvW - margin * 2;
+  var drawH = pvH - margin * 2;
+  if (drawW / drawH > imgRat) { ih = drawH; iw = Math.round(drawH * imgRat); }
+  else                         { iw = drawW; ih = Math.round(drawW / imgRat); }
+  ix = margin + Math.round((drawW - iw) / 2);
+  iy = margin + Math.round((drawH - ih) / 2);
+
+  ctx.drawImage(cv, ix, iy, iw, ih);
+
+  // 用紙枠
+  ctx.strokeStyle = '#bbb';
+  ctx.lineWidth = 0.5;
+  ctx.strokeRect(0.5, 0.5, pvW - 1, pvH - 1);
+}
+
+function execPrint() {
+  if (!cv) return;
+  closePrintPreview();
+
+  var url = cv.toDataURL('image/png');
+  var ps  = PRINT_SIZES.find(function(x){ return x.k === _printCfg.size; }) || PRINT_SIZES[1];
+  var isLand = _printCfg.orient === 'landscape';
+  // @page size: 幅 高さ（landscape の場合は長辺が幅）
+  var pw = isLand ? ps.h : ps.w;
+  var ph = isLand ? ps.w : ps.h;
+  var pageSize = pw + 'mm ' + ph + 'mm';
 
   var win = window.open('', '_blank', 'width=900,height=700');
   if (!win) { alert('ポップアップを許可してください'); return; }
@@ -2987,17 +3697,17 @@ function doPrint() {
 // 保存・読込
 // ============================================================
 // =============================================
-// 保存管理
+// 保存管理（ユーザースコープ）
 // =============================================
-var SAVES_KEY = 'shuji_saves_v1';
+var SAVES_KEY = 'shuji_saves_v1'; // ベースキー（UserCtrl.key()でユーザー別に変換）
 var _owTarget = null; // 上書き対象のキー
 
 function getSaves() {
-  try { return JSON.parse(localStorage.getItem(SAVES_KEY) || '{}'); }
+  try { return JSON.parse(localStorage.getItem(UserCtrl.key('saves')) || '{}'); }
   catch(e) { return {}; }
 }
 function setSaves(obj) {
-  localStorage.setItem(SAVES_KEY, JSON.stringify(obj));
+  localStorage.setItem(UserCtrl.key('saves'), JSON.stringify(obj));
 }
 
 // ファイル名: テキスト先頭8文字（スペース除く）
@@ -3167,7 +3877,7 @@ function loadSaved() {
   openSaves();
 }
 
-// 旧形式(shuji_v2)のデータをマイグレーション
+// 旧形式(shuji_v2)のデータをマイグレーション（現在ユーザーへ）
 function migrateOldSave() {
   try {
     var old = localStorage.getItem('shuji_v2');
@@ -3184,9 +3894,6 @@ function migrateOldSave() {
   } catch(e) {}
 }
 
-// 旧データマイグレーション実行
-migrateOldSave();
-
 // doSave は openSaves に統合されたが互換性のため残す
 function doSave() { openSaves(); }
 
@@ -3195,13 +3902,279 @@ function doSave() { openSaves(); }
 // ============================================================
 initBgGrid();
 
-return { go:go, goBgNext:goBgNext, switchBgTab:switchBgTab, resetZoom:resetZoom, loadSaved:loadSaved, goEdit:goEdit, handleFile:handleFile, spTab:spTab, doPrint:doPrint, doSave:doSave, openSaves:openSaves, closeSaves:closeSaves, saveAsNew:saveAsNew, confirmOverwrite:confirmOverwrite, closeOverwrite:closeOverwrite, openFontPopup:openFontPopup, closeFontPopup:closeFontPopup, closeSaveBg:closeSaveBg, doSaveBg:doSaveBg, confirmRange:confirmRange, confirmEditRange:confirmEditRange, toggleRangeAdjust:toggleRangeAdjust, skipRange:skipRange, openOcrFile:openOcrFile, openCameraGuide:openCameraGuide, closeCameraGuide:closeCameraGuide, handleOcrFile:handleOcrFile, openTextEdit:openTextEdit, closeTextEdit:closeTextEdit, applyTextEdit:applyTextEdit, onColorSlider:onColorSlider, onTraceToggle:onTraceToggle, exportData:exportData, importData:importData };
+return { go:go, goBgNext:goBgNext, switchBgTab:switchBgTab, resetZoom:resetZoom, loadSaved:loadSaved, goEdit:goEdit, handleFile:handleFile, spTab:spTab, doPrint:doPrint, doSave:doSave, openSaves:openSaves, closeSaves:closeSaves, saveAsNew:saveAsNew, confirmOverwrite:confirmOverwrite, closeOverwrite:closeOverwrite, openFontPopup:openFontPopup, closeFontPopup:closeFontPopup, closeSaveBg:closeSaveBg, doSaveBg:doSaveBg, confirmRange:confirmRange, confirmEditRange:confirmEditRange, toggleRangeAdjust:toggleRangeAdjust, skipRange:skipRange, openOcrFile:openOcrFile, openCameraGuide:openCameraGuide, closeCameraGuide:closeCameraGuide, handleOcrFile:handleOcrFile, openTextEdit:openTextEdit, closeTextEdit:closeTextEdit, applyTextEdit:applyTextEdit, onColorSlider:onColorSlider, onTraceToggle:onTraceToggle, exportData:exportData, importData:importData, toggleHist:toggleHist, setSaveBgDir:setSaveBgDir, closePrintPreview:closePrintPreview, execPrint:execPrint };
 })();
 
 // ページ読み込み完了時に診断
 window.addEventListener('DOMContentLoaded', function(){
   dbg('JS OK / ' + navigator.userAgent.slice(0,50));
 });
+
+// ============================================================
+// ユーザー管理（App IIFEの外 → App.go等を呼べる）
+// ============================================================
+var UserCtrl = (function(){
+  var USERS_KEY  = 'shuji_users_v1';   // ユーザー一覧
+  var CURRENT_KEY = 'shuji_current_user'; // 現在のユーザー名
+
+  function _esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // 現在ユーザー名を返す（未選択なら'default'）
+  function currentUser() {
+    return localStorage.getItem(CURRENT_KEY) || '';
+  }
+
+  // ストレージキーをユーザー別に変換
+  function key(base) {
+    var u = currentUser();
+    return u ? ('shuji_' + base + '_u_' + u) : ('shuji_' + base);
+  }
+
+  // ユーザー一覧を取得
+  function getUsers() {
+    try { return JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); }
+    catch(e) { return []; }
+  }
+  function saveUsers(arr) {
+    localStorage.setItem(USERS_KEY, JSON.stringify(arr));
+  }
+
+  // ユーザー選択画面を表示
+  function showUserScreen() {
+    // 全screenをoff
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('on'); });
+    document.getElementById('s-user').classList.add('on');
+    renderUserList();
+    // 入力欄をフォーカス
+    setTimeout(function(){ document.getElementById('user-name-input').focus(); }, 100);
+  }
+
+  // ユーザーを選択してスタート画面へ
+  function selectUser(name) {
+    localStorage.setItem(CURRENT_KEY, name);
+    // 最終ログイン更新
+    var users = getUsers();
+    var u = users.find(function(x){ return x.name === name; });
+    if (u) { u.lastAt = new Date().toISOString(); saveUsers(users); }
+
+    // ユーザー画面を閉じてスタートへ
+    document.getElementById('s-user').classList.remove('on');
+    // App の画面遷移でスタート画面を表示
+    App.go('start');
+    updateBadges();
+    // 旧データマイグレーション（そのユーザーへ）
+    migrateOldSave();
+  }
+
+  // 新規ユーザー追加
+  function addUser() {
+    var inp = document.getElementById('user-name-input');
+    var name = inp.value.trim();
+    if (!name) { inp.focus(); return; }
+    if (name.length > 20) { alert('名前は20文字以内にしてください'); return; }
+    var users = getUsers();
+    if (users.find(function(u){ return u.name === name; })) {
+      // 既存ユーザーはそのまま選択
+      inp.value = '';
+      selectUser(name);
+      return;
+    }
+    users.unshift({ name: name, createdAt: new Date().toISOString(), lastAt: new Date().toISOString() });
+    saveUsers(users);
+    inp.value = '';
+    selectUser(name);
+  }
+
+  // ユーザー一覧をレンダリング
+  function renderUserList() {
+    var list = document.getElementById('user-list');
+    if (!list) return;
+    var users = getUsers();
+    list.innerHTML = '';
+    if (users.length === 0) {
+      list.innerHTML = '<div class="user-empty">まだユーザーがいません<br>上の欄に名前を入力して追加してください</div>';
+      return;
+    }
+    users.forEach(function(u){
+      var item = document.createElement('div');
+      item.className = 'user-item';
+      var initial = u.name.charAt(0).toUpperCase();
+      var lastStr = u.lastAt
+        ? new Date(u.lastAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) + ' に使用'
+        : '';
+      // セーブ件数を表示
+      var savesRaw = localStorage.getItem('shuji_saves_u_' + u.name);
+      var saveCount = 0;
+      try { saveCount = Object.keys(JSON.parse(savesRaw || '{}')).length; } catch(e){}
+
+      var avatar = document.createElement('div');
+      avatar.className = 'user-avatar';
+      avatar.textContent = initial;
+
+      var info = document.createElement('div');
+      info.className = 'user-info';
+      info.innerHTML = '<div class="user-name">'+_esc(u.name)+'</div>'+
+        '<div class="user-meta">'+(saveCount?saveCount+'件の保存データ　':'')+lastStr+'</div>';
+
+      var del = document.createElement('button');
+      del.className = 'user-del';
+      del.title = '削除';
+      del.textContent = '🗑';
+
+      ;(function(name){
+        item.onclick = function(){ selectUser(name); };
+        del.onclick = function(e){
+          e.stopPropagation();
+          if (confirm('「'+name+'」のユーザーデータをすべて削除しますか？\n（保存データ・履歴・カスタム用紙も削除されます）')){
+            deleteUser(name);
+          }
+        };
+      })(u.name);
+
+      item.appendChild(avatar);
+      item.appendChild(info);
+      item.appendChild(del);
+      list.appendChild(item);
+    });
+  }
+
+  // ユーザー削除（関連データもすべて削除）
+  function deleteUser(name) {
+    // 関連ストレージキーを削除
+    ['saves','custom_bgs','text_hist'].forEach(function(base){
+      localStorage.removeItem('shuji_' + base + '_u_' + name);
+    });
+    var users = getUsers().filter(function(u){ return u.name !== name; });
+    saveUsers(users);
+    // 現在ユーザーが削除されたらユーザー画面へ
+    if (currentUser() === name) {
+      localStorage.removeItem(CURRENT_KEY);
+    }
+    renderUserList();
+  }
+
+  // ヘッダーのユーザーバッジを更新
+  function updateBadges() {
+    var name = currentUser();
+    var initial = name ? name.charAt(0).toUpperCase() : '?';
+    [['hdr-avatar-bg','hdr-name-bg'],
+     ['hdr-avatar-text','hdr-name-text']].forEach(function(ids){
+      var av = document.getElementById(ids[0]);
+      var nm = document.getElementById(ids[1]);
+      if (av) av.textContent = initial;
+      if (nm) nm.textContent = name || '-';
+    });
+  }
+
+  // ユーザー未選択なら初回にユーザー画面表示
+  function init() {
+    if (!currentUser()) {
+      // すでに s-user.on なのでそのまま
+      renderUserList();
+    } else {
+      // 前回のユーザーが残っていればスタート画面へ
+      document.getElementById('s-user').classList.remove('on');
+      App.go('start');
+      updateBadges();
+      migrateOldSave();
+    }
+  }
+
+  // DOMContentLoaded 後に初期化
+  window.addEventListener('DOMContentLoaded', function(){ init(); });
+
+  return { key: key, currentUser: currentUser, addUser: addUser, showUserScreen: showUserScreen, updateBadges: updateBadges };
+})();
+
+// ============================================================
+// アプリ終了コントロール
+// ============================================================
+var ExitCtrl = (function(){
+
+  // スマホ判定
+  function isMobile() {
+    return ('ontouchstart' in window || navigator.maxTouchPoints > 0)
+        && window.screen.width < 1024;
+  }
+
+  // 終了ボタン表示制御 — スマホなら常時表示、PCは非表示
+  function updateBtn() {
+    var btn = document.getElementById('exit-btn');
+    if (!btn) return;
+    btn.classList.toggle('show', isMobile());
+  }
+
+  // 確認ダイアログを開く
+  function ask() {
+    var inEdit = !!(document.getElementById('s-edit') &&
+                   document.getElementById('s-edit').classList.contains('on'));
+    var sub = document.getElementById('exit-sub');
+    if (sub) {
+      sub.textContent = inEdit
+        ? '現在の編集内容を保存してから終了できます。'
+        : 'ユーザー選択画面に戻ります。';
+    }
+    // 編集画面以外では「保存して終了」を非表示
+    var saveBtn = document.querySelector('#exit-dialog .ex-save');
+    if (saveBtn) saveBtn.style.display = inEdit ? '' : 'none';
+
+    document.getElementById('exit-overlay').classList.add('on');
+  }
+
+  // 保存して終了
+  function saveAndExit() {
+    document.getElementById('exit-overlay').classList.remove('on');
+    var inEdit = !!(document.getElementById('s-edit') &&
+                   document.getElementById('s-edit').classList.contains('on'));
+    if (inEdit && typeof App !== 'undefined') {
+      try {
+        var name = makeSaveName(st.text);
+        var saves = getSaves();
+        saves[name] = currentData();
+        setSaves(saves);
+        showSaveToast('💾 「' + name + '」を保存しました');
+      } catch(e) {}
+    }
+    setTimeout(doExit, 700);
+  }
+
+  // 保存せず終了
+  function exitWithout() {
+    document.getElementById('exit-overlay').classList.remove('on');
+    doExit();
+  }
+
+  // キャンセル
+  function cancel() {
+    document.getElementById('exit-overlay').classList.remove('on');
+  }
+
+  // 終了処理：全画面・向き固定解除 → ユーザー選択画面へ
+  function doExit() {
+    try {
+      if (document.exitFullscreen)           document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    } catch(e) {}
+    try {
+      if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
+    } catch(e) {}
+    document.body.classList.remove('force-landscape');
+
+    if (typeof UserCtrl !== 'undefined') {
+      UserCtrl.showUserScreen();
+    } else if (typeof App !== 'undefined') {
+      App.go('start');
+    }
+  }
+
+  // DOMContentLoaded 後にボタン表示を初期化
+  window.addEventListener('DOMContentLoaded', function(){ updateBtn(); });
+  // fullscreen変化時にも更新
+  document.addEventListener('fullscreenchange',       updateBtn);
+  document.addEventListener('webkitfullscreenchange', updateBtn);
+
+  return { ask: ask, saveAndExit: saveAndExit, exitWithout: exitWithout, cancel: cancel, updateBtn: updateBtn };
+})();
 
 // 画面回転時にcanvasを再描画
 window.addEventListener('orientationchange', function(){
@@ -3218,6 +4191,149 @@ window.addEventListener('resize', function(){
     window._resizeTimer = setTimeout(initCanvas, 300);
   }
 });
+
+// ============================================================
+// 横向き全画面コントロール
+// ============================================================
+var OrientCtrl = (function(){
+  var STORED_KEY = 'shuji_orient_asked';
+  var _active = false;   // ロック中フラグ
+  var _fallback = false; // CSS回転フォールバック中フラグ
+
+  // スマホ判定（タッチ対応かつ画面幅1024px未満）
+  function isMobile() {
+    return ('ontouchstart' in window || navigator.maxTouchPoints > 0)
+        && window.screen.width < 1024;
+  }
+
+  // 起動時：スマホのみダイアログ表示
+  function init() {
+    // PCはダイアログなし
+    if (!isMobile()) return;
+
+    var ans = localStorage.getItem(STORED_KEY);
+    if (ans === 'ok') {
+      // 前回OKした → ダイアログを再表示（fullscreen APIはユーザー操作が必要）
+      showDialog();
+    } else if (ans === 'skip') {
+      // スキップ済み → 何もしない
+    } else {
+      // 初回 → ダイアログ表示
+      showDialog();
+    }
+  }
+
+  function showDialog() {
+    var ov = document.getElementById('orient-overlay');
+    if (ov) ov.classList.add('on');
+  }
+
+  function hideDialog() {
+    var ov = document.getElementById('orient-overlay');
+    if (ov) ov.classList.remove('on');
+  }
+
+  // OKタップ
+  function activate() {
+    hideDialog();
+    localStorage.setItem(STORED_KEY, 'ok');
+
+    // 1. Fullscreen API
+    var el = document.documentElement;
+    var fsPromise = null;
+    if (el.requestFullscreen)             fsPromise = el.requestFullscreen();
+    else if (el.webkitRequestFullscreen)  fsPromise = el.webkitRequestFullscreen();
+
+    // 2. Screen Orientation Lock API
+    function tryLock() {
+      try {
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock('landscape').then(function(){
+            _active = true;
+            _fallback = false;
+            document.body.classList.remove('force-landscape');
+          }).catch(function(){
+            // lockに失敗（iOS等）→ CSSフォールバック
+            applyFallback();
+          });
+        } else {
+          applyFallback();
+        }
+      } catch(e) {
+        applyFallback();
+      }
+    }
+
+    if (fsPromise && typeof fsPromise.then === 'function') {
+      fsPromise.then(tryLock).catch(tryLock);
+    } else {
+      tryLock();
+    }
+  }
+
+  // CSS回転フォールバック（iOS Safari など orientation.lock 非対応）
+  function applyFallback() {
+    var isPortrait = window.innerHeight > window.innerWidth;
+    if (isPortrait) {
+      document.body.classList.add('force-landscape');
+      _fallback = true;
+      // resize後にcanvas再描画
+      setTimeout(function(){
+        if (document.getElementById('s-edit') &&
+            document.getElementById('s-edit').classList.contains('on')) {
+          initCanvas();
+        }
+      }, 150);
+    }
+    _active = true;
+  }
+
+  // 「このまま使う」タップ
+  function dismiss() {
+    hideDialog();
+    localStorage.setItem(STORED_KEY, 'skip');
+  }
+
+  // fullscreenchange で解除検知 → フォールバックも解除
+  document.addEventListener('fullscreenchange', function(){
+    if (!document.fullscreenElement && _active) {
+      // 全画面を手動で解除したらロックも解除
+      try {
+        if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
+      } catch(e){}
+      document.body.classList.remove('force-landscape');
+      _fallback = false;
+      _active = false;
+    }
+  });
+  document.addEventListener('webkitfullscreenchange', function(){
+    if (!document.webkitFullscreenElement && _active) {
+      try {
+        if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
+      } catch(e){}
+      document.body.classList.remove('force-landscape');
+      _fallback = false;
+      _active = false;
+    }
+  });
+
+  // portrait に戻ったときもフォールバック再適用
+  window.addEventListener('resize', function(){
+    if (_active && _fallback) {
+      var isPortrait = window.innerHeight > window.innerWidth;
+      if (isPortrait) {
+        document.body.classList.add('force-landscape');
+      } else {
+        document.body.classList.remove('force-landscape');
+      }
+    }
+  });
+
+  // DOMContentLoaded後に初期化
+  window.addEventListener('DOMContentLoaded', function(){ init(); });
+
+  return { activate: activate, dismiss: dismiss };
+})();
 </script>
 </body>
 </html>
